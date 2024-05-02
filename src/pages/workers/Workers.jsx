@@ -24,7 +24,6 @@ import { columns, statusOptions } from '../../utils/data-types/data'
 import { capitalize } from '../../lib/helpers/utils'
 import CreateWorkerModal from './CreateWorkerModal'
 
-
 // const statusColorMap = {
 //     active: 'success',
 //     paused: 'danger',
@@ -39,6 +38,7 @@ const INITIAL_VISIBLE_COLUMNS = [
   'documentNumber',
   'chiefOfficerName',
   'contractType',
+  'techSkills',
   'actions'
 ]
 
@@ -53,25 +53,25 @@ export default function Workers() {
     input: ''
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data } = await axios.get('workers', {
-          params: queryParams
-        })
-        const formatData = data.data.map((worker) => {
-          return {
-            ...worker,
-            chiefOfficerName: worker.chiefOfficer !== null ? worker.chiefOfficer.name : 'Ninguno'
-          }
-        })
-        setWorkers(formatData)
-        setLoading(false) // Update loading state when data fetching is complete
-      } catch (error) {
-        console.log('Error:', error)
-        setLoading(false) // Update loading state in case of error
-      }
+  async function fetchData() {
+    try {
+      const { data } = await axios.get('workers', {
+        params: queryParams
+      })
+      const formatData = data.data.map((worker) => {
+        return {
+          ...worker,
+          chiefOfficerName: worker.chiefOfficer !== null ? worker.chiefOfficer.name : 'Ninguno'
+        }
+      })
+      setWorkers(formatData)
+      setLoading(false) // Update loading state when data fetching is complete
+    } catch (error) {
+      console.log('Error:', error)
+      setLoading(false) // Update loading state in case of error
     }
+  }
+  useEffect(() => {
 
     fetchData()
   }, [])
@@ -325,7 +325,7 @@ export default function Workers() {
   return (
     <>
       {/* Modal para crear colaborador */}
-      <CreateWorkerModal isOpen={isOpen} onOpen={onOpen} onOpenChange={onOpenChange} />
+      <CreateWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} list={fetchData} />
       <Table
         aria-label="Example table with custom cells, pagination and sorting"
         isHeaderSticky

@@ -3,8 +3,10 @@ import Layout from './components/shared/Layout'
 import Dashboard from './pages/dashboard/Dashboard'
 import Login from './pages/login/Login'
 import Register from './pages/register/Register'
-import Workers from './pages/workers/Workers'
 import ProtectedRoute from './components/validation/requireAuth'
+
+import Workers from './pages/workers/Workers'
+import { UserList } from './pages/users/UserList'
 
 function App() {
     return (
@@ -22,6 +24,7 @@ function App() {
                 >
                     <Route index element={<Dashboard />} />
                     <Route path="workers" element={<Workers />} />
+                    <Route path="users" element={<UserList />} />
                 </Route>
             </Routes>
         </Router>

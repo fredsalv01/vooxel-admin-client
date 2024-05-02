@@ -4,7 +4,7 @@ import { addToken } from '../features/tokenReducer'
 import { redirect } from 'react-router-dom' 
 
 const axiosInstance = axios.create({
-    baseURL: 'https://vooxel-admin.onrender.com/'
+    baseURL: 'http://localhost:3005'
 })
 
 axiosInstance.interceptors.request.use(
