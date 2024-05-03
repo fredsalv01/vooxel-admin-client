@@ -1,11 +1,13 @@
 import React from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, Card, CardBody, CardHeader } from '@nextui-org/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Button, Card, CardBody, CardHeader, ModalFooter } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import InputBase from '../../components/base/InputBase';
 import axios from '../../axios/axios';
+import ToastNotification from '../../helpers/toast-notification';
 
-const CreateWorkerModal = ({ isOpen, onOpenChange }) => {
+const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
+
     const initialValues = {
         username: '',
         password: '',
@@ -16,41 +18,45 @@ const CreateWorkerModal = ({ isOpen, onOpenChange }) => {
     };
 
     const validationSchema = Yup.object({
-        username: Yup.string().max(15, 'Must be 15 characters or less').required(),
-        password: Yup.string().required('Password is required'),
-        retypedPassword: Yup.string().required().oneOf([Yup.ref('password'), null], 'Passwords must match'),
+        username: Yup.string().required(),
+        password: Yup.string().required(),
+        retypedPassword: Yup.string().required().oneOf([Yup.ref('password')]),
         firstName: Yup.string().required(),
         lastName: Yup.string().required(),
-        email: Yup.string().required(),
+        email: Yup.string().required().email(),
     });
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async (values, setSubmitting, onClose) => {
         console.log(JSON.stringify(values, null, 2));
-
-
         try {
-            await axios.post('users', { ...values })
+            setSubmitting(true);
+            await axios.post('users', { ...values });
+            (new ToastNotification('usuario creado correctamente')).showSuccess();
+            fetchData();
+            onClose();
         } catch (error) {
-            console.log(error)
+            if (error.response.status === 400) (new ToastNotification(error.response.data.message)).showError();
+            else (new ToastNotification('Error al crear el usuario')).showError();
+        } finally {
+            setSubmitting(false);
         }
     };
 
     return (
-        <Modal size="5xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange}>
+        <Modal size="5xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior='inside'>
             <ModalContent>
                 {(onClose) => (
                     <Formik
                         initialValues={initialValues}
                         validationSchema={validationSchema}
-                        onSubmit={handleSubmit}
+                        onSubmit={(values, { setSubmitting }) => handleSubmit(values, setSubmitting, onClose)}
                     >
-                        <Form style={{ overflowY: 'scroll', height: '720px' }}>
-                            <ModalHeader className="flex flex-col gap-1 text-green-700">Agregar Nuevo Colaborador</ModalHeader>
-                            <ModalBody>
-                                <Card>
-                                    <CardHeader className="text-sm font-semibold">Datos Personales y de contacto</CardHeader>
-                                    <CardBody className="grid grid-cols-2 gap-4">
-                                        <div className="col-span-2">
+                        {({ isSubmitting }) => (
+                            <Form>
+                                <ModalHeader className="text-2xl">Agregar nuevo usuario</ModalHeader>
+                                <ModalBody>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="col-span-1 md:col-span-2">
                                             <Field
                                                 name="username"
                                                 label="Nombre de usuario"
@@ -97,13 +103,15 @@ const CreateWorkerModal = ({ isOpen, onOpenChange }) => {
                                                 component={InputBase}
                                             />
                                         </div>
-                                    </CardBody>
-                                </Card>
-                                <Button color="primary" type="submit">
-                                    Registrar Colaborador
-                                </Button>
-                            </ModalBody>
-                        </Form>
+                                    </div>
+                                </ModalBody>
+                                <ModalFooter>
+                                    <Button color="primary" type='submit' isLoading={isSubmitting} size="lg">
+                                        Guardar
+                                    </Button>
+                                </ModalFooter>
+                            </Form>
+                        )}
                     </Formik>
                 )}
             </ModalContent>

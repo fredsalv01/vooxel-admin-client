@@ -20,19 +20,17 @@ import { PlusIcon } from '../../components/icons/PlusIcon'
 import { VerticalDotsIcon } from '../../components/icons/VerticalDotsIcon'
 import { SearchIcon } from '../../components/icons/SearchIcon'
 import { ChevronDownIcon } from '../../components/icons/ChevronDownIcon'
-import { columns, statusOptions } from '../../utils/data-types/data'
+// import { columns, statusOptions } from '../../utils/data-types/data'
+import { columns } from './utils/table-props'
 import { capitalize } from '../../lib/helpers/utils'
 import CreateUserModal from './CreateUserModal'
 
 const INITIAL_VISIBLE_COLUMNS = [
-    'name',
-    'apPat',
-    'charge',
-    'documentType',
-    'documentNumber',
-    'chiefOfficerName',
-    'contractType',
-    'actions'
+    "id",
+    "username",
+    "email",
+    "firstName",
+    "lastName",
 ]
 
 export const UserList = () => {
@@ -41,30 +39,31 @@ export const UserList = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
     const queryParams = {
-        limit: 0, // Número máximo de resultados por página
-        page: 1, // Número de página
-        input: ''
+        isActive: true,
+        // limit: 0, // Número máximo de resultados por página
+        // page: 1, // Número de página
+        // input: ''
     }
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const { data } = await axios.get('workers', {
-                    params: queryParams
-                })
-                const formatData = data.data.map((worker) => {
-                    return {
-                        ...worker,
-                        chiefOfficerName: worker.chiefOfficer !== null ? worker.chiefOfficer.name : 'Ninguno'
-                    }
-                })
-                setWorkers(formatData)
-                setLoading(false) // Update loading state when data fetching is complete
-            } catch (error) {
-                console.log('Error:', error)
-                setLoading(false) // Update loading state in case of error
-            }
+    async function fetchData() {
+        try {
+            const { data } = await axios.get('users', {
+                params: queryParams
+            })
+            // const formatData = data.data.map((worker) => {
+            //     return {
+            //         ...worker,
+            //         chiefOfficerName: worker.chiefOfficer !== null ? worker.chiefOfficer.name : 'Ninguno'
+            //     }
+            // })
+            setWorkers(data)
+            setLoading(false) // Update loading state when data fetching is complete
+        } catch (error) {
+            console.log('Error:', error)
+            setLoading(false) // Update loading state in case of error
         }
+    }
+    useEffect(() => {
 
         fetchData()
     }, [])
@@ -73,7 +72,7 @@ export const UserList = () => {
     const [selectedKeys, setSelectedKeys] = React.useState(new Set([]))
     const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS))
     const [statusFilter, setStatusFilter] = React.useState('all')
-    const [rowsPerPage, setRowsPerPage] = React.useState(3)
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [sortDescriptor, setSortDescriptor] = React.useState({
         column: 'id',
         direction: 'descending'
@@ -110,6 +109,7 @@ export const UserList = () => {
                 }
             })
         }
+
         if (statusFilter !== 'all' && Array.from(statusFilter).length !== statusOptions.length) {
             filteredWorkers = filteredWorkers.filter((worker) => Array.from(statusFilter).includes(worker.status))
         }
@@ -233,26 +233,26 @@ export const UserList = () => {
                     />
                     <div className="flex gap-3">
                         {/* <Dropdown>
-                  <DropdownTrigger className="hidden sm:flex">
-                    <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                      Cargo
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    disallowEmptySelection
-                    aria-label="Table Columns"
-                    closeOnSelect={false}
-                    selectedKeys={statusFilter}
-                    selectionMode="multiple"
-                    onSelectionChange={setStatusFilter}
-                  >
-                    {statusOptions.map((status) => (
-                      <DropdownItem key={status.uid} className="capitalize">
-                        {capitalize(status.name)}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown> */}
+                        <DropdownTrigger className="hidden sm:flex">
+                            <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+                            Cargo
+                            </Button>
+                        </DropdownTrigger>
+                        <DropdownMenu
+                            disallowEmptySelection
+                            aria-label="Table Columns"
+                            closeOnSelect={false}
+                            selectedKeys={statusFilter}
+                            selectionMode="multiple"
+                            onSelectionChange={setStatusFilter}
+                        >
+                            {statusOptions.map((status) => (
+                            <DropdownItem key={status.uid} className="capitalize">
+                                {capitalize(status.name)}
+                            </DropdownItem>
+                            ))}
+                        </DropdownMenu>
+                        </Dropdown> */}
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
                                 <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
@@ -318,7 +318,7 @@ export const UserList = () => {
     return (
         <>
             {/* Modal para crear colaborador */}
-            <CreateUserModal isOpen={isOpen} onOpenChange={onOpenChange} />
+            <CreateUserModal isOpen={isOpen} onOpenChange={onOpenChange} fetchData={fetchData} />
             <Table
                 aria-label="Example table with custom cells, pagination and sorting"
                 isHeaderSticky

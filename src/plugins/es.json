@@ -1,3 +1,8 @@
 {
-    "username": "nombre de usuario"
+    "username": "nombre de usuario",
+    "password": "contraseña",
+    "retypedPassword": "repite la contraseña",
+    "firstName": "nombre(s)",
+    "lastName": "apellidos",
+    "email": "correo"
 }

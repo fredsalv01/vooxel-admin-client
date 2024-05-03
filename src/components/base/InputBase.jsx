@@ -6,19 +6,19 @@ const InputBase = ({ field, form, label, ...props }) => {
 
     const hasError = (form.errors[field.name] && form.touched[field.name]) || false;
     return (
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col">
             <Input
-                size="sm"
+                size="md"
                 variant="bordered"
                 label={label}
                 {...field}
                 {...props}
+                autoComplete='off'
                 isInvalid={hasError}
                 errorMessage={
                     hasError && form.errors[field.name]
                 }
             />
-
         </div>
     );
 };
