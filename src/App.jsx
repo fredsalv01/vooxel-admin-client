@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import Layout from './components/shared/Layout'
-import Dashboard from './pages/dashboard/Dashboard'
-import Login from './pages/login/Login'
-import Register from './pages/register/Register'
+import Dashboard from './modules/dashboard/Dashboard'
+import { Login, Register } from './auth'
 import ProtectedRoute from './components/validation/requireAuth'
 
-import Workers from './pages/workers/Workers'
-import { UserList } from './pages/users/UserList'
+import Workers from './modules/workers/Workers'
+
+import { UserList } from './modules/users/pages/UserList'
 
 function App() {
     return (

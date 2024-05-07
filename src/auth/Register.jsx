@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from '../../axios/axios'
-import ValidationRegister from '../../components/validation/validationRegister'
+import axios from '../axios/axios'
+import ValidationRegister from '../components/validation/validationRegister'
 
-export default function Register() {
+export const Register = () => {
     // const [email, setEmail] = useState('');
     // const [password, setPassword] = useState('');
     // const [retypedPassword, setRetypedPassword] = useState('');

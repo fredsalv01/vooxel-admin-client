@@ -1,5 +1,4 @@
-export const columns = [
-    { name: 'ID', uid: 'id', sortable: true },
+export const headersTable = [
     { name: 'Usuario', uid: 'username', sortable: true },
     { name: 'Correo', uid: 'email', sortable: true },
     { name: 'Nombre(s)', uid: 'firstName', sortable: true },

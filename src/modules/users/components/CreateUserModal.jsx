@@ -2,11 +2,11 @@ import React from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, Card, CardBody, CardHeader, ModalFooter } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import InputBase from '../../components/base/InputBase';
-import axios from '../../axios/axios';
-import ToastNotification from '../../helpers/toast-notification';
+import InputBase from '../../../components/base/InputBase';
+import axios from '../../../axios/axios';
+import ToastNotification from '../../../helpers/toast-notification';
 
-const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
+export const CreateUserModal = ({ isOpen, onOpenChange, fetchData }) => {
 
     const initialValues = {
         username: '',
@@ -43,7 +43,7 @@ const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
     };
 
     return (
-        <Modal size="5xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior='inside'>
+        <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior='inside'>
             <ModalContent>
                 {(onClose) => (
                     <Formik
@@ -118,5 +118,3 @@ const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         </Modal>
     );
 };
-
-export default CreateWorkerModal;

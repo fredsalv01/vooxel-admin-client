@@ -20,26 +20,26 @@ import {
 
 export default function TableList({ url }) {
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const { data } = await axios.get('items', {
-                    params: queryParams
-                })
-                const formatData = data.data.map((item) => {
-                    return {
-                        ...item,
-                        chiefOfficerName: item.chiefOfficer !== null ? item.chiefOfficer.name : 'Ninguno'
-                    }
-                })
-                setItem(formatData)
-            } catch (error) {
-                console.log('Error:', error)
-            } finally {
-                setLoading(false) // Update loading state in case of error
-            }
+    async function fetchData() {
+        try {
+            const { data } = await axios.get('items', {
+                params: queryParams
+            })
+            const formatData = data.data.map((item) => {
+                return {
+                    ...item,
+                    chiefOfficerName: item.chiefOfficer !== null ? item.chiefOfficer.name : 'Ninguno'
+                }
+            })
+            setItem(formatData)
+        } catch (error) {
+            console.log('Error:', error)
+        } finally {
+            setLoading(false) // Update loading state in case of error
         }
+    }
 
+    useEffect(() => {
         fetchData()
     }, [])
 
@@ -84,6 +84,7 @@ export default function TableList({ url }) {
                 }
             })
         }
+
         if (statusFilter !== 'all' && Array.from(statusFilter).length !== statusOptions.length) {
             filteredItem = filteredItem.filter((item) => Array.from(statusFilter).includes(item.status))
         }
@@ -116,13 +117,6 @@ export default function TableList({ url }) {
         switch (columnKey) {
             case 'name':
                 return (
-                    // <User
-                    //   avatarProps={{radius: "lg", src: user.avatar}}
-                    //   description={user.email}
-                    //   name={cellValue}
-                    // >
-                    //   {user.email}
-                    // </User>
                     <div>{item.name}</div>
                 )
             case 'apPat':
@@ -135,9 +129,6 @@ export default function TableList({ url }) {
             case 'charge':
                 return (
                     <div>{item.charge}</div>
-                    // <Chip className="capitalize" color={statusColorMap[item.status]} size="sm" variant="flat">
-                    //   {cellValue}
-                    // </Chip>
                 )
             case 'actions':
                 return (
@@ -206,27 +197,6 @@ export default function TableList({ url }) {
                         onValueChange={onSearchChange}
                     />
                     <div className="flex gap-3">
-                        {/* <Dropdown>
-                  <DropdownTrigger className="hidden sm:flex">
-                    <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
-                      Cargo
-                    </Button>
-                  </DropdownTrigger>
-                  <DropdownMenu
-                    disallowEmptySelection
-                    aria-label="Table Columns"
-                    closeOnSelect={false}
-                    selectedKeys={statusFilter}
-                    selectionMode="multiple"
-                    onSelectionChange={setStatusFilter}
-                  >
-                    {statusOptions.map((status) => (
-                      <DropdownItem key={status.uid} className="capitalize">
-                        {capitalize(status.name)}
-                      </DropdownItem>
-                    ))}
-                  </DropdownMenu>
-                </Dropdown> */}
                         <Dropdown>
                             <DropdownTrigger className="hidden sm:flex">
                                 <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">

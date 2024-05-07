@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from '../../axios/axios'
-import Validation from '../../components/validation/validation'
+import axios from '../axios/axios'
+import Validation from '../components/validation/validation'
 import { useDispatch, useSelector } from 'react-redux'
-import { addToken } from '../../features/tokenReducer'
+import { addToken } from '../features/tokenReducer'
 
-export default function Login() {
+export const Login = () => {
     const dispatch = useDispatch()
 
     const tokens = useSelector((state) => state.tokens)
