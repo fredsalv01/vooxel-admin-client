@@ -126,16 +126,16 @@ export const UserList = () => {
             case 'actions':
                 return (
                     <div className="relative flex items-center gap-2">
-                        <Tooltip content="Edit user">
+                        <Tooltip content="Editar">
                             <span className="text-lg text-default-400 cursor-pointer active:opacity-50" onClick={() => handleEditUser(item.id)}>
                                 <EditIcon />
                             </span>
                         </Tooltip>
-                        <Tooltip color="danger" content="Delete user">
+                        {/* <Tooltip color="danger" content="Delete user">
                             <span className="text-lg text-danger cursor-pointer active:opacity-50" onClick={() => handleDeleteUser(item.id)}>
                                 <DeleteIcon />
                             </span>
-                        </Tooltip>
+                        </Tooltip> */}
                     </div>
                 );
             default:
