@@ -4,7 +4,7 @@ import Dashboard from './modules/dashboard/Dashboard'
 import { Login, Register } from './auth'
 import ProtectedRoute from './components/validation/requireAuth'
 
-import Workers from './modules/workers/Workers'
+import WorkList from './modules/workers/pages/WorkerList'
 
 import { UserList } from './modules/users/pages/UserList'
 
@@ -23,7 +23,7 @@ function App() {
                     }
                 >
                     <Route index element={<Dashboard />} />
-                    <Route path="workers" element={<Workers />} />
+                    <Route path="workers" element={<WorkList />} />
                     <Route path="users" element={<UserList />} />
                 </Route>
             </Routes>

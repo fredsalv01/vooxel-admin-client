@@ -2,7 +2,6 @@
 import esJson from './es.json';
 
 const getLocaleName = ({field, localeJson, property = 'path'}) => {
-
   if (property === 'resolved') {
     let resolved = [];
     for (const iterator of field[property]) {

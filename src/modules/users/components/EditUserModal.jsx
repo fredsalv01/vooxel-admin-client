@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, Card, CardBody, CardHeader, ModalFooter } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
-import ToastNotification from '../../../helpers/toast-notification';
+import ToastNotification from '../../../lib/helpers/toast-notification';
 import { SwitchBase, InputBase } from '../../../components/base';
 import axios from '../../../axios/axios';
 

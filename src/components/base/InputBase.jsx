@@ -13,7 +13,6 @@ export const InputBase = ({ field, form, label, ...props }) => {
                 label={label}
                 {...field}
                 {...props}
-                autoComplete='off'
                 isInvalid={hasError}
                 errorMessage={
                     hasError && form.errors[field.name]

@@ -31,7 +31,7 @@ import { headersTable } from '../utils/table-props'
 import { capitalize } from '../../../lib/helpers/utils'
 import { CreateUserModal, EditUserModal } from '../components'
 import { useQuery } from '@tanstack/react-query';
-import { EditIcon, EyeIcon, DeleteIcon } from '../../../components/icons'
+import { EditIcon } from '../../../components/icons'
 
 const INITIAL_VISIBLE_COLUMNS = [
     "username",
@@ -48,7 +48,6 @@ export const UserList = () => {
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const { isOpen: isOpenEdit, onOpen: onOpenEdit, onOpenChange: onOpenChangeEdit } = useDisclosure();
-    const { isOpen: isOpenDelete, onOpen: onOpenDelete, onOpenChange: onOpenChangeDelete } = useDisclosure();
     const [selectedItemId, setSelectedItemId] = useState(null);
 
     const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS))
@@ -204,8 +203,7 @@ export const UserList = () => {
                         labelPlacement={'outside-left'}
                         label="Nro por página"
                         defaultSelectedKeys={["5"]}
-                        onChange={async (selected) => {
-                            console.log("🚀 ~ bottomContent ~ selected:", selected.target.value)
+                        onChange={(selected) => {
                             setPerPage(selected.target.value);
                             refetch();
                         }}

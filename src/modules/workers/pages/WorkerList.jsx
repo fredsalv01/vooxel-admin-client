@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import axios from '../../axios/axios'
+import axios from '../../../axios/axios'
 import {
   Table,
   TableHeader,
@@ -16,13 +16,13 @@ import {
   Pagination,
   useDisclosure
 } from '@nextui-org/react'
-import { PlusIcon } from '../../components/icons/PlusIcon'
-import { VerticalDotsIcon } from '../../components/icons/VerticalDotsIcon'
-import { SearchIcon } from '../../components/icons/SearchIcon'
-import { ChevronDownIcon } from '../../components/icons/ChevronDownIcon'
-import { columns, statusOptions } from '../../utils/data-types/data'
-import { capitalize } from '../../lib/helpers/utils'
-import CreateWorkerModal from './CreateWorkerModal'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
+import { VerticalDotsIcon } from '../../../components/icons/VerticalDotsIcon'
+import { SearchIcon } from '../../../components/icons/SearchIcon'
+import { ChevronDownIcon } from '../../../components/icons/ChevronDownIcon'
+import { columns, statusOptions } from '../../../utils/data-types/data'
+import { capitalize } from '../../../lib/helpers/utils'
+import { CreateWorkerModal } from '../components'
 
 // const statusColorMap = {
 //     active: 'success',
@@ -325,7 +325,7 @@ export default function Workers() {
   return (
     <>
       {/* Modal para crear colaborador */}
-      <CreateWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} list={fetchData} />
+      {isOpen && <CreateWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} list={() => { }} />}
       <Table
         aria-label="Example table with custom cells, pagination and sorting"
         isHeaderSticky

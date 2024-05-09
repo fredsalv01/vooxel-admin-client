@@ -14,12 +14,12 @@ import {
   CardBody,
   CardHeader
 } from '@nextui-org/react'
-import { ContractTypeData, DocumentTypeData, EnglishLevelData } from '../../utils/data-types/data'
+import { ContractTypeData, DocumentTypeData, EnglishLevelData } from '../../../utils/data-types/data'
 import { parseDate } from '@internationalized/date'
 import moment from 'moment/moment'
 import { I18nProvider } from '@react-aria/i18n'
-import { InputTag } from '../../components/InputTag'
-import axios from '../../axios/axios'
+import { InputTag } from '../../../components/base/InputTagBase'
+import axios from '../../../axios/axios'
 
 export default function CreateWorkerModal({ isOpen, onOpenChange, list }) {
   const [formData, setFormData] = useState({

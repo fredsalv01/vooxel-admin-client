@@ -5,7 +5,8 @@ import App from './App'
 import { NextUIProvider } from '@nextui-org/react'
 import { Provider } from 'react-redux'
 import { store } from './store'
-import { ToastContainer, toast } from 'react-toastify';
+import { I18nProvider } from "@react-aria/i18n";
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './plugins/yup'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
@@ -25,11 +26,13 @@ root.render(
     <React.StrictMode>
         <NextUIProvider>
             <Provider store={store}>
-                <QueryClientProvider client={queryClient}>
-                    <App />
-                    <ToastContainer />
-                    <ReactQueryDevtools initialIsOpen={false} />
-                </QueryClientProvider>
+                <I18nProvider locale="es-PE">
+                    <QueryClientProvider client={queryClient}>
+                        <App />
+                        <ToastContainer />
+                        <ReactQueryDevtools initialIsOpen={false} />
+                    </QueryClientProvider>
+                </I18nProvider>
             </Provider>
         </NextUIProvider>
     </React.StrictMode>

@@ -3,6 +3,12 @@
     "password": "contraseña",
     "retypedPassword": "repite la contraseña",
     "firstName": "nombre(s)",
+    "name": "nombre(s)",
     "lastName": "apellidos",
-    "email": "correo"
+    "apPat": "apellido paterno",
+    "apMat": "apellido materno",
+    "email": "correo",
+    "documentType": "tipo de documento",
+    "documentNumber": "nro. de documento",
+    "charge": "cargo"
 }
