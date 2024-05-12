@@ -4,7 +4,7 @@ import Dashboard from './modules/dashboard/Dashboard'
 import { Login, Register } from './auth'
 import ProtectedRoute from './components/validation/requireAuth'
 
-import WorkList from './modules/workers/pages/WorkerList'
+import { WorkerList, DetailWorkerPage } from './modules/workers/pages'
 
 import { UserList } from './modules/users/pages/UserList'
 
@@ -23,8 +23,9 @@ function App() {
                     }
                 >
                     <Route index element={<Dashboard />} />
-                    <Route path="workers" element={<WorkList />} />
+                    <Route path="workers" element={<WorkerList />} />
                     <Route path="users" element={<UserList />} />
+                    <Route path="workers/:id/edit" element={<DetailWorkerPage />} />
                 </Route>
             </Routes>
         </Router>

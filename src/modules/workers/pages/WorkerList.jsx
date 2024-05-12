@@ -24,12 +24,6 @@ import { columns, statusOptions } from '../../../utils/data-types/data'
 import { capitalize } from '../../../lib/helpers/utils'
 import { CreateWorkerModal } from '../components'
 
-// const statusColorMap = {
-//     active: 'success',
-//     paused: 'danger',
-//     vacation: 'warning'
-// }
-
 const INITIAL_VISIBLE_COLUMNS = [
   'name',
   'apPat',
@@ -42,12 +36,13 @@ const INITIAL_VISIBLE_COLUMNS = [
   'actions'
 ]
 
-export default function Workers() {
+export const WorkerList = () => {
   const [loading, setLoading] = useState(true)
   const [workers, setWorkers] = useState([])
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const queryParams = {
+    isActive: true,
     limit: 0, // Número máximo de resultados por página
     page: 1, // Número de página
     input: ''
@@ -58,7 +53,7 @@ export default function Workers() {
       const { data } = await axios.get('workers', {
         params: queryParams
       })
-      const formatData = data.data.map((worker) => {
+      const formatData = data.items.map((worker) => {
         return {
           ...worker,
           chiefOfficerName: worker.chiefOfficer !== null ? worker.chiefOfficer.name : 'Ninguno'
@@ -175,7 +170,7 @@ export default function Workers() {
       case 'actions':
         return (
           <div className="relative flex justify-end items-center gap-2">
-            <Dropdown>
+            <Dropdown key={worker.id}>
               <DropdownTrigger>
                 <Button isIconOnly size="sm" variant="light">
                   <VerticalDotsIcon className="text-default-300" />
@@ -183,7 +178,8 @@ export default function Workers() {
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem>Mostrar</DropdownItem>
-                <DropdownItem>Editar</DropdownItem>
+                <DropdownItem href={`/workers/${worker.id}/edit`}>Editar
+                </DropdownItem>
                 <DropdownItem>Desactivar</DropdownItem>
               </DropdownMenu>
             </Dropdown>

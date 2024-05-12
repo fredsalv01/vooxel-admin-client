@@ -88,17 +88,10 @@ export const UserList = () => {
         }
     }, [isSuccess, data])
 
-
     const handleEditUser = (id) => {
-        console.log("🚀 ~ handleEditUser ~ id:", id)
         setSelectedItemId(id);
         onOpenEdit();
     };
-
-    const handleDeleteUser = (id) => {
-        console.log("🚀 ~ handleDeleteUser ~ id:", id)
-    }
-
 
     const renderCell = React.useCallback((item, columnKey) => {
         const cellValue = item[columnKey]
@@ -140,7 +133,7 @@ export const UserList = () => {
             default:
                 return cellValue
         }
-    }, [selectedItemId, handleEditUser, handleDeleteUser])
+    }, [selectedItemId, handleEditUser])
 
     let timer = null
     const onSearchChange = React.useCallback((value) => {

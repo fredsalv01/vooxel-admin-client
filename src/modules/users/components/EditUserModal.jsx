@@ -8,9 +8,6 @@ import axios from '../../../axios/axios';
 
 export const EditUserModal = ({ isOpen, onOpenChange, itemId, fetchData }) => {
 
-    const [item, setItem] = useState(null);
-
-
     const [initialValues, setInitialValues] = useState({
         username: '',
         password: '',
@@ -58,6 +55,7 @@ export const EditUserModal = ({ isOpen, onOpenChange, itemId, fetchData }) => {
         } catch (error) {
             if (error.response.status === 400) (new ToastNotification(error.response.data.message)).showError();
             else (new ToastNotification('Error al crear el usuario')).showError();
+            console.log('Error', error);
         } finally {
             setSubmitting(false);
         }

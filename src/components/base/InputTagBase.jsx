@@ -3,11 +3,7 @@ import React from 'react'
 import { IoCloseCircleOutline } from 'react-icons/io5'
 
 export const InputTagBase = ({ label, options, field, form, ...props }) => {
-  console.log("🚀 ~ InputTagBase ~ form:", form)
-  console.log("🚀 ~ InputTagBase ~ field:", field)
-
   const hasError = (form.errors[field.name] && form.touched[field.name]) || false
-  console.log("🚀 ~ InputTagBase ~ hasError:", hasError)
 
   const [tags, setTags] = React.useState(field.value || [])
 
@@ -32,7 +28,7 @@ export const InputTagBase = ({ label, options, field, form, ...props }) => {
   return (
     <>
       <fieldset className={`border-2 rounded-lg p-4 ${hasError ? 'border-danger' : ''}`}>
-        <legend className={`border-b text-sm px-2 text-gray-500 ${hasError ? 'text-red-500 border-red-500' : ''}`}>{label}</legend>
+        <legend className={`border-b text-sm px-2 ${hasError ? 'text-danger border-danger' : 'text-gray-500'}`}>{label}</legend>
         <div className="flex min-h-12 w-full flex-wrap gap-2">
           {tags.length > 0 && (
             tags.map((tag, index) => (
@@ -59,7 +55,7 @@ export const InputTagBase = ({ label, options, field, form, ...props }) => {
           />
         </div>
       </fieldset>
-      {hasError && <span className="text-red-500 text-sm">{form.errors[field.name]}</span>}
+      {hasError && <span className="text-danger text-sm">{form.errors[field.name]}</span>}
     </>
   )
 }

@@ -31,12 +31,13 @@ export const CreateUserModal = ({ isOpen, onOpenChange, fetchData }) => {
         try {
             setSubmitting(true);
             await axios.post('users', { ...values });
-            (new ToastNotification('usuario creado correctamente')).showSuccess();
+            (new ToastNotification('Usuario creado correctamente')).showSuccess();
             fetchData();
             onClose();
         } catch (error) {
             if (error.response.status === 400) (new ToastNotification(error.response.data.message)).showError();
             else (new ToastNotification('Error al crear el usuario')).showError();
+            console.log('Error', error);
         } finally {
             setSubmitting(false);
         }
