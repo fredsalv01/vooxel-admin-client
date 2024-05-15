@@ -146,7 +146,6 @@ export const UserList = () => {
 
     const topContent = React.useMemo(() => {
         return (
-
             <div className="flex flex-wrap md:flex-nowrap gap-3">
                 <Input
                     isClearable

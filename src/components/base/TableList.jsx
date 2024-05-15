@@ -18,7 +18,7 @@ import {
     useDisclosure
 } from '@nextui-org/react'
 
-export default function TableList({ url }) {
+export const TableList = ({ url }) => {
 
     async function fetchData() {
         try {
@@ -121,7 +121,7 @@ export default function TableList({ url }) {
                 )
             case 'apPat':
                 return (
-                    <div className="flex flex-col">
+                    <div className="mb-3 flex flex-col">
                         <p className="text-bold text-small capitalize">{cellValue}</p>
                         <p className="text-bold text-tiny capitalize text-default-400">{item.apPat}</p>
                     </div>

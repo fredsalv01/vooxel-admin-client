@@ -1,32 +1,36 @@
-import React from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker } from '@nextui-org/react';
+import React, { useEffect } from 'react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker, Autocomplete, AutocompleteSection, AutocompleteItem } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
 import { DatePickerBase, InputBase, SelectBase, InputTagBase } from '../../../components/base';
+import { useAsyncList } from "@react-stately/data";
 import axios from '../../../axios/axios';
 import ToastNotification from '../../../lib/helpers/toast-notification';
 import * as Yup from 'yup';
 
-export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
+export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
 
     const initialValues = {
-        name: 'Juan',
-        apPat: 'Perez',
-        apMat: 'Lozano',
+        name: '',
+        apPat: '',
+        apMat: '',
         documentType: '',
-        documentNumber: '72557612',
-        englishLevel: 'Basico',
-        charge: 'cargo1',
-        birthdate: '1996-09-03',
-        contractType: 'RECIBOS POR HONORARIOS',
-        hiringDate: '2024-09-01',
-        phoneNumber: '950562099',
-        address: 'Av corregidor 2653',
-        district: 'Distrito 1',
-        province: 'Provincia 1',
-        department: 'Departamento 1',
-        familiarAssignment: 'Tiene 1 hijo',
-        techSkills: ['simon'],
-        // emergencyContacts: []
+        documentNumber: '',
+        englishLevel: '',
+        charge: '',
+        birthdate: '',
+        contractType: '',
+        hiringDate: '',
+        phoneNumber: '',
+        address: '',
+        district: '',
+        province: '',
+        department: '',
+        familiarAssignment: '',
+        techSkills: [],
+        // despues emercy contact despues
+        emergencyContacts: [],
+        clientId: '',
+        bank
     };
 
     const validationSchema = Yup.object({
@@ -59,10 +63,11 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         province: Yup.string().required(),
         department: Yup.string().required(),
         familiarAssignment: Yup.string().required(),
+        clientId: Yup.string().required(),
         techSkills: Yup.array().of(
             Yup.string().required() // Example: require each element to be a string
-        ).min(1, 'The array must have at least one element').required('This field is required'),
-        // emergencyContacts: Yup.array().min(1).required(), // Validate that emergencyContacts array is not empty
+        ).min(1).required(),
+        emergencyContacts: Yup.array().min(1).required(), // Validate that emergencyContacts array is not empty
     });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
@@ -71,16 +76,32 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
             setSubmitting(true);
             await axios.post('workers', { ...values });
             (new ToastNotification('Colaborador creado correctamente')).showSuccess();
-            // fetchData();
+            fetchData();
             onClose();
         } catch (error) {
-            console.log('Error', error);
             if (error.response.status === 400) (new ToastNotification(error.response.data.message)).showError();
             else (new ToastNotification('Error al crear el colaborador')).showError();
+            console.log('Error', error);
         } finally {
             setSubmitting(false);
         }
     };
+
+    const [selectedOption, setSelectedOption] = React.useState(null);
+
+    // const getClients = async (query) => {
+    //     const data = await axios.get('clients', { params: { input: query, isActive: true } });
+    //     return (data.items.map((item) => ({ id: item.id, label: item.fullName })));
+    // };
+
+    let list = useAsyncList({
+        async load({ signal, filterText }) {
+            const data = await axios.get('clients', { params: { input: filterText, isActive: true } });
+            return {
+                items: data.data.items.map((item) => ({ id: item.id, label: item.businessName })) || [],
+            };
+        },
+    });
 
     return (
         <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
@@ -94,9 +115,12 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                         }
                         enableReinitialize
                     >
-                        {({ isSubmitting }) => (
+                        {/* props Formik */}
+                        {({ isSubmitting, errors, handleChange, values, setFieldValue }) => (
                             <Form className='grid overflow-y-auto' autoComplete='off'>
-                                <ModalHeader className="text-2xl">Agregar nuevo colaborador</ModalHeader>
+                                <ModalHeader className='text-2xl'>
+                                    Editar Colaborador
+                                </ModalHeader>
                                 <ModalBody>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="col-span-1 md:col-span-2">
@@ -126,9 +150,9 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                                 label="Tipo de documento"
                                                 component={SelectBase}
                                                 options={[
-                                                    { value: 'Dni', label: 'DNI' },
-                                                    { value: 'Pasaporte', label: 'PASAPORTE' },
-                                                    { value: 'Carnet Extranjeria', label: 'CARNET EXTRANJERÍA' },
+                                                    { value: 'DNI', label: 'DNI' },
+                                                    { value: 'PASAPORTE', label: 'PASAPORTE' },
+                                                    { value: 'CARNET EXTRANJERÍA', label: 'CARNET EXTRANJERÍA' },
                                                 ]}
                                             />
                                         </div>
@@ -255,9 +279,33 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                                 component={InputTagBase}
                                             />
                                         </div>
+
+                                        <div className="col-span-1 md:col-span-2">
+                                            <Autocomplete
+                                                className="max-w-xs"
+                                                inputValue={list.filterText}
+                                                isLoading={list.isLoading}
+                                                items={list.items}
+                                                label="Select a character"
+                                                placeholder="Type to search..."
+                                                variant="bordered"
+                                                name="clientId"
+                                                onInputChange={(event) => {
+                                                    list.setFilterText(event)
+                                                }}
+                                                onSelectionChange={(key) => setFieldValue('clientId', key)}
+                                            >
+                                                {(item) => (
+                                                    <AutocompleteItem key={item.id} className="capitalize">
+                                                        {item.label}
+                                                    </AutocompleteItem>
+                                                )}
+                                            </Autocomplete>
+                                        </div>
                                     </div>
+
                                 </ModalBody>
-                                <ModalFooter>
+                                <ModalFooter className='flex justify-end'>
                                     <Button color="primary" type='submit' isLoading={isSubmitting} size="lg">
                                         Guardar
                                     </Button>

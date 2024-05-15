@@ -14,6 +14,7 @@
     "@internationalized/date": "^3.5.2",
     "@nextui-org/react": "^2.3.6",
     "@react-aria/i18n": "^3.10.2",
+    "@react-stately/data": "^3.11.3",
     "@reduxjs/toolkit": "^2.2.3",
     "@tanstack/react-query": "^5.35.1",
     "@tanstack/react-query-devtools": "^5.35.1",
@@ -45,6 +46,8 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
     "postcss": "^8.4.38",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.14",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.0"
   }

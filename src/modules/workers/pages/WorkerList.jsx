@@ -178,7 +178,7 @@ export const WorkerList = () => {
               </DropdownTrigger>
               <DropdownMenu>
                 <DropdownItem>Mostrar</DropdownItem>
-                <DropdownItem href={`/workers/${worker.id}/edit`}>Editar
+                <DropdownItem href={`/workers/${worker.id}/detail`}>Ver
                 </DropdownItem>
                 <DropdownItem>Desactivar</DropdownItem>
               </DropdownMenu>
