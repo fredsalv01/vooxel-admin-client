@@ -2,7 +2,7 @@
 
 import { Switch } from '@nextui-org/react';
 
-export const SwitchBase = ({ field, form, label, ...rest }) => {
+export const SwitchBase = ({ field, form, label, arrText, ...rest }) => {
 
     return (
         <Switch
@@ -18,7 +18,7 @@ export const SwitchBase = ({ field, form, label, ...rest }) => {
             }}
             {...rest}
         >
-            {label}
+            {label} {`${field.value ? arrText[0] : arrText[1]}`}
         </Switch>
     );
 };

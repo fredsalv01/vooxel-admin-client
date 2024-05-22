@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './plugins/yup'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {

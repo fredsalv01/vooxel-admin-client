@@ -20,13 +20,12 @@ export const DetailWorkerPage = () => {
             const { data } = await axios.get(`/workers/${id}`);
             setItem(data);
         }
-
         getItemToEdit();
     }, []);
 
     return (
         <div className='container bg-white ml-auto mr-auto'>
-            {isOpen && <EditWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} fetchData={() => { }} />}
+            {isOpen && <EditWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} editItem={item} fetchData={() => { }} />}
 
             <Button onPress={onOpen} color="warning" className='mb-3'>
                 Editar
@@ -54,7 +53,7 @@ export const DetailWorkerPage = () => {
                     <p>Habilidades blandas: {item?.techSkills} </p>
                     <p> Estado: {item?.isActive ? 'Activo' : 'Inactivo'} </p>
                     {/* Se debe asignar despues */}
-                    <p>Cuenta bancaria: {item?.bankAccount} </p>
+                    <p>Cuenta bancaria: {item?.bankAccount?.bankName} </p>
                     <p>Supervisor: {item?.chiefOfficer}</p>
                     {/* <p>: {item?.chiefOfficerId} </p>  */}
                     <p>CV: {item?.resumeUrl} </p>

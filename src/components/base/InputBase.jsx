@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Input } from '@nextui-org/react';
+import { getValueFromFieldFormik } from '../../lib/helpers/utils';
 
 export const InputBase = ({ field, form, label, ...props }) => {
 
-    const hasError = (form.errors[field.name] && form.touched[field.name]) || false;
+    const hasError = getValueFromFieldFormik(form.errors, field.name) && getValueFromFieldFormik(form.touched, field.name);
     return (
         <div className="flex flex-col">
             <Input
@@ -15,9 +16,9 @@ export const InputBase = ({ field, form, label, ...props }) => {
                 {...props}
                 isInvalid={hasError}
                 errorMessage={
-                    hasError && form.errors[field.name]
+                    hasError && getValueFromFieldFormik(form.errors, field.name)
                 }
             />
         </div>
     );
-};
+};  

@@ -1,18 +1,31 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Select, SelectItem } from '@nextui-org/react';
 import { useUniqueID } from '../../hooks/useUniqueID';
+import { getValueFromFieldFormik } from '../../lib/helpers/utils';
 
 export const SelectBase = ({ label, options, field, form, ...rest }) => {
 
     const uuid = useUniqueID().getID().toString();
 
-    const hasError = form.errors[field.name] && form.touched[field.name] || false;
+    const [isEmptyOptionSelected, setIsEmptyOptionSelected] = useState(
+        field.value === null || field.value === ''
+    );
+
+    useEffect(() => {
+        form.setFieldTouched(field.name, true);
+        if (field.value !== '') {
+            form.setFieldValue(field.name, field.value);
+        }
+
+        setIsEmptyOptionSelected(field.value === null || field.value === '');
+    }, [field.value, form.touched[field.name]]);
+
+    const hasError = getValueFromFieldFormik(form.errors, field.name) && getValueFromFieldFormik(form.touched, field.name);
     const [touched, setTouched] = React.useState(hasError);
 
     const handleSelect = (event) => {
-        console.log("🚀 ~ handleSelect ~ event:", event)
-        field.onChange(event)
+        form.handleChange(event)
         setTouched(false);
     }
 
@@ -26,8 +39,9 @@ export const SelectBase = ({ label, options, field, form, ...rest }) => {
             label={label}
             labelPlacement={'inside'}
             onChange={handleSelect}
-            errorMessage={field.value || !touched ? "" : form.errors[field.name]}
+            errorMessage={field.value || !touched ? "" : getValueFromFieldFormik(form.errors, field.name)}
             isInvalid={field.value || !touched ? false : true}
+            defaultSelectedKeys={field.value ? [field.value] : 'all'}
             onClose={() => setTouched(true)}
         >
             {(option) => (

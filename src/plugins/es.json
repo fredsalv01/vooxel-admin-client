@@ -10,5 +10,6 @@
     "email": "correo",
     "documentType": "tipo de documento",
     "documentNumber": "nro. de documento",
-    "charge": "cargo"
+    "charge": "cargo",
+    "bankAccount.bankName": "nombre del banco"
 }

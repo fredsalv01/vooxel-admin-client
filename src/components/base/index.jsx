@@ -6,3 +6,4 @@ export { InputTagBase } from './InputTagBase';
 export { TableBottomContent } from './TableBottomContent';
 export { TableTopContent } from './TableTopContent';
 export { TableList } from './TableList';
+export { AutocompleteBase } from './AutocompleteBase';

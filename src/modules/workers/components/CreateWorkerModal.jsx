@@ -9,23 +9,23 @@ import * as Yup from 'yup';
 export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
 
     const initialValues = {
-        name: 'Juan',
-        apPat: 'Perez',
-        apMat: 'Lozano',
+        name: '',
+        apPat: '',
+        apMat: '',
         documentType: '',
-        documentNumber: '72557612',
-        englishLevel: 'Basico',
-        charge: 'cargo1',
-        birthdate: '1996-09-03',
-        contractType: 'RECIBOS POR HONORARIOS',
-        hiringDate: '2024-09-01',
-        phoneNumber: '950562099',
-        address: 'Av corregidor 2653',
-        district: 'Distrito 1',
-        province: 'Provincia 1',
-        department: 'Departamento 1',
-        familiarAssignment: 'Tiene 1 hijo',
-        techSkills: ['simon'],
+        documentNumber: '',
+        englishLevel: '',
+        charge: '',
+        birthdate: '',
+        contractType: '',
+        hiringDate: '',
+        phoneNumber: '',
+        address: '',
+        district: '',
+        province: '',
+        department: '',
+        familiarAssignment: '',
+        techSkills: [],
         // emergencyContacts: []
     };
 
@@ -94,7 +94,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                         }
                         enableReinitialize
                     >
-                        {({ isSubmitting }) => (
+                        {({ isSubmitting, values }) => (
                             <Form className='grid overflow-y-auto' autoComplete='off'>
                                 <ModalHeader className="text-2xl">Agregar nuevo colaborador</ModalHeader>
                                 <ModalBody>
@@ -142,7 +142,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         <div className="col-span-1">
                                             <Field
                                                 name="englishLevel"
-                                                label="Tipo de contrato"
+                                                label="Nivel de inglés"
                                                 component={SelectBase}
                                                 options={[
                                                     {

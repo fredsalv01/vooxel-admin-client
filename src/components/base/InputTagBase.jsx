@@ -1,11 +1,17 @@
-import { Input } from '@nextui-org/react'
-import React from 'react'
+
+import React, { useEffect, useState } from 'react'
 import { IoCloseCircleOutline } from 'react-icons/io5'
+import { getValueFromFieldFormik } from '../../lib/helpers/utils';
 
 export const InputTagBase = ({ label, options, field, form, ...props }) => {
-  const hasError = (form.errors[field.name] && form.touched[field.name]) || false
 
-  const [tags, setTags] = React.useState(field.value || [])
+  const [tags, setTags] = useState(field.value || [])
+
+  useEffect(() => {
+    if (field.value !== tags) {
+      setTags(field.value || []);
+    }
+  }, [field.value]);
 
   const removeTags = (indexToRemove) => {
     setTags([...tags.filter((_, index) => index !== indexToRemove)]);
@@ -24,6 +30,8 @@ export const InputTagBase = ({ label, options, field, form, ...props }) => {
       }
     }
   }
+
+  const hasError = getValueFromFieldFormik(form.errors, field.name) && getValueFromFieldFormik(form.touched, field.name);
 
   return (
     <>
@@ -55,7 +63,7 @@ export const InputTagBase = ({ label, options, field, form, ...props }) => {
           />
         </div>
       </fieldset>
-      {hasError && <span className="text-danger text-sm">{form.errors[field.name]}</span>}
+      {hasError && <span className="text-danger text-sm">{getValueFromFieldFormik(form.errors, field.name)}</span>}
     </>
   )
 }

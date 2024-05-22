@@ -1,15 +1,17 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker, Autocomplete, AutocompleteSection, AutocompleteItem } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
-import { DatePickerBase, InputBase, SelectBase, InputTagBase } from '../../../components/base';
+import { DatePickerBase, InputBase, SelectBase, InputTagBase, AutocompleteBase } from '../../../components/base';
 import { useAsyncList } from "@react-stately/data";
 import axios from '../../../axios/axios';
 import ToastNotification from '../../../lib/helpers/toast-notification';
 import * as Yup from 'yup';
+import { BANKS_BACKEND } from '../../../lib/consts/general';
+import { setPropsItem } from '../../../lib/helpers/utils';
 
-export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
+export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) => {
 
-    const initialValues = {
+    const [initialValues, setInitialValues] = useState({
         name: '',
         apPat: '',
         apMat: '',
@@ -28,10 +30,47 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         familiarAssignment: '',
         techSkills: [],
         // despues emercy contact despues
-        emergencyContacts: [],
+        // emergencyContacts: [],
         clientId: '',
-        bank
-    };
+        // bank
+        bankAccount: {
+            bankName: '',
+            bankAccountNumber: '',
+            cci: '',
+        }
+    });
+
+    useEffect(() => {
+        if (editItem) {
+            console.log("🚀 ~ useEffect ~ editItem:", editItem)
+            setInitialValues({
+                ...initialValues,
+                name: editItem?.name,
+                apPat: editItem?.apPat,
+                apMat: editItem?.apMat,
+                documentType: editItem?.documentType,
+                documentNumber: editItem?.documentNumber,
+                englishLevel: editItem?.englishLevel,
+                charge: editItem?.charge,
+                birthdate: editItem?.birthdate || '',
+                contractType: editItem?.contractType,
+                hiringDate: editItem?.hiringDate || '',
+                phoneNumber: editItem?.phoneNumber,
+                address: editItem?.address,
+                district: editItem?.district,
+                province: editItem?.province,
+                department: editItem?.department,
+                familiarAssignment: editItem?.familiarAssignment,
+                techSkills: editItem?.techSkills,
+                clientId: editItem?.clientId,
+                bankAccount: {
+                    bankName: editItem?.bankAccount?.bankName || '',
+                    bankAccountNumber: editItem?.bankAccount?.bankAccountNumber || '',
+                    cci: editItem?.bankAccount?.cci || '',
+                }
+            })
+        }
+    }, []);
 
     const validationSchema = Yup.object({
         name: Yup.string().required(),
@@ -63,19 +102,36 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         province: Yup.string().required(),
         department: Yup.string().required(),
         familiarAssignment: Yup.string().required(),
-        clientId: Yup.string().required(),
         techSkills: Yup.array().of(
             Yup.string().required() // Example: require each element to be a string
         ).min(1).required(),
-        emergencyContacts: Yup.array().min(1).required(), // Validate that emergencyContacts array is not empty
+        // emergencyContacts: Yup.array().min(1).required(), // Validate that emergencyContacts array is not empty
+        clientId: Yup.string().required(),
+        bankAccount: Yup.object({
+            bankName: Yup.string().required(),
+            bankAccountNumber: Yup.string().required(),
+            cci: Yup.string().required(),
+        })
     });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
-        console.log(JSON.stringify(values, null, 2));
+        console.log("🚀 ~ handleSubmit ~ values:", values)
+        delete values.id;
+        delete values.isActive;
         try {
             setSubmitting(true);
-            await axios.post('workers', { ...values });
-            (new ToastNotification('Colaborador creado correctamente')).showSuccess();
+
+            const body = {
+                ...values,
+                bankAccount: {
+                    ...values.bankAccount,
+                    workerId: editItem.id
+                },
+            };
+            console.log("🚀 ~ handleSubmit ~ body:", body)
+            // return;
+            await axios.patch(`workers/${editItem.id}`, body);
+            (new ToastNotification('Colaborador actualizado correctamente')).showSuccess();
             fetchData();
             onClose();
         } catch (error) {
@@ -87,15 +143,10 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         }
     };
 
-    const [selectedOption, setSelectedOption] = React.useState(null);
-
-    // const getClients = async (query) => {
-    //     const data = await axios.get('clients', { params: { input: query, isActive: true } });
-    //     return (data.items.map((item) => ({ id: item.id, label: item.fullName })));
-    // };
-
+    // autocomplete
     let list = useAsyncList({
         async load({ signal, filterText }) {
+            // console.log("🚀 ~ load ~ signal:", signal)
             const data = await axios.get('clients', { params: { input: filterText, isActive: true } });
             return {
                 items: data.data.items.map((item) => ({ id: item.id, label: item.businessName })) || [],
@@ -166,7 +217,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         <div className="col-span-1">
                                             <Field
                                                 name="englishLevel"
-                                                label="Tipo de contrato"
+                                                label="Nivel de inglés"
                                                 component={SelectBase}
                                                 options={[
                                                     {
@@ -272,6 +323,28 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                                 component={InputBase}
                                             />
                                         </div>
+                                        <div className="col-span-1">
+                                            <Field
+                                                name="bankAccount.bankName"
+                                                label="Nombre del banco"
+                                                component={SelectBase}
+                                                options={BANKS_BACKEND}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
+                                                name="bankAccount.bankAccountNumber"
+                                                label="Nro de cuenta"
+                                                component={InputBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
+                                                name="bankAccount.cci"
+                                                label="Nro de CCI"
+                                                component={InputBase}
+                                            />
+                                        </div>
                                         <div className="col-span-1 md:col-span-2">
                                             <Field
                                                 name="techSkills"
@@ -281,19 +354,23 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         </div>
 
                                         <div className="col-span-1 md:col-span-2">
+                                            <pre>{JSON.stringify(values.clientId)}</pre>
                                             <Autocomplete
-                                                className="max-w-xs"
                                                 inputValue={list.filterText}
                                                 isLoading={list.isLoading}
                                                 items={list.items}
-                                                label="Select a character"
-                                                placeholder="Type to search..."
+                                                label="Seleccionar cliente"
+                                                placeholder="buscar cliente..."
                                                 variant="bordered"
                                                 name="clientId"
                                                 onInputChange={(event) => {
                                                     list.setFilterText(event)
                                                 }}
-                                                onSelectionChange={(key) => setFieldValue('clientId', key)}
+                                                onSelectionChange={(event) => {
+                                                    // if (!!event) handleChange(event)
+                                                    setFieldValue('clientId', event)
+                                                }}
+                                                isRequired
                                             >
                                                 {(item) => (
                                                     <AutocompleteItem key={item.id} className="capitalize">

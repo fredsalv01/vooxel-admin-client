@@ -87,6 +87,7 @@ export const EditUserModal = ({ isOpen, onOpenChange, itemId, fetchData }) => {
                                             <Field
                                                 name="isActive"
                                                 label="Estado"
+                                                arrText={['Activo', 'Inactivo']}
                                                 component={SwitchBase}
                                             />
                                         </div>
