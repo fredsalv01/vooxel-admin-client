@@ -5,3 +5,4 @@ export { EyeIcon } from "./EyeIcon";
 export { PlusIcon } from "./PlusIcon";
 export { SearchIcon } from "./SearchIcon";
 export { VerticalDotsIcon } from "./VerticalDotsIcon";
+export { SpinnerButton } from "./SpinnerButton";

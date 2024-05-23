@@ -62,7 +62,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                 department: editItem?.department,
                 familiarAssignment: editItem?.familiarAssignment,
                 techSkills: editItem?.techSkills,
-                clientId: editItem?.clientId,
+                clientId: editItem?.clientInfo?.id.toString() || '',
                 bankAccount: {
                     bankName: editItem?.bankAccount?.bankName || '',
                     bankAccountNumber: editItem?.bankAccount?.bankAccountNumber || '',
@@ -153,6 +153,18 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
             };
         },
     });
+
+
+    const [autoValue, setAutoValue] = useState('');
+
+    // useEffect(() => {
+    //     console.log("🚀 ~ useEffect ~ list.items:", list.items)
+
+    //     if (initialValues.clientId.length > 0 && list.items.length > 0) {
+    //         const item = list.items.find((item) => item.id === initialValues.clientId)
+    //         setAutoValue(item.label)
+    //     }
+    // }, [list, initialValues.clientId])
 
     return (
         <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
@@ -372,11 +384,11 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                                 }}
                                                 isRequired
                                             >
-                                                {(item) => (
+                                                {(item) =>
                                                     <AutocompleteItem key={item.id} className="capitalize">
                                                         {item.label}
                                                     </AutocompleteItem>
-                                                )}
+                                                }
                                             </Autocomplete>
                                         </div>
                                     </div>

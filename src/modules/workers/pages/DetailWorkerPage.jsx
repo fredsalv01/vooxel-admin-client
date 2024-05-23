@@ -3,7 +3,7 @@ import { Button, Card, CardBody, CardFooter, CardHeader, useDisclosure } from '@
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { EditIcon } from '../../../components/icons';
-import { EditWorkerModal } from '../components/EditWorkerModal';
+import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers } from '../components';
 import axios from '../../../axios/axios';
 
 export const DetailWorkerPage = () => {
@@ -56,15 +56,15 @@ export const DetailWorkerPage = () => {
                     <p>Cuenta bancaria: {item?.bankAccount?.bankName} </p>
                     <p>Supervisor: {item?.chiefOfficer}</p>
                     {/* <p>: {item?.chiefOfficerId} </p>  */}
-                    <p>CV: {item?.resumeUrl} </p>
-                    <p>contrato: {item?.contractUrl} </p>
-                    <p>Test psicológico: {item?.psychologicalTestUrl} </p>
-                    <p>Contactos de emergencia: {item?.emergencyContacts} ,</p>
-                    <p>Certificados: {item?.certifications} ,</p>
                     <p>Clientes: {item?.client} </p>
                 </div>
                 <div>
-                    <h2 className='text-2xl'>Archivos del colaborador</h2>
+
+                    <div className='grid gap-4'>
+                        <FilesWorkers itemId={id} />
+                        <EditCreateEmergencyContact itemId={id} />
+                    </div>
+
                 </div>
             </div>
         </div>
