@@ -9,6 +9,7 @@ import { I18nProvider } from "@react-aria/i18n";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './plugins/yup'
+import './plugins/fontawesome';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 

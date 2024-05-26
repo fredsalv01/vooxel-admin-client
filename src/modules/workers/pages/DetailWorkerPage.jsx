@@ -3,7 +3,7 @@ import { Button, Card, CardBody, CardFooter, CardHeader, useDisclosure } from '@
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { EditIcon } from '../../../components/icons';
-import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers } from '../components';
+import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers, EditCreateBankAccount } from '../components';
 import axios from '../../../axios/axios';
 
 export const DetailWorkerPage = () => {
@@ -20,21 +20,21 @@ export const DetailWorkerPage = () => {
             const { data } = await axios.get(`/workers/${id}`);
             setItem(data);
         }
-        getItemToEdit();
+        // getItemToEdit();
     }, []);
 
     return (
-        <div className='container bg-white ml-auto mr-auto'>
+        <div className='container bg-slate-100 ml-auto mr-auto'>
             {isOpen && <EditWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} editItem={item} fetchData={() => { }} />}
 
             <Button onPress={onOpen} color="warning" className='mb-3'>
                 Editar
             </Button>
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
                 <div>
                     <h2 className='text-2xl'>Datos</h2>
 
-                    <p>Nombre: {item?.name}</p>
+                    {/* <p>Nombre: {item?.name}</p>
                     <p>Apellidos: {`${item?.apPat} ${item?.apMat}`}</p>
                     <p>Cumpleaños: {item?.birthdate} </p>
                     <p>Tipo de documento": {item?.documentType}</p>
@@ -51,12 +51,15 @@ export const DetailWorkerPage = () => {
                     <p>Departamento: {item?.department} </p>
                     <p>Asignación familiar: {item?.familiarAssignment} </p>
                     <p>Habilidades blandas: {item?.techSkills} </p>
-                    <p> Estado: {item?.isActive ? 'Activo' : 'Inactivo'} </p>
+                    <p> Estado: {item?.isActive ? 'Activo' : 'Inactivo'} </p> */}
+
                     {/* Se debe asignar despues */}
-                    <p>Cuenta bancaria: {item?.bankAccount?.bankName} </p>
+                    {/* <p>Cuenta bancaria: {item?.bankAccount?.bankName} </p>
                     <p>Supervisor: {item?.chiefOfficer}</p>
-                    {/* <p>: {item?.chiefOfficerId} </p>  */}
-                    <p>Clientes: {item?.client} </p>
+                    <p>Clientes: {item?.client} </p> */}
+
+
+                    <EditCreateBankAccount itemId={id} />
                 </div>
                 <div>
 

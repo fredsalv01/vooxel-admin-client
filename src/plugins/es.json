@@ -11,5 +11,9 @@
     "documentType": "tipo de documento",
     "documentNumber": "nro. de documento",
     "charge": "cargo",
-    "bankAccount.bankName": "nombre del banco"
+    "bankAccount.bankName": "nombre del banco",
+    "bankName": "nombre del banco",
+    "bankAccountNumber": "nro. de cuenta",
+    "AccountType ": "tipo de cuenta",
+    "cci": "nro. de cuenta interbancaria"
 }

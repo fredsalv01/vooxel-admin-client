@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Select, SelectItem } from '@nextui-org/react';
 import { useUniqueID } from '../../hooks/useUniqueID';
@@ -15,11 +14,16 @@ export const SelectBase = ({ label, options, field, form, ...rest }) => {
     useEffect(() => {
         form.setFieldTouched(field.name, true);
         if (field.value !== '') {
+            if (field.name === 'AccountType') {
+
+                console.log("🚀 ~ useEffect ~ field.value:", field)
+            }
             form.setFieldValue(field.name, field.value);
+        } else {
+            setIsEmptyOptionSelected(field.value === null || field.value === '');
         }
 
-        setIsEmptyOptionSelected(field.value === null || field.value === '');
-    }, [field.value, form.touched[field.name]]);
+    }, [field.value, field.name]);
 
     const hasError = getValueFromFieldFormik(form.errors, field.name) && getValueFromFieldFormik(form.touched, field.name);
     const [touched, setTouched] = React.useState(hasError);
@@ -41,11 +45,12 @@ export const SelectBase = ({ label, options, field, form, ...rest }) => {
             onChange={handleSelect}
             errorMessage={field.value || !touched ? "" : getValueFromFieldFormik(form.errors, field.name)}
             isInvalid={field.value || !touched ? false : true}
+            selectedKeys={field.value ? [field.value] : 'all'}
             defaultSelectedKeys={field.value ? [field.value] : 'all'}
             onClose={() => setTouched(true)}
         >
             {(option) => (
-                <SelectItem key={option?.id ?? option.value} value={option.value}>
+                <SelectItem key={option.id ?? option.value} value={option.value}>
                     {option.label}
                 </SelectItem>
             )}

@@ -81,7 +81,7 @@ export const FilesWorkers = ({ itemId }) => {
             });
 
             window.open(file);
-            
+
         } catch (error) {
             console.error('Error al obtener la información del archivo', error); // Debugging: Capturar y registrar errores
             alert('Fallo al obtener la información del archivo');
