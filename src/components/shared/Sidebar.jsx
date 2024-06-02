@@ -12,7 +12,7 @@ const linkClasses =
 
 export default function Sidebar() {
     return (
-        <div className="bg-neutral-900 w-60 p-3 flex flex-col text-white">
+        <div className="bg-neutral-900 w-60 p-3 flex flex-col text-white fixed h-screen">
             <div className="flex items-center gap-2 px-1 py-3">
                 <FcBullish fontSize={24} />
                 <span className="text-neutral-100 text-lg">OpenShop</span>

@@ -1,30 +1,41 @@
 import { Button, Input } from '@nextui-org/react';
 import React, { useState } from 'react';
 import axiosInstance from '../../../axios/axios';
+import { FileInputBase } from '../../../components/base';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { DownloadCloud } from '../../../components/icons';
+import ToastNotification from '../../../lib/helpers/toast-notification';
+
+// cv, certification, psychological_test, profile_photo
+
+const typeFiles = [
+    { label: 'CV', tag: 'cv' },
+    { label: 'Test Psicológico', tag: 'psychological_test' },
+    { label: 'Profile Foto', tag: 'profile_photo' },
+    { label: 'Contrato', tag: 'contract' },
+]
 
 export const FilesWorkers = ({ itemId }) => {
-    const [selectedFile, setSelectedFile] = useState(null);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
+    const handleFileChange = (file, tag) => {
         if (!file) {
             alert('Por favor selecciona un archivo primero');
             return;
         }
         console.log('Archivo seleccionado:', file); // Debugging: Verificar si se seleccionó el archivo
-        setSelectedFile(file);
+        handleFileUpload(file, tag)
     };
 
-    const handleFileUpload = async () => {
+    const handleFileUpload = async (selectedFile, tag) => {
         if (!selectedFile) {
-            alert('No hay ningún archivo seleccionado para subir');
+            (new ToastNotification('No hay ningún archivo seleccionado para subir')).showError();
             return;
         }
 
         try {
             const { data } = await axiosInstance.get('/files/presigned-url', {
                 params: {
-                    type: 'cv'
+                    type: tag
                 }
             });
 
@@ -46,19 +57,20 @@ export const FilesWorkers = ({ itemId }) => {
                 await axiosInstance.post('/files', {
                     table_name: 'worker',
                     tableId: itemId,
-                    tag: 'cv',
+                    tag: tag,
                     keyFile: fileName,
                     path: filePath
                 });
-                alert('Archivo subido correctamente');
+
+                (new ToastNotification('Archivo subido correctamente')).showSuccess();
             } else {
                 const errorText = await resp.text(); // Leer el cuerpo de la respuesta para obtener detalles del error
                 console.error('Fallo en la subida', resp.status, errorText); // Debugging: Registro detallado del error
-                alert('Fallo al subir el archivo');
+                (new ToastNotification('Fallo al subir el archivo')).showError();
             }
         } catch (error) {
             console.error('Error en la subida', error); // Debugging: Capturar y registrar errores
-            alert('Fallo al subir el archivo');
+            (new ToastNotification('Fallo al subir el archivo')).showError();
         }
     };
 
@@ -84,25 +96,30 @@ export const FilesWorkers = ({ itemId }) => {
 
         } catch (error) {
             console.error('Error al obtener la información del archivo', error); // Debugging: Capturar y registrar errores
-            alert('Fallo al obtener la información del archivo');
+            (new ToastNotification('Fallo al obtener la información del archivo')).showError();
         }
     };
 
     return (
         <div>
             <h2 className='text-2xl'>Archivos del colaborador</h2>
-
-            <input
-                type='file'
-                onChange={handleFileChange}
-            />
-            <Button onClick={handleFileUpload}>
-                Subir CV
-            </Button>
-
-            <Button onClick={getFileInfo('cv')}>
-                Descargar CV
-            </Button>
+            <div className='bg-white p-4 my-4 rounded-md'>
+                {typeFiles.map(({ label, tag }) => (
+                    <div key={tag} className='flex gap-4 items-center mb-4'>
+                        <label className='font-semibold w-20'> {label} </label>
+                        <FileInputBase onChangeFile={(file) => handleFileChange(file, tag)} className='flex-1' />
+                        <Button color='primary' onClick={getFileInfo(tag)}>
+                            <DownloadCloud />
+                        </Button>
+                    </div>
+                ))}
+                {/* <div className='flex gap-4 items-center'>
+                    <FileInputBase label='CV' onChangeFile={handleFileChange} className='flex-1' />
+                    <Button color='primary' onClick={getFileInfo('cv')}>
+                        <DownloadCloud />
+                    </Button>
+                </div> */}
+            </div>
         </div>
     );
 };

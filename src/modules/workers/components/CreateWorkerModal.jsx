@@ -1,10 +1,11 @@
 import React from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker } from '@nextui-org/react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker, Divider } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
 import { DatePickerBase, InputBase, SelectBase, InputTagBase } from '../../../components/base';
 import axios from '../../../axios/axios';
 import ToastNotification from '../../../lib/helpers/toast-notification';
 import * as Yup from 'yup';
+import axiosInstance from '../../../axios/axios';
 
 export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
 
@@ -18,7 +19,8 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         charge: '',
         birthdate: '',
         contractType: '',
-        hiringDate: '',
+        hiringDateContract: '',
+        endDateContract: '',
         phoneNumber: '',
         address: '',
         district: '',
@@ -52,7 +54,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         charge: Yup.string().required(),
         birthdate: Yup.string().max(new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate()), 'debe tener al menos 18 años').required(), // Assuming birthdate is a string, adjust if it's a date
         contractType: Yup.string().required(),
-        hiringDate: Yup.string().max(new Date(), 'No puede ser mayor al día de hoy').required(), // Assuming hiringDate is a string, adjust if it's a date
+        hiringDateContract: Yup.string().max(new Date(), 'No puede ser mayor al día de hoy').required(), // Assuming hiringDateContract is a string, adjust if it's a date
         phoneNumber: Yup.string().length(9).matches(/^[0-9]+$/).required(),
         address: Yup.string().required(),
         district: Yup.string().required(),
@@ -62,16 +64,27 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         techSkills: Yup.array().of(
             Yup.string().required() // Example: require each element to be a string
         ).min(1, 'The array must have at least one element').required('This field is required'),
-        // emergencyContacts: Yup.array().min(1).required(), // Validate that emergencyContacts array is not empty
     });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
-        console.log(JSON.stringify(values, null, 2));
+        // console.log(JSON.stringify(values, null, 2));
+        const { contractType,
+            hiringDateContract,
+            endDateContract, ...args } = values;
         try {
             setSubmitting(true);
-            await axios.post('workers', { ...values });
+            const workerCreated = await axiosInstance.post('workers', {
+                ...args
+            });
+
+            await axiosInstance.post('/contract-workers', {
+                workerId: workerCreated.data.id,
+                contractType,
+                hiringDate: hiringDateContract,
+                endDate: endDateContract,
+            });
+
             (new ToastNotification('Colaborador creado correctamente')).showSuccess();
-            // fetchData();
             onClose();
         } catch (error) {
             console.log('Error', error);
@@ -83,7 +96,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
     };
 
     return (
-        <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
+        <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside" isDismissable={false}>
             <ModalContent>
                 {(onClose) => (
                     <Formik
@@ -99,7 +112,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                 <ModalHeader className="text-2xl">Agregar nuevo colaborador</ModalHeader>
                                 <ModalBody>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="col-span-1 md:col-span-2">
+                                        <div className="col-span-1">
                                             <Field
                                                 name="name"
                                                 label="Nombre(s)"
@@ -180,34 +193,6 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         </div>
                                         <div className="col-span-1">
                                             <Field
-                                                name="contractType"
-                                                label="Tipo de contrato"
-                                                component={SelectBase}
-                                                options={[
-                                                    {
-                                                        label: 'Recibo por Honorarios',
-                                                        value: 'RECIBOS POR HONORARIOS'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por planilla',
-                                                        value: 'CONTRATO POR PLANILLA'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por obras',
-                                                        value: 'CONTRATO POR OBRAS'
-                                                    }
-                                                ]}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="hiringDate"
-                                                label="Fecha de contratación"
-                                                component={DatePickerBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
                                                 name="phoneNumber"
                                                 label="Nro. de celular"
                                                 component={InputBase}
@@ -215,8 +200,28 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         </div>
                                         <div className="col-span-1">
                                             <Field
+                                                name="familiarAssignment"
+                                                label="Asignación familiar"
+                                                component={InputBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1 md:col-span-2">
+                                            <Field
+                                                name="techSkills"
+                                                label="Habilidades blandas"
+                                                component={InputTagBase}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <Divider className='mt-2' />
+
+                                    <h3 className="text-lg font-semibold">Dirección</h3>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                                        <div className="col-span-1">
+                                            <Field
                                                 name="address"
-                                                label="Dirección"
+                                                label="Dirección de dominicilio"
                                                 component={InputBase}
                                             />
                                         </div>
@@ -241,21 +246,52 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                                 component={InputBase}
                                             />
                                         </div>
+                                    </div>
+
+                                    <Divider className='mt-2' />
+
+                                    <h3 className="text-lg font-semibold">Contrato</h3>
+                                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                                         <div className="col-span-1">
                                             <Field
-                                                name="familiarAssignment"
-                                                label="Asignación familiar"
-                                                component={InputBase}
+                                                name="hiringDateContract"
+                                                label="Fecha inicio de contratación"
+                                                component={DatePickerBase}
                                             />
                                         </div>
-                                        <div className="col-span-1 md:col-span-2">
+                                        <div className="col-span-1">
                                             <Field
-                                                name="techSkills"
-                                                label="Habilidades blandas"
-                                                component={InputTagBase}
+                                                name="endDateContract"
+                                                label="Fecha fin de contratación"
+                                                component={DatePickerBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
+                                                name="contractType"
+                                                label="Tipo de contrato"
+                                                component={SelectBase}
+                                                options={[
+                                                    {
+                                                        label: 'Recibo por Honorarios',
+                                                        value: 'RECIBOS POR HONORARIOS'
+                                                    },
+                                                    {
+                                                        label: 'Contrato por planilla',
+                                                        value: 'CONTRATO POR PLANILLA'
+                                                    },
+                                                    {
+                                                        label: 'Contrato por obras',
+                                                        value: 'CONTRATO POR OBRAS'
+                                                    }
+                                                ]}
                                             />
                                         </div>
                                     </div>
+
+
                                 </ModalBody>
                                 <ModalFooter>
                                     <Button color="primary" type='submit' isLoading={isSubmitting} size="lg">

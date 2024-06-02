@@ -8,3 +8,4 @@ export { TableTopContent } from './TableTopContent';
 export { TableList } from './TableList';
 export { AutocompleteBase } from './AutocompleteBase';
 export { CardBase } from './CardBase';
+export { FileInputBase } from './FileInputBase';

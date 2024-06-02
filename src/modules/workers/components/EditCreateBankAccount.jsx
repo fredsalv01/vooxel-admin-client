@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types';
 
 import Slot from '../../../components/Slot';
@@ -14,21 +14,31 @@ import ToastNotification from '../../../lib/helpers/toast-notification';
 export const EditCreateBankAccount = ({ itemId }) => {
 
     const [bankAccounts, setBankAccounts] = useState([]);
-
+    const [isLoading, setLoading] = useState(false);
     const { isOpen, onOpen, onOpenChange, } = useDisclosure();
-
     const [editItem, setEditItem] = useState({});
 
     const fetchData = async () => {
-        const { data } = await axiosInstance.get(`/bank-accounts/worker/${itemId}`);
-        setBankAccounts(data.sort((a, b) => {
+        try {
+            setLoading(true);
+            const { data } = await axiosInstance.get(`/bank-accounts/worker/${itemId}`);
+            setBankAccounts(data);
+        } catch (error) {
+            console.log('Error', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const sortItems = useMemo(() => (
+        bankAccounts.sort((a, b) => {
             if (a.isMain && a.isActive) return -1;
             if (b.isMain && b.isActive) return 1;
             if (!a.isActive) return 1;
             if (!b.isActive) return -1;
             return 0;
-        }));
-    }
+        })
+    ), [bankAccounts]);
 
     useEffect(() => {
         fetchData();
@@ -65,7 +75,6 @@ export const EditCreateBankAccount = ({ itemId }) => {
     }
 
     const handleEditAccount = (item) => {
-        console.log("🚀 ~ handleEditAccount ~ item:", item)
         setEditItem(item);
         onOpen();
     }
@@ -74,7 +83,7 @@ export const EditCreateBankAccount = ({ itemId }) => {
         <>
             {isOpen && <EditCreateBankAccountModal isOpen={isOpen} onOpenChange={onOpenChange} item={editItem} items={bankAccounts} parentId={itemId} fetchData={fetchData} />}
 
-            <CardBase title='Cuentas bancarias' async={bankAccounts.length} skeletonlines={4}
+            <CardBase title='Cuentas bancarias' async={isLoading} skeletonlines={4}
             >
                 <Slot slot="header">
                     <Button onPress={() => {
@@ -84,7 +93,7 @@ export const EditCreateBankAccount = ({ itemId }) => {
                 </Slot>
                 <Slot slot="body">
                     <div className='grid gap-4 overflow-y-auto max-h-[500px]'>
-                        {bankAccounts.map((bankAccount, index) => (
+                        {sortItems.map((bankAccount, index) => (
                             <div key={index} className={'relative rounded-md px-4 bg-blue-400 grid gap-3 py-3'}>
                                 <div className='flex justify-between'>
                                     <h3 className='text-lg font-bold'>{bankAccount.AccountType} - {bankAccount.bankName}</h3>

@@ -20,7 +20,7 @@ export const DetailWorkerPage = () => {
             const { data } = await axios.get(`/workers/${id}`);
             setItem(data);
         }
-        // getItemToEdit();
+        getItemToEdit();
     }, []);
 
     return (

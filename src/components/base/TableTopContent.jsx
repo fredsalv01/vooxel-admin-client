@@ -1,14 +1,20 @@
 import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input } from '@nextui-org/react'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { ChevronDownIcon, SearchIcon } from '../icons'
+import { capitalize } from '../../lib/helpers/utils';
 
-export const TableTopContent = ({ content, visibleColumns, setVisibleColumns, headersTable }) => {
+export const TableTopContent = ({ content = {}, visibleColumns, headersTable, onVisibleColumnsChange }) => {
 
   const [inputSearch, setInputSearch] = useState();
 
   const onSearchChange = (value) => {
 
   }
+
+  const handleVisibleColumnsChange = (keys) => {
+    console.log("🚀 ~ handleVisibleColumnsChange ~ keys:", keys)
+    onVisibleColumnsChange(keys);
+  };
 
   return (
     <div className="gap-3 flex flex-wrap md:flex-nowrap">
@@ -34,7 +40,7 @@ export const TableTopContent = ({ content, visibleColumns, setVisibleColumns, he
             closeOnSelect={false}
             selectedKeys={visibleColumns}
             selectionMode="multiple"
-            onSelectionChange={setVisibleColumns}
+            onSelectionChange={handleVisibleColumnsChange}
           >
             {headersTable.map((column) => (
               <DropdownItem key={column.uid} className="capitalize">
@@ -44,7 +50,7 @@ export const TableTopContent = ({ content, visibleColumns, setVisibleColumns, he
           </DropdownMenu>
         </Dropdown>
 
-        {content}
+        {/* {content} */}
         {/* <Button onPress={onOpen} color="primary" endContent={<PlusIcon />}>
           Agregar
         </Button> */}

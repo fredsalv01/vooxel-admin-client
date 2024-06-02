@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import axios from '../../../axios/axios'
 import {
   Table,
@@ -14,17 +14,32 @@ import {
   DropdownMenu,
   DropdownItem,
   Pagination,
-  useDisclosure
+  useDisclosure,
+  Spinner,
+  Tooltip
 } from '@nextui-org/react'
-import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { VerticalDotsIcon } from '../../../components/icons/VerticalDotsIcon'
-import { SearchIcon } from '../../../components/icons/SearchIcon'
-import { ChevronDownIcon } from '../../../components/icons/ChevronDownIcon'
-import { columns, statusOptions } from '../../../utils/data-types/data'
+import { ChevronDownIcon, PlusIcon, SearchIcon, EditIcon } from '../../../components/icons'
+import { statusOptions } from '../../../utils/data-types/data'
 import { capitalize } from '../../../lib/helpers/utils'
 import { CreateWorkerModal } from '../components'
+import debounce from 'lodash.debounce';
+
+const columns = [
+  { name: 'Nro', uid: 'nro' },
+  { name: 'Nombre(s)', uid: 'name' },
+  { name: 'Apellidos', uid: 'apPat' },
+  { name: 'Cargo', uid: 'charge' },
+  { name: 'Tipo de Documento', uid: 'documentType' },
+  { name: 'Numero de Documento', uid: 'documentNumber' },
+  { name: 'Jefe Directo', uid: 'chiefOfficerName' },
+  { name: 'Tipo de Contrato', uid: 'contractType' },
+  { name: 'habilidades', uid: 'techSkills' },
+  { name: 'Acciones', uid: 'actions' }
+]
+
 
 const INITIAL_VISIBLE_COLUMNS = [
+  'Nro',
   'name',
   'apPat',
   'charge',
@@ -40,6 +55,7 @@ export const WorkerList = () => {
   const [loading, setLoading] = useState(true)
   const [workers, setWorkers] = useState([])
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const searchRef = useRef(true);
 
   const queryParams = {
     isActive: true,
@@ -48,49 +64,62 @@ export const WorkerList = () => {
     input: ''
   }
 
-  async function fetchData() {
-    try {
-      const { data } = await axios.get('workers', {
-        params: queryParams
-      })
-      const formatData = data.items.map((worker) => {
-        return {
-          ...worker,
-          chiefOfficerName: worker.chiefOfficer !== null ? worker.chiefOfficer.name : 'Ninguno'
-        }
-      })
-      setWorkers(formatData)
-      setLoading(false) // Update loading state when data fetching is complete
-    } catch (error) {
-      console.log('Error:', error)
-      setLoading(false) // Update loading state in case of error
-    }
-  }
-  useEffect(() => {
-
-    fetchData()
-  }, [])
-
-  const [filterValue, setFilterValue] = React.useState('')
-  const [selectedKeys, setSelectedKeys] = React.useState(new Set([]))
-  const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS))
-  const [statusFilter, setStatusFilter] = React.useState('all')
-  const [rowsPerPage, setRowsPerPage] = React.useState(3)
-  const [sortDescriptor, setSortDescriptor] = React.useState({
+  const [filterValue, setFilterValue] = useState('')
+  const [selectedKeys, setSelectedKeys] = useState(new Set([]))
+  const [visibleColumns, setVisibleColumns] = useState(new Set(INITIAL_VISIBLE_COLUMNS))
+  const [statusFilter, setStatusFilter] = useState('all')
+  const [rowsPerPage, setRowsPerPage] = useState(3)
+  const [sortDescriptor, setSortDescriptor] = useState({
     column: 'id',
     direction: 'descending'
   })
-  const [page, setPage] = React.useState(1)
+  const [page, setPage] = useState(1)
+
+  async function fetchData(searchQuery) {
+    try {
+      setLoading(true)
+      const { data } = await axios.get('workers', {
+        params: { ...queryParams, input: searchQuery || '' }
+      })
+      const { items, meta } = data;
+      const formatData = items.map((worker) => {
+        return {
+          ...worker,
+          chiefOfficerName: worker.chiefOfficer !== null ? worker.chiefOfficer.name : 'Ninguno',
+        }
+      })
+      setWorkers(formatData)
+    } catch (error) {
+      console.log('Error:', error)
+    } finally {
+      setLoading(false) // Update loading state in case of error
+    }
+  }
+
+  const debouncedFetchResults = useCallback(
+    debounce((searchQuery) => fetchData(searchQuery), 200),
+    []
+  );
+
+
+  useEffect(() => {
+    if (filterValue) {
+      console.log("🚀 ~ useEffect ~ filterValue:", filterValue)
+      debouncedFetchResults(filterValue);
+    } else {
+      fetchData();
+    }
+  }, [filterValue, debouncedFetchResults])
 
   const hasSearchFilter = Boolean(filterValue)
 
-  const headerColumns = React.useMemo(() => {
+  const headerColumns = useMemo(() => {
     if (visibleColumns === 'all') return columns
 
     return columns.filter((column) => Array.from(visibleColumns).includes(column.uid))
   }, [visibleColumns])
 
-  const filteredItems = React.useMemo(() => {
+  const filteredItems = useMemo(() => {
     if (!Array.isArray(workers)) return [] // Ensure workers is an array before filtering
 
     let filteredWorkers = [...workers]
@@ -121,24 +150,25 @@ export const WorkerList = () => {
 
   const pages = Math.ceil(filteredItems.length / rowsPerPage)
 
-  const items = React.useMemo(() => {
+  const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage
     const end = start + rowsPerPage
 
     return filteredItems.slice(start, end)
   }, [page, filteredItems, rowsPerPage])
 
-  const sortedItems = React.useMemo(() => {
-    return [...items].sort((a, b) => {
-      const first = a[sortDescriptor.column]
-      const second = b[sortDescriptor.column]
-      const cmp = first < second ? -1 : first > second ? 1 : 0
+  // const sortedItems = useMemo(() => {
+  //   return [...items].sort((a, b) => {
+  //     const first = a[sortDescriptor.column]
+  //     const second = b[sortDescriptor.column]
+  //     const cmp = first < second ? -1 : first > second ? 1 : 0
 
-      return sortDescriptor.direction === 'descending' ? -cmp : cmp
-    })
-  }, [sortDescriptor, items])
+  //     return sortDescriptor.direction === 'descending' ? -cmp : cmp
+  //   })
+  // }, [sortDescriptor, items])
 
-  const renderCell = React.useCallback((worker, columnKey) => {
+
+  const renderCell = useCallback((worker, columnKey) => {
     const cellValue = worker[columnKey]
 
     switch (columnKey) {
@@ -156,8 +186,8 @@ export const WorkerList = () => {
       case 'apPat':
         return (
           <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">{cellValue}</p>
-            <p className="text-bold text-tiny capitalize text-default-400">{worker.apPat}</p>
+            <p className="text-bold text-tiny capitalize">{worker.apPat}</p>
+            <p className="text-bold text-tiny capitalize text-default-400">{worker.apMat}</p>
           </div>
         )
       case 'charge':
@@ -167,22 +197,32 @@ export const WorkerList = () => {
           //   {cellValue}
           // </Chip>
         )
+      case 'contractType':
+        return (
+          (worker.contractType === 'No tiene contrato') ? (<div className="text-red-600">No tiene contrato</div>) :
+            (<div className="text-xs">{worker.contractType}</div>)
+        )
       case 'actions':
         return (
-          <div className="relative flex justify-end items-center gap-2">
-            <Dropdown key={worker.id}>
+          <div className="relative flex justify-center items-center gap-2">
+            {/* <Dropdown key={worker.id}>
               <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
+                <Button isIconOnly size="sm" variant="light" aria-label="More options">
                   <VerticalDotsIcon className="text-default-300" />
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem>Mostrar</DropdownItem>
-                <DropdownItem href={`/workers/${worker.id}/detail`}>Ver
-                </DropdownItem>
-                <DropdownItem>Desactivar</DropdownItem>
+                <DropdownItem aria-label="Show" href={`/workers/${worker.id}/detail`}>Ver</DropdownItem>
+                <DropdownItem aria-label="Desactive">Desactivar</DropdownItem>
               </DropdownMenu>
-            </Dropdown>
+            </Dropdown> */}
+
+
+            <Tooltip content="Editar">
+              <a href={`/workers/${worker.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                <EditIcon />
+              </a>
+            </Tooltip>
           </div>
         )
       default:
@@ -190,24 +230,24 @@ export const WorkerList = () => {
     }
   }, [])
 
-  const onNextPage = React.useCallback(() => {
+  const onNextPage = useCallback(() => {
     if (page < pages) {
       setPage(page + 1)
     }
   }, [page, pages])
 
-  const onPreviousPage = React.useCallback(() => {
+  const onPreviousPage = useCallback(() => {
     if (page > 1) {
       setPage(page - 1)
     }
   }, [page])
 
-  const onRowsPerPageChange = React.useCallback((e) => {
+  const onRowsPerPageChange = useCallback((e) => {
     setRowsPerPage(Number(e.target.value))
     setPage(1)
   }, [])
 
-  const onSearchChange = React.useCallback((value) => {
+  const onSearchChange = useCallback((value) => {
     if (value) {
       setFilterValue(value)
       setPage(1)
@@ -216,12 +256,17 @@ export const WorkerList = () => {
     }
   }, [])
 
-  const onClear = React.useCallback(() => {
+  const onClear = useCallback(() => {
     setFilterValue('')
     setPage(1)
   }, [])
 
-  const topContent = React.useMemo(() => {
+  const handleChange = (e) => {
+    console.log("🚀 ~ handleChange ~ e:", e)
+    setFilterValue(e);
+  };
+
+  const topContent = useMemo(() => {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-3 items-end">
@@ -232,7 +277,7 @@ export const WorkerList = () => {
             startContent={<SearchIcon />}
             value={filterValue}
             onClear={() => onClear()}
-            onValueChange={onSearchChange}
+            onValueChange={handleChange}
           />
           <div className="flex gap-3">
             {/* <Dropdown>
@@ -262,13 +307,16 @@ export const WorkerList = () => {
                   Columnas
                 </Button>
               </DropdownTrigger>
+
               <DropdownMenu
                 disallowEmptySelection
                 aria-label="Table Columns"
                 closeOnSelect={false}
                 selectedKeys={visibleColumns}
                 selectionMode="multiple"
-                onSelectionChange={setVisibleColumns}
+                onSelectionChange={
+                  setVisibleColumns
+                }
               >
                 {columns.map((column) => (
                   <DropdownItem key={column.uid} className="capitalize">
@@ -297,7 +345,7 @@ export const WorkerList = () => {
     )
   }, [filterValue, statusFilter, visibleColumns, onRowsPerPageChange, workers.length, onSearchChange, hasSearchFilter])
 
-  const bottomContent = React.useMemo(() => {
+  const bottomContent = useMemo(() => {
     return (
       <div className="py-2 px-2 flex justify-between items-center">
         <span className="w-[30%] text-small text-default-400">
@@ -349,7 +397,10 @@ export const WorkerList = () => {
             </TableColumn>
           )}
         </TableHeader>
-        <TableBody emptyContent={'Ningun colaborador encontrado'} items={sortedItems}>
+        <TableBody emptyContent={'Ningun colaborador encontrado'} items={workers}
+          isLoading={loading}
+          loadingContent={<Spinner label="Loading..." />}
+        >
           {(item) => (
             <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}</TableRow>
           )}
