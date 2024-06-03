@@ -3,12 +3,20 @@ import { Card, CardBody, CardHeader, Divider, Skeleton } from '@nextui-org/react
 import { isSlot } from '../Slot';
 import clsx from 'clsx';
 
+/**
+ * @typedef {Object} CardBaseProps
+ * @property {string} title
+ * @property {boolean} async
+ * @property {number} skeletonlines
+ * @property {string} className
+ * @property {React.ReactNode} children
+ */
 export const CardBase = ({ title, async = false, skeletonlines = 6, className, children }) => {
     const headerSlot = React.Children.toArray(children).find(child => isSlot('header', child));
     const bodySlot = React.Children.toArray(children).find(child => isSlot('body', child));
     const footerSlot = React.Children.toArray(children).find(child => isSlot('footer', child));
 
-    const [isLoaded, setLoaded] = useState(true);
+    const [isLoaded, setLoaded] = useState(async);
 
     useEffect(() => {
         if (async) setLoaded(false);
@@ -20,7 +28,7 @@ export const CardBase = ({ title, async = false, skeletonlines = 6, className, c
                 <>
                     <CardHeader className='flex justify-between'>
                         {title && <h2 className='text-2xl'>{title}</h2>}
-                        {headerSlot.props.children}
+                        {headerSlot ? headerSlot.props.children : ''}
                     </CardHeader>
                     <Divider />
                 </>

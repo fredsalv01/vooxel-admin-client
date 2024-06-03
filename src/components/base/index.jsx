@@ -9,3 +9,4 @@ export { TableList } from './TableList';
 export { AutocompleteBase } from './AutocompleteBase';
 export { CardBase } from './CardBase';
 export { FileInputBase } from './FileInputBase';
+export { FileInput } from './FileInput';

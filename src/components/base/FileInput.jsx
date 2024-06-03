@@ -1,9 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button, Input } from '@nextui-org/react';
-import { getValueFromFieldFormik } from '../../lib/helpers/utils';
 
-export const FileInputBase = ({ field, form, label, onChangeFile, ...props }) => {
+export const FileInput = ({ onChangeFile, ...props }) => {
     const fileInputRef = useRef(null);
+    const [fileName, setFileName] = useState('');
 
     const handleClick = () => {
         fileInputRef.current.click();
@@ -11,34 +11,28 @@ export const FileInputBase = ({ field, form, label, onChangeFile, ...props }) =>
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
+        console.info("🚀 ~ handleFileChange child ~ file:", file)
 
         if (!file) {
-            form.setFieldValue(field.name, '');
+            setFileName('');
             return;
         }
+        setFileName(file.name);
 
-        form.setFieldValue(field.name, file);
-
-        if (onChangeFile) {
+        if (onChangeFile)
             onChangeFile(file);
-        }
-    };
 
-    const hasError = getValueFromFieldFormik(form.errors, field.name) && getValueFromFieldFormik(form.touched, field.name);
+    };
 
     return (
         <>
             <Input
-                size='md'
-                variant="bordered"
+                isReadOnly
                 onClick={handleClick}
                 placeholder="Click para seleccionar archivo..."
                 contentRight={<Button auto onClick={handleClick}>Browse</Button>}
+                value={fileName}
                 {...props}
-                isInvalid={hasError}
-                errorMessage={
-                    hasError && getValueFromFieldFormik(form.errors, field.name)
-                }
             />
             <input
                 type="file"
@@ -49,3 +43,4 @@ export const FileInputBase = ({ field, form, label, onChangeFile, ...props }) =>
         </>
     );
 };
+

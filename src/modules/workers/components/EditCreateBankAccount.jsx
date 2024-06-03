@@ -3,11 +3,11 @@ import PropTypes from 'prop-types';
 
 import Slot from '../../../components/Slot';
 import { Button, useDisclosure } from '@nextui-org/react';
-import { EditCreateBankAccountModal } from './EditCreateBankAccountModal';
 import { CardBase } from '../../../components/base';
+import { EditCreateBankAccountModal } from './EditCreateBankAccountModal';
+import { PlusIcon } from '../../../components/icons';
 
 import axiosInstance from '../../../axios/axios';
-import { EditIcon, PlusIcon } from '../../../components/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ToastNotification from '../../../lib/helpers/toast-notification';
 
@@ -15,7 +15,7 @@ export const EditCreateBankAccount = ({ itemId }) => {
 
     const [bankAccounts, setBankAccounts] = useState([]);
     const [isLoading, setLoading] = useState(false);
-    const { isOpen, onOpen, onOpenChange, } = useDisclosure();
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [editItem, setEditItem] = useState({});
 
     const fetchData = async () => {

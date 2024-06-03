@@ -4,3 +4,5 @@ export { EditCreateEmergencyContact } from './EditCreateEmergencyContact';
 export { FilesWorkers } from './FilesWorkers';
 export { EditCreateBankAccount } from './EditCreateBankAccount';
 export { EditCreateBankAccountModal } from './EditCreateBankAccountModal';
+export { EditCreateContract } from './EditCreateContract';
+export { EditCreateContractModal } from './EditCreateContractModal';

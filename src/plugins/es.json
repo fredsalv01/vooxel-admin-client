@@ -15,5 +15,10 @@
     "bankName": "nombre del banco",
     "bankAccountNumber": "nro. de cuenta",
     "AccountType ": "tipo de cuenta",
-    "cci": "nro. de cuenta interbancaria"
+    "cci": "nro. de cuenta interbancaria",
+    "phone": "celular",
+    "file": "archivo",
+    "hiringDate": "fecha de contratación",
+    "endDate": "fecha fin",
+    "startDate": "fecha inicio"
 }

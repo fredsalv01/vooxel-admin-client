@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { EditIcon } from '../../../components/icons';
 import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers, EditCreateBankAccount } from '../components';
 import axios from '../../../axios/axios';
+import { EditCreateContract } from '../components/EditCreateContract';
 
 export const DetailWorkerPage = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -31,9 +32,7 @@ export const DetailWorkerPage = () => {
                 Editar
             </Button>
             <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
-                <div>
-                    <h2 className='text-2xl'>Datos</h2>
-
+                <div className='grid gap-4'>
                     {/* <p>Nombre: {item?.name}</p>
                     <p>Apellidos: {`${item?.apPat} ${item?.apMat}`}</p>
                     <p>Cumpleaños: {item?.birthdate} </p>
@@ -58,6 +57,7 @@ export const DetailWorkerPage = () => {
                     <p>Supervisor: {item?.chiefOfficer}</p>
                     <p>Clientes: {item?.client} </p> */}
 
+                    <EditCreateContract itemId={id} />
 
                     <EditCreateBankAccount itemId={id} />
                 </div>

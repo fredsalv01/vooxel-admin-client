@@ -45,7 +45,7 @@ export const SelectBase = ({ label, options, field, form, ...rest }) => {
             onChange={handleSelect}
             errorMessage={field.value || !touched ? "" : getValueFromFieldFormik(form.errors, field.name)}
             isInvalid={field.value || !touched ? false : true}
-            selectedKeys={field.value ? [field.value] : 'all'}
+            selectedKeys={field.value ? [field.value] : ''}
             defaultSelectedKeys={field.value ? [field.value] : 'all'}
             onClose={() => setTouched(true)}
         >
