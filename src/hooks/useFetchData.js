@@ -13,7 +13,6 @@ export const useFetchData = ({ url }) => {
             setLoading(true);
             setError(null);
             const response = await axiosInstance.get(`${url}`);
-            console.log("🚀 ~ fetchData ~ response:", response)
             setData(response.data);
             
         } catch (error) {
@@ -23,6 +22,7 @@ export const useFetchData = ({ url }) => {
             setLoading(false);
         }
     }
+
     useEffect(() => {
         fetchData();
     }, []);

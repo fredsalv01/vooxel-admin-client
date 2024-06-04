@@ -28,27 +28,20 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
     });
 
 
-    const { handleFileChange,
-        handleFileUpload,
-        handleFileUpdated,
-        isLoading } = useUploadFile({ tableName: 'contractWorkers', goUpload: false });
+    const { handleFileChange, handleFileUpload, handleFileUpdated } = useUploadFile({ tableName: 'contractWorkers', goUpload: false });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
-        console.log(JSON.stringify(values, null, 2));
+        // console.log(JSON.stringify(values, null, 2));
 
         const { file, ...restValues } = values
-
         const fileCreated = await handleFileUpload(file, 'contract');
-        console.log("🚀 ~ handleSubmit ~ fileCreated:", fileCreated)
 
         try {
             setSubmitting(true);
-            console.log("🚀 ~ handleSubmit ~ parentId:", parentId)
             const contractCreated = await axiosInstance.post(`contract-workers`, {
                 ...restValues,
                 workerId: parentId
             });
-            console.log("🚀 ~ handleSubmit ~ contractCreated:", contractCreated);
 
             (new ToastNotification('Contrato creado correctamente')).showSuccess();
 
@@ -57,55 +50,16 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
                 fetchData();
                 onClose();
             } catch (error) {
-                console.log("🚀 ~ handleSubmit ~ error:", error)
+                console.log("Error updated File in contracts", error)
             }
 
         } catch (error) {
+            console.log('Error creating contract', error);
             if (error.response.status === 400) (new ToastNotification(error.response.data.message)).showError();
             else (new ToastNotification('Error al crear el Contrato')).showError();
-            console.log('Error', error);
         } finally {
             setSubmitting(false);
         }
-
-
-        let isMain = false;
-
-        // validate if item is empty, then create a new item by endDate
-        if (Object.keys(item).length === 0) {
-            const itemExists = items.find((item) => item.endDate === values.endDate);
-            if (!itemExists) isMain = true;
-
-
-            const newValue = { ...values, workerId: parentId, isMain };
-
-
-        } else {
-
-            const itemExists = items.find((otherItem) => (otherItem.endDate === values.endDate));
-
-            if (itemExists.id == item.id) {
-                isMain = true
-            }
-
-            const newValue = { ...values, workerId: parentId };
-            console.log("🚀 ~ handleSubmit ~ newValue:", newValue)
-
-            try {
-                setSubmitting(true);
-                await axiosInstance.patch(`/bank-accounts/bank/${item.id}`, newValue);
-                (new ToastNotification('Cuenta actualizada correctamente')).showSuccess();
-                fetchData();
-                onClose();
-            } catch (error) {
-                console.log('Error', error);
-                if (error.response.status === 400) (new ToastNotification(error.response.data.message)).showError();
-                else (new ToastNotification('Error al crear la cuenta')).showError();
-            } finally {
-                setSubmitting(false);
-
-            }
-        };
     }
 
     useEffect(() => {

@@ -11,8 +11,7 @@ import { useFetchData } from '../../../hooks/useFetchData';
 import { EditCreateContractModal } from './EditCreateContractModal';
 import { useUploadFile } from '../../../hooks/useUploadFile';
 
-export const EditCreateContract = ({ itemId }) => {
-
+export const EditCreateCertification = ({ itemId }) => {
     const { data, isLoading, fetchData } = useFetchData({ url: `/contract-workers/${itemId}` });
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [editItem, setEditItem] = useState({});
@@ -65,7 +64,7 @@ export const EditCreateContract = ({ itemId }) => {
                 </div>);
             case 'actions':
                 return (
-                    <div className='flex justify-center'>
+                    <div className='flex gap-2 justify-center'>
                         <ButtonGroup>
                             <Button isIconOnly color='white' className='p-0'>
                                 <EditIcon />
@@ -79,7 +78,7 @@ export const EditCreateContract = ({ itemId }) => {
             default:
                 return cellValue;
         }
-    }, [rows]);
+    });
 
     const classNames = useMemo(
         () => ({
@@ -92,7 +91,7 @@ export const EditCreateContract = ({ itemId }) => {
     return (
         <>
             {isOpen && <EditCreateContractModal isOpen={isOpen} onOpenChange={onOpenChange} item={editItem} items={rows} parentId={itemId} fetchData={fetchData} />}
-            <CardBase title='Contractos' async={isLoading} skeletonlines={5}>
+            <CardBase title='Certificaciones' async={isLoading} skeletonlines={5}>
                 <Slot slot="header">
                     <Button size='sm' onPress={() => {
                         setEditItem({});
@@ -100,13 +99,13 @@ export const EditCreateContract = ({ itemId }) => {
                     }} color="primary" endContent={<PlusIcon />}>Agregar</Button>
                 </Slot>
                 <Slot slot="body">
-                    <Table aria-label="Table worker's contracts" isStriped classNames={classNames}>
+                    <Table aria-label="Example table with dynamic content" isStriped classNames={classNames}>
                         <TableHeader columns={columns}>
                             {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
                         </TableHeader>
                         <TableBody items={rows}>
                             {(item) => (
-                                <TableRow key={item.id}>
+                                <TableRow key={item.key}>
                                     {(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}
                                 </TableRow>
                             )}
@@ -118,6 +117,6 @@ export const EditCreateContract = ({ itemId }) => {
     )
 }
 
-EditCreateContract.propTypes = {
+EditCreateCertification.propTypes = {
     itemId: PropTypes.string.isRequired
 }

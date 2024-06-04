@@ -86,7 +86,7 @@ export const EditCreateBankAccount = ({ itemId }) => {
             <CardBase title='Cuentas bancarias' async={isLoading} skeletonlines={4}
             >
                 <Slot slot="header">
-                    <Button onPress={() => {
+                    <Button size='sm' onPress={() => {
                         setEditItem({});
                         onOpen();
                     }} color="primary" endContent={<PlusIcon />}>Agregar</Button>

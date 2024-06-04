@@ -6,6 +6,7 @@ import { EditIcon } from '../../../components/icons';
 import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers, EditCreateBankAccount } from '../components';
 import axios from '../../../axios/axios';
 import { EditCreateContract } from '../components/EditCreateContract';
+import { EditCreateCertification } from '../components/EditCreateCertification';
 
 export const DetailWorkerPage = () => {
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -32,8 +33,7 @@ export const DetailWorkerPage = () => {
                 Editar
             </Button>
             <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
-                <div className='grid gap-4'>
-                    {/* <p>Nombre: {item?.name}</p>
+                {/* <p>Nombre: {item?.name}</p>
                     <p>Apellidos: {`${item?.apPat} ${item?.apMat}`}</p>
                     <p>Cumpleaños: {item?.birthdate} </p>
                     <p>Tipo de documento": {item?.documentType}</p>
@@ -52,23 +52,16 @@ export const DetailWorkerPage = () => {
                     <p>Habilidades blandas: {item?.techSkills} </p>
                     <p> Estado: {item?.isActive ? 'Activo' : 'Inactivo'} </p> */}
 
-                    {/* Se debe asignar despues */}
-                    {/* <p>Cuenta bancaria: {item?.bankAccount?.bankName} </p>
+                {/* Se debe asignar despues */}
+                {/* <p>Cuenta bancaria: {item?.bankAccount?.bankName} </p>
                     <p>Supervisor: {item?.chiefOfficer}</p>
                     <p>Clientes: {item?.client} </p> */}
 
-                    <EditCreateContract itemId={id} />
-
-                    <EditCreateBankAccount itemId={id} />
-                </div>
-                <div>
-
-                    <div className='grid gap-4'>
-                        <FilesWorkers itemId={id} />
-                        <EditCreateEmergencyContact itemId={id} />
-                    </div>
-
-                </div>
+                <EditCreateContract itemId={id} />
+                <EditCreateBankAccount itemId={id} />
+                <FilesWorkers itemId={id} />
+                <EditCreateCertification itemId={id} />
+                <EditCreateEmergencyContact itemId={id} />
             </div>
         </div>
     );
