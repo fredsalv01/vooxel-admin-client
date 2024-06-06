@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Select, SelectItem } from '@nextui-org/react';
 import { useUniqueID } from '../../hooks/useUniqueID';
 import { getValueFromFieldFormik } from '../../lib/helpers/utils';
@@ -7,22 +7,13 @@ export const SelectBase = ({ label, options, field, form, ...rest }) => {
 
     const uuid = useUniqueID().getID().toString();
 
-    const [isEmptyOptionSelected, setIsEmptyOptionSelected] = useState(
-        field.value === null || field.value === ''
-    );
+    const [selected, setSelected] = useState(field.value || null);
 
     useEffect(() => {
         form.setFieldTouched(field.name, true);
-        if (field.value !== '') {
-            if (field.name === 'AccountType') {
-
-                console.log("🚀 ~ useEffect ~ field.value:", field)
-            }
-            form.setFieldValue(field.name, field.value);
-        } else {
-            setIsEmptyOptionSelected(field.value === null || field.value === '');
+        if (field.value !== undefined && field.value !== null) {
+            setSelected(field.value);
         }
-
     }, [field.value, field.name]);
 
     const hasError = getValueFromFieldFormik(form.errors, field.name) && getValueFromFieldFormik(form.touched, field.name);
@@ -30,8 +21,16 @@ export const SelectBase = ({ label, options, field, form, ...rest }) => {
 
     const handleSelect = (event) => {
         form.handleChange(event)
+        setSelected(event);
         setTouched(false);
     }
+
+    const fielValue = useMemo(() => {
+        if (field.value !== '') {
+            return field.value
+        }
+        return null
+    }, [field.value])
 
     return (
         <Select
@@ -39,14 +38,13 @@ export const SelectBase = ({ label, options, field, form, ...rest }) => {
             items={options}
             id={uuid}
             name={field.name}
-            value={field.value}
+            value={selected}
             label={label}
             labelPlacement={'inside'}
             onChange={handleSelect}
             errorMessage={field.value || !touched ? "" : getValueFromFieldFormik(form.errors, field.name)}
             isInvalid={field.value || !touched ? false : true}
-            selectedKeys={field.value ? [field.value] : ''}
-            defaultSelectedKeys={field.value ? [field.value] : 'all'}
+            selectedKeys={fielValue ? [fielValue] : []}
             onClose={() => setTouched(true)}
         >
             {(option) => (

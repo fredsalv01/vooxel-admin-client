@@ -8,17 +8,18 @@ import Slot from '../../../components/Slot';
 import InternationalizationDate from '../../../lib/helpers/internationalization-date';
 
 import { useFetchData } from '../../../hooks/useFetchData';
-import { EditCreateContractModal } from './EditCreateContractModal';
 import { useUploadFile } from '../../../hooks/useUploadFile';
+import { EditCreateCertificationModal } from './EditCreateCertificationModal';
+import { TABLE_NAME_FILES, TAGS_FILES } from '../../../lib/consts/general';
 
 export const EditCreateCertification = ({ itemId }) => {
-    const { data, isLoading, fetchData } = useFetchData({ url: `/contract-workers/${itemId}` });
+    const { data, isLoading, fetchData } = useFetchData({ url: `/certifications/${itemId}` });
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [editItem, setEditItem] = useState({});
 
     const [rows, setRows] = useState([]);
 
-    const { getFileInfo, isLoading: isLoadingFile } = useUploadFile({ tableName: 'contractWorkers' });
+    const { getFileInfo, isLoading: isLoadingFile } = useUploadFile({ tableName: TABLE_NAME_FILES.certifications });
 
     useEffect(() => {
         if (!!data) {
@@ -33,16 +34,8 @@ export const EditCreateCertification = ({ itemId }) => {
 
     const columns = [
         {
-            key: "hiringDate",
-            label: "Fecha inicio",
-        },
-        {
-            key: "endDate",
-            label: "Fecha fin",
-        },
-        {
-            key: "contractType",
-            label: "Tipo de contrato",
+            key: "certificationName",
+            label: "Nombre",
         },
         {
             key: "actions",
@@ -50,26 +43,25 @@ export const EditCreateCertification = ({ itemId }) => {
         },
     ];
 
+    const handleEditCerfication = (item) => {
+        setEditItem(item);
+        onOpen();
+    }
+
     const renderCell = useCallback((item, columnKey) => {
         const cellValue = item[columnKey]
 
         switch (columnKey) {
-            case 'hiringDate':
-            case 'endDate':
-                return InternationalizationDate().formatDate(new Date(cellValue));
-
-            case 'contractType':
-                return (<div className='text-xs'>
-                    {cellValue}
-                </div>);
+            // case 'certificationName':
+            //     return InternationalizationDate().formatDate(new Date(cellValue));
             case 'actions':
                 return (
                     <div className='flex gap-2 justify-center'>
                         <ButtonGroup>
-                            <Button isIconOnly color='white' className='p-0'>
+                            <Button isIconOnly color='white' className='p-0' onClick={() => handleEditCerfication(item)} >
                                 <EditIcon />
                             </Button>
-                            <Button isIconOnly color='white' onClick={getFileInfo({ tag: 'contract', rowTableId: item.id })} isLoading={isLoadingFile}>
+                            <Button isIconOnly color='white' onClick={getFileInfo({ tag: TAGS_FILES.certification, rowTableId: item.id })} isLoading={isLoadingFile}>
                                 <DownloadCloud />
                             </Button>
                         </ButtonGroup>
@@ -90,7 +82,7 @@ export const EditCreateCertification = ({ itemId }) => {
 
     return (
         <>
-            {isOpen && <EditCreateContractModal isOpen={isOpen} onOpenChange={onOpenChange} item={editItem} items={rows} parentId={itemId} fetchData={fetchData} />}
+            {isOpen && <EditCreateCertificationModal isOpen={isOpen} onOpenChange={onOpenChange} item={editItem} items={rows} parentId={itemId} fetchData={fetchData} />}
             <CardBase title='Certificaciones' async={isLoading} skeletonlines={5}>
                 <Slot slot="header">
                     <Button size='sm' onPress={() => {

@@ -4,14 +4,12 @@ import { Button } from '@nextui-org/react';
 import { CardBase, FileInput } from '../../../components/base';
 import { DownloadCloud } from '../../../components/icons';
 import { useUploadFile } from '../../../hooks/useUploadFile';
-import Slot from '../../../components/Slot';
-
-// cv, certification, psychological_test, profile_photo
+import { TAGS_FILES } from '../../../lib/consts/general';
 
 const typeFiles = [
-    { label: 'CV', tag: 'cv' },
-    { label: 'Test Psicológico', tag: 'psychological_test' },
-    { label: 'Profile Foto', tag: 'profile_photo' },
+    { label: 'CV', tag: TAGS_FILES.cv },
+    { label: 'Test Psicológico', tag: TAGS_FILES.psychological_test },
+    { label: 'Profile Foto', tag: TAGS_FILES.profile_photo },
 ]
 
 export const FilesWorkers = ({ itemId }) => {

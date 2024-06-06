@@ -6,3 +6,5 @@ export { EditCreateBankAccount } from './EditCreateBankAccount';
 export { EditCreateBankAccountModal } from './EditCreateBankAccountModal';
 export { EditCreateContract } from './EditCreateContract';
 export { EditCreateContractModal } from './EditCreateContractModal';
+export { EditCreateCertification } from './EditCreateCertification';
+export { EditCreateCertificationModal } from './EditCreateCertificationModal';

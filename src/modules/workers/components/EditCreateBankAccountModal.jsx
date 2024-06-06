@@ -90,7 +90,6 @@ export const EditCreateBankAccountModal = ({ isOpen, onOpenChange, item = {}, it
                 bankAccountNumber: item.bankAccountNumber,
                 cci: item.cci
             })
-            console.log(initialValues)
         }
     }, []);
 

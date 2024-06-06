@@ -29,6 +29,7 @@ export const FileInputBase = ({ field, form, label, onChangeFile, ...props }) =>
     return (
         <>
             <Input
+                label={label}
                 size='md'
                 variant="bordered"
                 onClick={handleClick}

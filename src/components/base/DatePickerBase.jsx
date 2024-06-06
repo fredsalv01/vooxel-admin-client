@@ -5,11 +5,11 @@ import { formatInTimeZone } from 'date-fns-tz'
 
 import { es } from 'date-fns/locale';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export const DatePickerBase = ({ field, form, label, isRequired = true, ...props }) => {
 
-    const [startDate, setStartDate] = useState();
+    // const [startDate, setStartDate] = useState();
 
     const handleDatePickerInput = (newValue) => {
         console.log("🚀 ~ handleDatePickerInput ~ newValue:", newValue)
@@ -33,6 +33,14 @@ export const DatePickerBase = ({ field, form, label, isRequired = true, ...props
         // console.log("🚀 ~ handleDatePickerInput ~ zonedDate:", zonedDate)
         form.setFieldValue(field.name, date)
     }
+
+    const startDate = useMemo(() => {
+        if (field.value) {
+            const date = parseDate(field.value)
+            return date;
+        }
+        return null
+    }, [field.value])
 
     const hasError = (form.errors[field.name] && form.touched[field.name]) || false
 

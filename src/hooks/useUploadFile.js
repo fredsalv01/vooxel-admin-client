@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axiosInstance from "../axios/axios";
-import ToastNotification from "../lib/helpers/toast-notification";
+import {ToastNotification} from "../lib/helpers/toast-notification-temp";
 
 /**
  * 
@@ -25,7 +25,7 @@ export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
 
     const handleFileUpload = async (selectedFile, tag) => {
         if (!selectedFile) {
-            (new ToastNotification('No hay ningún archivo seleccionado para subir')).showError();
+            ToastNotification.showError('No hay ningún archivo seleccionado para subir');
             return;
         }
 
@@ -62,16 +62,16 @@ export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
                 if (tableId) body.tableId = tableId 
 
                 const response = await axiosInstance.post('/files', body);
-                (new ToastNotification('Archivo subido correctamente')).showSuccess();
+                ToastNotification.showSuccess('Archivo subido correctamente');
                 return response.data;
             } else {
                 const errorText = await resp.text(); // Leer el cuerpo de la respuesta para obtener detalles del error
                 console.error('Fallo en la subida', resp.status, errorText); // Debugging: Registro detallado del error
-                (new ToastNotification('Fallo al subir el archivo')).showError();
+                ToastNotification.showError('Fallo al subir el archivo');
             }
         } catch (error) {
             console.error('Error en la subida', error); // Debugging: Capturar y registrar errores
-            (new ToastNotification('Fallo al subir el archivo')).showError();
+            ToastNotification.showError('Fallo al subir el archivo');
         } finally {
             setIsLoading(false);
         }
@@ -82,10 +82,10 @@ export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
         try {
             setIsLoading(true);
             await axiosInstance.patch(`/files/${fileId}`, { tableId: updateTableId });
-            (new ToastNotification('Archivo actualizado correctamente')).showSuccess();
+            ToastNotification.showSuccess('Archivo actualizado correctamente');
         } catch (error) {
             console.error('Error en la subida', error); // Debugging: Capturar y registrar errores
-            (new ToastNotification('Fallo al subir el archivo')).showError();
+            ToastNotification.showError('Fallo al subir el archivo');
         }  finally {
             setIsLoading(false);
         }
@@ -120,7 +120,7 @@ export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
 
         } catch (error) {
             console.error('Error al obtener la información del archivo', error); // Debugging: Capturar y registrar errores
-            (new ToastNotification('Fallo al obtener la información del archivo')).showError();
+            ToastNotification('Fallo al obtener la información del archivo').showError();
         } finally {
             setIsLoading(false);
         }

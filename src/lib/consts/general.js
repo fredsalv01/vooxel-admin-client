@@ -13,3 +13,19 @@ export const ACCOUNT_TYPES_BACKEND = [
     { label: 'Cta. CTS', value:'CTA CTS'},
     { label: 'Cta. sueldo', value:'CTA AHORROS'}
 ]
+
+
+export const TABLE_NAME_FILES = {
+    contractWorkers: 'contractWorkers',
+    contractClients: 'contractClients',
+    certifications: 'certifications',
+}
+
+export const TAGS_FILES = {
+    worker: 'worker',
+    contract: 'contract',
+    certification: 'certification',
+    cv: 'cv',
+    psychological_test: 'psychological_test',
+    profile_photo: 'profile_photo',
+}

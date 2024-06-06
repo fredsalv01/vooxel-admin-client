@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, select, Select } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
 
-import { DatePickerBase, FileInputBase, InputBase, SelectBase } from '../../../components/base';
+import { FileInputBase, InputBase } from '../../../components/base';
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
 import * as Yup from 'yup';
 
@@ -10,33 +10,28 @@ import axiosInstance from '../../../axios/axios';
 import { useUploadFile } from '../../../hooks/useUploadFile';
 import { TABLE_NAME_FILES, TAGS_FILES } from '../../../lib/consts/general';
 
-export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items, parentId, fetchData }) => {
+export const EditCreateCertificationModal = ({ isOpen, onOpenChange, item = {}, items, parentId, fetchData }) => {
     const [title, setTitle] = useState('Agregar');
 
     const [initialValues, setInitialValues] = useState({
         file: '',
-        hiringDate: '',
-        endDate: '',
-        contractType: '',
+        certificationName: '',
     });
 
     const validationSchema = Yup.object({
         file: Yup.mixed().required(),
-        hiringDate: Yup.string().required(),
-        endDate: Yup.string().required(),
-        contractType: Yup.string().required(),
+        certificationName: Yup.string().required(),
     });
 
     const updateValidationSchema = Yup.object({
         // file: Yup.mixed().required(),
-        hiringDate: Yup.string().required(),
-        endDate: Yup.string().required(),
-        contractType: Yup.string().required(),
+        certificationName: Yup.string().required(),
     });
 
     const isEditItem = useMemo(() => Object.keys(item).length > 0, [item]);
 
-    const { handleFileChange, handleFileUpload, handleFileUpdated } = useUploadFile({ tableName: TABLE_NAME_FILES.contractWorkers, goUpload: false });
+
+    const { handleFileChange, handleFileUpload, handleFileUpdated } = useUploadFile({ tableName: TABLE_NAME_FILES.certifications, goUpload: false });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
         // console.log(JSON.stringify(values, null, 2));
@@ -49,28 +44,28 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
 
         try {
             setSubmitting(true);
-            let contractUpserted;
 
+            let certificationUpserted;
             if (isEditItem) {
-                contractUpserted = await axiosInstance.patch(`contract-workers/contract/${item.id}`, {
+                certificationUpserted = await axiosInstance.patch(`certifications/${item.id}`, {
                     ...restValues,
                     workerId: parentId
                 });
 
-                ToastNotification.showSuccess('Contrato actualizado correctamente');
-
+                ToastNotification.showSuccess('Certificado actualizado correctamente');
             } else {
-                contractUpserted = await axiosInstance.post(`contract-workers`, {
+                certificationUpserted = await axiosInstance.post(`certifications`, {
                     ...restValues,
                     workerId: parentId
                 });
-                ToastNotification.showSuccess('Contrato creado correctamente');
+                ToastNotification.showSuccess('Certificado creado correctamente');
             }
+            console.log("🚀 ~ handleSubmit ~ certificationUpserted:", certificationUpserted)
 
 
             if (!isEditItem || (isEditItem && values.file)) {
                 try {
-                    await handleFileUpdated({ fileId: fileCreated.id, updateTableId: contractUpserted.data.id });
+                    await handleFileUpdated({ fileId: fileCreated.id, updateTableId: certificationUpserted.data.id });
                 } catch (error) {
                     console.log("Error updated File in contracts", error)
                 }
@@ -79,9 +74,9 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
             fetchData();
             onClose();
         } catch (error) {
-            console.log('Error upserting contract', error);
+            console.log('Error creating contract', error);
             if (error.response.status === 400) ToastNotification.showError(error.response.data.message);
-            else ToastNotification.showError(`Error al ${isEditItem ? 'editar' : 'crear'} el Contrato`);
+            else ToastNotification.showError(`Error al ${isEditItem ? 'editar' : 'crear'} el Certificado`);
         } finally {
             setSubmitting(false);
         }
@@ -92,10 +87,9 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
             setTitle('Editar');
 
             setInitialValues({
-                hiringDate: item.hiringDate,
-                endDate: item.endDate,
-                contractType: item.contractType,
+                certificationName: item.certificationName,
             })
+            console.log(initialValues)
         }
     }, []);
 
@@ -111,9 +105,8 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
                     >
                         {({ isSubmitting }) => (
                             <Form>
-                                <ModalHeader className="text-2xl">{title} contrato</ModalHeader>
+                                <ModalHeader className="text-2xl">{title} Certificado</ModalHeader>
                                 <ModalBody>
-                                    <pre>{JSON.stringify(initialValues)}</pre>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="col-span-1">
                                             <Field
@@ -127,37 +120,9 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
                                         </div>
                                         <div className="col-span-1">
                                             <Field
-                                                name="contractType"
-                                                label="Tipo de contrato"
-                                                component={SelectBase}
-                                                options={[
-                                                    {
-                                                        label: 'Recibo por Honorarios',
-                                                        value: 'RECIBOS POR HONORARIOS'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por planilla',
-                                                        value: 'CONTRATO POR PLANILLA'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por obras',
-                                                        value: 'CONTRATO POR OBRAS'
-                                                    }
-                                                ]}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="hiringDate"
-                                                label="Fecha inicio"
-                                                component={DatePickerBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="endDate"
-                                                label="Fecha fin"
-                                                component={DatePickerBase}
+                                                name="certificationName"
+                                                label="Nombre"
+                                                component={InputBase}
                                             />
                                         </div>
                                     </div>

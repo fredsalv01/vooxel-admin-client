@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types';
 
 import { CardBase } from '../../../components/base'
-import { Button, ButtonGroup, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, Tooltip, useDisclosure } from '@nextui-org/react'
+import { Button, ButtonGroup, Chip, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow, useDisclosure } from '@nextui-org/react'
 import { DownloadCloud, EditIcon, PlusIcon } from '../../../components/icons';
 import Slot from '../../../components/Slot';
 import InternationalizationDate from '../../../lib/helpers/internationalization-date';
@@ -10,6 +10,7 @@ import InternationalizationDate from '../../../lib/helpers/internationalization-
 import { useFetchData } from '../../../hooks/useFetchData';
 import { EditCreateContractModal } from './EditCreateContractModal';
 import { useUploadFile } from '../../../hooks/useUploadFile';
+import { TABLE_NAME_FILES, TAGS_FILES } from '../../../lib/consts/general';
 
 export const EditCreateContract = ({ itemId }) => {
 
@@ -19,7 +20,7 @@ export const EditCreateContract = ({ itemId }) => {
 
     const [rows, setRows] = useState([]);
 
-    const { getFileInfo, isLoading: isLoadingFile } = useUploadFile({ tableName: 'contractWorkers' });
+    const { getFileInfo, isLoading: isLoadingFile } = useUploadFile({ tableName: TABLE_NAME_FILES.contractWorkers });
 
     useEffect(() => {
         if (!!data) {
@@ -46,10 +47,20 @@ export const EditCreateContract = ({ itemId }) => {
             label: "Tipo de contrato",
         },
         {
+            key: "isActive",
+            label: "Estado",
+        },
+        {
             key: "actions",
             label: "Acciones",
         },
     ];
+
+
+    const handleEditContract = (item) => {
+        setEditItem(item);
+        onOpen();
+    }
 
     const renderCell = useCallback((item, columnKey) => {
         const cellValue = item[columnKey]
@@ -63,14 +74,24 @@ export const EditCreateContract = ({ itemId }) => {
                 return (<div className='text-xs'>
                     {cellValue}
                 </div>);
+            case 'isActive':
+                return (<Chip
+                    className="capitalize border-none gap-1 text-default-600"
+                    color={cellValue ? 'success' : 'danger'}
+                    size="sm"
+                    variant="dot"
+                >
+
+                    {cellValue ? 'Activo' : 'Inactivo'}
+                </Chip>)
             case 'actions':
                 return (
                     <div className='flex justify-center'>
                         <ButtonGroup>
-                            <Button isIconOnly color='white' className='p-0'>
+                            {item.isActive && <Button isIconOnly color='white' className='p-0' onClick={() => handleEditContract(item)}>
                                 <EditIcon />
-                            </Button>
-                            <Button isIconOnly color='white' onClick={getFileInfo({ tag: 'contract', rowTableId: item.id })} isLoading={isLoadingFile}>
+                            </Button>}
+                            <Button isIconOnly color='white' onClick={getFileInfo({ tag: TAGS_FILES.contract, rowTableId: item.id })} isLoading={isLoadingFile}>
                                 <DownloadCloud />
                             </Button>
                         </ButtonGroup>

@@ -1,5 +1,5 @@
 import { Button, ButtonGroup, Input, Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from '@nextui-org/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from '../../../axios/axios';
 import { DeleteIcon, EditIcon, PlusIcon, SpinnerButton } from '../../../components/icons';
 import { CardBase } from '../../../components/base';
@@ -9,12 +9,11 @@ import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
 import { Alerts } from '../../../lib/helpers/alerts';
 
 export const EditCreateEmergencyContact = ({ itemId }) => {
-  const [isLoading, setIsLoading] = useState(false);
   const [rows, setRows] = useState([]);
   const [cloneData, setCloneData] = useState([{}]);
   const inputRefs = useRef([]);
 
-  const { data, isLoading: isLoadingData, fetchData } = useFetchData({ url: `/emeToastNotificationrgency_contacts/${itemId}` });
+  const { data, isLoading, fetchData } = useFetchData({ url: `/emergency_contacts/${itemId}` });
 
   useEffect(() => {
     if (data) {
@@ -34,7 +33,7 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
     { key: "actions", label: "Acciones" },
   ];
 
-  const addNewContact = () => {
+  const addRow = () => {
     const hasOneToCreate = rows.filter(row => row.origin === 'frontend').length > 0;
     if (hasOneToCreate) return;
 
@@ -49,12 +48,21 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
         origin: 'frontend',
       },
     ]);
+
+    inputRefs.current = [...inputRefs.current, createRef()];
   };
 
   const handleCreate = async (id) => {
-    setIsLoading(true);
     const contact = rows.find(row => row.id === id);
+
+    if (contact.phone.length !== 9) {
+      ToastNotification.showError('El número de celular debe tener 9 dígitos');
+      return;
+    }
+
+
     try {
+      Alerts.showLoading();
       await axiosInstance.post('/emergency_contacts', {
         workerId: itemId,
         name: contact.name,
@@ -64,33 +72,30 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
       ToastNotification.showSuccess('Contacto creado correctamente');
       fetchData();
     } catch (error) {
-      console.error('Error creating contact:', error);
       if (error.response.status === 400) ToastNotification.showError(error.response.data.message);
       else ToastNotification.showError('Error al crear el contacto');
     } finally {
-      setIsLoading(false);
+      Alerts.close();
     }
   };
 
-  const handleEdit = async (id) => {
+  const handleUpdate = async (id) => {
 
-    // validate if information has changed
-    const contact = rows.find(row => row.id === id);
-    const cloneContact = cloneData.find(row => row.id === id);
-
-    if (contact.name === cloneContact.name && contact.phone === cloneContact.phone && contact.relation === cloneContact.relation) {
-      ToastNotification.showWarning('No se han realizado cambios en el contacto');
-      return;
-    }
-
-    if (contact.phone.length !== 9) {
-      ToastNotification.showError('El número de celular debe tener 9 dígitos');
-      return;
-    }
-
-    setIsLoading(true);
-    // const contact = rows.find(row => row.id === id);
     try {
+      const contact = rows.find(row => row.id === id);
+      const cloneContact = cloneData.find(row => row.id === id);
+
+      if (contact.name === cloneContact.name && contact.phone === cloneContact.phone && contact.relation === cloneContact.relation) {
+        ToastNotification.showWarning('No se han realizado cambios en el contacto');
+        return;
+      }
+
+      if (contact.phone.length !== 9) {
+        ToastNotification.showError('El número de celular debe tener 9 dígitos');
+        return;
+      }
+
+      Alerts.showLoading()
       await axiosInstance.patch(`/emergency_contacts/${id}`, {
         workerId: itemId,
         name: contact.name,
@@ -100,11 +105,10 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
       ToastNotification.showSuccess('Contacto actualizado correctamente');
       fetchData();
     } catch (error) {
-      console.error('Error updating contact:', error);
       if (error.response.status === 400) ToastNotification.showError(error.response.data.message);
       else ToastNotification.showError('Error al actualizar el contacto');
     } finally {
-      setIsLoading(false);
+      Alerts.close();
     }
   };
 
@@ -118,18 +122,17 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
       return;
     }
 
-    setIsLoading(true);
     try {
+      Alerts.showLoading();
       await axiosInstance.delete(`/emergency_contacts/${item.id}`);
       setRows(rows.filter(row => row.id !== item.id));
       ToastNotification.showSuccess('Contacto eliminado correctamente');
       fetchData();
     } catch (error) {
-      console.error('Error deleting contact:', error);
       if (error.response.status === 400) ToastNotification.showError(error.response.data.message);
       else ToastNotification('Error al eliminar el contacto').showError();
     } finally {
-      setIsLoading(false);
+      Alerts.close();
     }
   };
 
@@ -142,11 +145,9 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
       e.preventDefault();
 
       const nextIndex = (currentIndex + 1) % (inputRefs.current.length);
-
-      const totalInputs = rows.length * (columns.length - 1);
+      const totalInputs = (inputRefs.current.length) * (columns.length - 1);
 
       inputRefs.current[totalInputs === nextIndex ? 0 : nextIndex].focus();
-
     }
   };
 
@@ -177,16 +178,14 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
               {item.origin === 'backend' && (
                 <Button
                   isIconOnly
-                  isLoading={isLoading}
                   color="white"
-                  onClick={() => handleEdit(item.id)}
+                  onClick={() => handleUpdate(item.id)}
                 >
                   <EditIcon />
                 </Button>
               )}
               {item.origin === 'frontend' && <Button
                 isIconOnly
-                isLoading={isLoading}
                 color="white"
                 onClick={() => handleCreate(item.id)}
               >
@@ -196,7 +195,6 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
               </Button>}
               <Button
                 isIconOnly
-                isLoading={isLoading}
                 color="white"
                 onClick={() => handleDelete(item)}
               >
@@ -210,7 +208,7 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
       default:
         return cellValue;
     }
-  }, [rows, isLoading]);
+  }, [rows]);
 
   const classNames = useMemo(
     () => ({
@@ -222,9 +220,9 @@ export const EditCreateEmergencyContact = ({ itemId }) => {
 
   return (
     <>
-      <CardBase title='Contactos de emergencia' async={isLoadingData} skeletonlines={5}>
+      <CardBase title='Contactos de emergencia' async={isLoading} skeletonlines={5}>
         <Slot slot="header">
-          <Button size='sm' onPress={addNewContact} color="primary" endContent={<PlusIcon />}>Agregar</Button>
+          <Button size='sm' onPress={addRow} color="primary" isDisabled={isLoading} endContent={<PlusIcon />}>Agregar</Button>
         </Slot>
         <Slot slot="body">
           <Table aria-label="Table worker's emergency contacts" classNames={classNames}>
