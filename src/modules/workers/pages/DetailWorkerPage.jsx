@@ -9,12 +9,12 @@ import { EditCreateContract } from '../components/EditCreateContract';
 import { EditCreateCertification } from '../components/EditCreateCertification';
 
 export const DetailWorkerPage = () => {
-    const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
     const navigate = useNavigate();
 
     const { id } = useParams();
 
+    const { isOpen, onOpen, onOpenChange } = useDisclosure()
     const [item, setItem] = useState(null);
 
     useEffect(() => {

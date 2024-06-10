@@ -7,7 +7,7 @@ import ProtectedRoute from './components/validation/requireAuth'
 import { WorkerList, DetailWorkerPage } from './modules/workers/pages'
 
 import { UserList } from './modules/users/pages/UserList'
-import { ClientList } from './modules/clients/pages/ClientList'
+import { ClientList, DetailClientPage } from './modules/clients/pages'
 import { ClientServiceList } from './modules/client-services/pages/ClientServiceList'
 import { BillingList } from './modules/billing/pages/BillingList'
 
@@ -29,6 +29,7 @@ function App() {
                     <Route path="workers" element={<WorkerList />} />
                     <Route path="users" element={<UserList />} />
                     <Route path="workers/:id/detail" element={<DetailWorkerPage />} />
+                    <Route path="clients/:id/detail" element={<DetailClientPage />} />
                     <Route path="clients" element={<ClientList />} />
                     <Route path="services" element={<ClientServiceList />} />
                     <Route path="billing" element={<BillingList />} />

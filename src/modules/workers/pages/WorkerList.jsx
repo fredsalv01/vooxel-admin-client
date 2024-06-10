@@ -218,11 +218,9 @@ export const WorkerList = () => {
             </Dropdown> */}
 
 
-            <Tooltip content="Editar">
-              <a href={`/workers/${worker.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <EditIcon />
-              </a>
-            </Tooltip>
+            <a href={`/workers/${worker.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+              <EditIcon />
+            </a>
           </div>
         )
       default:

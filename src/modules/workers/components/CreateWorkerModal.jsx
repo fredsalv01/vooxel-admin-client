@@ -85,6 +85,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
             });
 
             (new ToastNotification('Colaborador creado correctamente')).showSuccess();
+            fetchData();
             onClose();
         } catch (error) {
             console.log('Error', error);

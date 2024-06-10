@@ -39,7 +39,7 @@ export const EditCreateCertificationModal = ({ isOpen, onOpenChange, item = {}, 
         const { file, ...restValues } = values
 
         if (!isEditItem || (isEditItem && values.file)) {
-            fileCreated = await handleFileUpload(file, TAGS_FILES.contract);
+            fileCreated = await handleFileUpload(file, TAGS_FILES.certification);
         }
 
         try {

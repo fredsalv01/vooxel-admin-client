@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react'
 import { ChevronDownIcon, SearchIcon } from '../icons'
 import { capitalize } from '../../lib/helpers/utils';
 
-export const TableTopContent = ({ content = {}, visibleColumns, headersTable, onVisibleColumnsChange }) => {
+export const TableTopContent = ({ visibleColumns, headersTable, onVisibleColumnsChange, children }) => {
 
   const [inputSearch, setInputSearch] = useState();
 
@@ -50,10 +50,8 @@ export const TableTopContent = ({ content = {}, visibleColumns, headersTable, on
           </DropdownMenu>
         </Dropdown>
 
-        {/* {content} */}
-        {/* <Button onPress={onOpen} color="primary" endContent={<PlusIcon />}>
-          Agregar
-        </Button> */}
+        {children}
+
       </div>
     </div>
   )

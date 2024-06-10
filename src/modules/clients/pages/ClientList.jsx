@@ -24,25 +24,22 @@ import {
     Tooltip
 } from '@nextui-org/react'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
-import { VerticalDotsIcon } from '../../../components/icons/VerticalDotsIcon'
-import { SearchIcon } from '../../../components/icons/SearchIcon'
-import { ChevronDownIcon } from '../../../components/icons/ChevronDownIcon'
-// import { headersTable } from '../utils/table-props'
-import { capitalize } from '../../../lib/helpers/utils'
-// import { CreateUserModal, EditUserModal } from '../components'
-import { useQuery } from '@tanstack/react-query';
-import { EditIcon } from '../../../components/icons'
+import { CreateClientModal } from '../components'
 import { TableList } from '../../../components/base'
 import { useQueryPromise } from '../../../hooks/useQueryPromise'
+import Slot from '../../../components/Slot'
+import { EditIcon } from '../../../components/icons'
 
-const columns = [
+
+
+const headersTable = [
     { name: 'Nombre', uid: 'fullName' },
     { name: 'Razon social', uid: 'businessName' },
     { name: 'Ruc', uid: 'ruc' },
     { name: 'Celular', uid: 'phone' },
     { name: 'Correo', uid: 'email' },
-    { name: 'Fecha inicio', uid: 'contractStartDate' },
-    { name: 'Fecha fin', uid: 'contractEndDate' },
+    // { name: 'Fecha inicio', uid: 'contractStartDate' },
+    // { name: 'Fecha fin', uid: 'contractEndDate' },
     { name: 'Acciones', uid: 'actions' }
 ]
 
@@ -53,22 +50,26 @@ const INITIAL_VISIBLE_COLUMNS = [
     'ruc',
     'phone',
     'email',
-    'contractStartDate',
-    'contractEndDate',
     'actions'
 ]
 
 export const ClientList = () => {
 
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
     const { data, isFetching, refetch, isSuccess } = useQueryPromise({ url: 'clients', key: 'clients' });
-
-
     const switchRenderCell = (item, columnKey) => {
         const cellValue = item[columnKey];
         switch (columnKey) {
             case 'fullName':
                 return (
                     <div>{item.fullName}</div>
+                )
+            case 'actions':
+                return (
+                    <a href={`/clients/${item.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                        <EditIcon />
+                    </a>
                 )
             default:
                 return cellValue;
@@ -77,11 +78,16 @@ export const ClientList = () => {
 
     return (
         <>
-            {/* Modal para crear colaborador */}
-            {/* {isOpen && <CreateUserModal isOpen={isOpen} onOpenChange={onOpenChange} fetchData={refetch} />}
-            {isOpenEdit && <EditUserModal isOpen={isOpenEdit} onOpenChange={onOpenChangeEdit} itemId={selectedItemId} fetchData={refetch} />} */}
+            {/* Modal para crear cliente */}
+            {isOpen && <CreateClientModal isOpen={isOpen} onOpenChange={onOpenChange} fetchData={refetch} />}
 
-            <TableList items={data?.items || []} columns={columns} switchFn={switchRenderCell} initialColumns={INITIAL_VISIBLE_COLUMNS} isLoading={isFetching} />
+            <TableList items={data?.items || []} headersTable={headersTable} switchFn={switchRenderCell} initialColumns={INITIAL_VISIBLE_COLUMNS} isLoading={isFetching} >
+                <Slot slot="topContent">
+                    <Button onPress={onOpen} color="primary" endContent={<PlusIcon />} onClick={onOpen}>
+                        Agregar
+                    </Button>
+                </Slot>
+            </TableList>
             {/* <Table
                 aria-label="Example table with custom cells, pagination and sorting"
                 isHeaderSticky
@@ -95,7 +101,7 @@ export const ClientList = () => {
                 topContentPlacement="outside"
                 onSelectionChange={setSelectedKeys}
             >
-                <TableHeader columns={showHeadersTable}>
+                <TableHeader headersTable={showHeadersTable}>
                     {(column,) => (
                         <TableColumn
                             key={column.uid}

@@ -4,10 +4,9 @@ import { Formik, Form, Field } from 'formik';
 import { DatePickerBase, InputBase, SelectBase, InputTagBase, AutocompleteBase } from '../../../components/base';
 import { useAsyncList } from "@react-stately/data";
 import axios from '../../../axios/axios';
-import ToastNotification from '../../../lib/helpers/toast-notification';
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
 import * as Yup from 'yup';
 import { BANKS_BACKEND } from '../../../lib/consts/general';
-import { setPropsItem } from '../../../lib/helpers/utils';
 
 export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) => {
 
@@ -131,12 +130,12 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
             console.log("🚀 ~ handleSubmit ~ body:", body)
             // return;
             await axios.patch(`workers/${editItem.id}`, body);
-            (new ToastNotification('Colaborador actualizado correctamente')).showSuccess();
+            ToastNotification.showSuccess('Colaborador actualizado correctamente');
             fetchData();
             onClose();
         } catch (error) {
-            if (error.response.status === 400) (new ToastNotification(error.response.data.message)).showError();
-            else (new ToastNotification('Error al crear el colaborador')).showError();
+            if (error.response.status === 400) ToastNotification.showError(error.response.data.message);
+            else ToastNotification.showError('Error al crear el colaborador');
             console.log('Error', error);
         } finally {
             setSubmitting(false);
@@ -153,18 +152,6 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
             };
         },
     });
-
-
-    const [autoValue, setAutoValue] = useState('');
-
-    // useEffect(() => {
-    //     console.log("🚀 ~ useEffect ~ list.items:", list.items)
-
-    //     if (initialValues.clientId.length > 0 && list.items.length > 0) {
-    //         const item = list.items.find((item) => item.id === initialValues.clientId)
-    //         setAutoValue(item.label)
-    //     }
-    // }, [list, initialValues.clientId])
 
     return (
         <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
