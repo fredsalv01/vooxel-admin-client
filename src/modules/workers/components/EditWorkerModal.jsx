@@ -6,7 +6,7 @@ import { useAsyncList } from "@react-stately/data";
 import axios from '../../../axios/axios';
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
 import * as Yup from 'yup';
-import { BANKS_BACKEND } from '../../../lib/consts/general';
+import { BANKS_BACKEND, DOCUMENT_TYPES_BACKEND, ENGLISH_LEVEL_BACKEND } from '../../../lib/consts/general';
 
 export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) => {
 
@@ -28,15 +28,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
         department: '',
         familiarAssignment: '',
         techSkills: [],
-        // despues emercy contact despues
-        // emergencyContacts: [],
         clientId: '',
-        // bank
-        bankAccount: {
-            bankName: '',
-            bankAccountNumber: '',
-            cci: '',
-        }
     });
 
     useEffect(() => {
@@ -52,8 +44,6 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                 englishLevel: editItem?.englishLevel,
                 charge: editItem?.charge,
                 birthdate: editItem?.birthdate || '',
-                contractType: editItem?.contractType,
-                hiringDate: editItem?.hiringDate || '',
                 phoneNumber: editItem?.phoneNumber,
                 address: editItem?.address,
                 district: editItem?.district,
@@ -62,11 +52,6 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                 familiarAssignment: editItem?.familiarAssignment,
                 techSkills: editItem?.techSkills,
                 clientId: editItem?.clientInfo?.id.toString() || '',
-                bankAccount: {
-                    bankName: editItem?.bankAccount?.bankName || '',
-                    bankAccountNumber: editItem?.bankAccount?.bankAccountNumber || '',
-                    cci: editItem?.bankAccount?.cci || '',
-                }
             })
         }
     }, []);
@@ -78,23 +63,21 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
         documentType: Yup.string().required(),
         documentNumber: Yup.string()
             .when('documentType', {
-                is: 'DNI',
+                is: 'Dni',
                 then: (schema) => schema.length(8),
             })
             .when('documentType', {
-                is: 'PASAPORTE',
+                is: 'Pasaporte',
                 then: (schema) => schema.length(9),
             })
             .when('documentType', {
-                is: 'PASAPORTE',
+                is: 'Carnet Extranjeria',
                 then: (schema) => schema.max(20),
             }).required()
         ,
         englishLevel: Yup.string().required(),
         charge: Yup.string().required(),
         birthdate: Yup.string().max(new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate()), 'debe tener al menos 18 años').required(), // Assuming birthdate is a string, adjust if it's a date
-        contractType: Yup.string().required(),
-        hiringDate: Yup.string().max(new Date(), 'No puede ser mayor al día de hoy').required(), // Assuming hiringDate is a string, adjust if it's a date
         phoneNumber: Yup.string().length(9).matches(/^[0-9]+$/).required(),
         address: Yup.string().required(),
         district: Yup.string().required(),
@@ -102,34 +85,17 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
         department: Yup.string().required(),
         familiarAssignment: Yup.string().required(),
         techSkills: Yup.array().of(
-            Yup.string().required() // Example: require each element to be a string
+            Yup.string().required()
         ).min(1).required(),
-        // emergencyContacts: Yup.array().min(1).required(), // Validate that emergencyContacts array is not empty
         clientId: Yup.string().required(),
-        bankAccount: Yup.object({
-            bankName: Yup.string().required(),
-            bankAccountNumber: Yup.string().required(),
-            cci: Yup.string().required(),
-        })
     });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
-        console.log("🚀 ~ handleSubmit ~ values:", values)
         delete values.id;
         delete values.isActive;
         try {
             setSubmitting(true);
-
-            const body = {
-                ...values,
-                bankAccount: {
-                    ...values.bankAccount,
-                    workerId: editItem.id
-                },
-            };
-            console.log("🚀 ~ handleSubmit ~ body:", body)
-            // return;
-            await axios.patch(`workers/${editItem.id}`, body);
+            await axios.patch(`workers/${editItem.id}`, { ...values });
             ToastNotification.showSuccess('Colaborador actualizado correctamente');
             fetchData();
             onClose();
@@ -199,11 +165,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                                 name="documentType"
                                                 label="Tipo de documento"
                                                 component={SelectBase}
-                                                options={[
-                                                    { value: 'DNI', label: 'DNI' },
-                                                    { value: 'PASAPORTE', label: 'PASAPORTE' },
-                                                    { value: 'CARNET EXTRANJERÍA', label: 'CARNET EXTRANJERÍA' },
-                                                ]}
+                                                options={DOCUMENT_TYPES_BACKEND}
                                             />
                                         </div>
                                         <div className="col-span-1">
@@ -218,24 +180,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                                 name="englishLevel"
                                                 label="Nivel de inglés"
                                                 component={SelectBase}
-                                                options={[
-                                                    {
-                                                        label: 'Básico',
-                                                        value: 'Basico'
-                                                    },
-                                                    {
-                                                        label: 'Intermedio',
-                                                        value: 'Intermedio'
-                                                    },
-                                                    {
-                                                        label: 'Avanzado',
-                                                        value: 'Avanzado'
-                                                    },
-                                                    {
-                                                        label: 'Nativo',
-                                                        value: 'Nativo'
-                                                    }
-                                                ]}
+                                                options={ENGLISH_LEVEL_BACKEND}
                                             />
                                         </div>
                                         <div className="col-span-1">
@@ -249,34 +194,6 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                             <Field
                                                 name="birthdate"
                                                 label="Fecha de nacimiento"
-                                                component={DatePickerBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="contractType"
-                                                label="Tipo de contrato"
-                                                component={SelectBase}
-                                                options={[
-                                                    {
-                                                        label: 'Recibo por Honorarios',
-                                                        value: 'RECIBOS POR HONORARIOS'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por planilla',
-                                                        value: 'CONTRATO POR PLANILLA'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por obras',
-                                                        value: 'CONTRATO POR OBRAS'
-                                                    }
-                                                ]}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="hiringDate"
-                                                label="Fecha de contratación"
                                                 component={DatePickerBase}
                                             />
                                         </div>
@@ -322,28 +239,6 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                                 component={InputBase}
                                             />
                                         </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="bankAccount.bankName"
-                                                label="Nombre del banco"
-                                                component={SelectBase}
-                                                options={BANKS_BACKEND}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="bankAccount.bankAccountNumber"
-                                                label="Nro de cuenta"
-                                                component={InputBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="bankAccount.cci"
-                                                label="Nro de CCI"
-                                                component={InputBase}
-                                            />
-                                        </div>
                                         <div className="col-span-1 md:col-span-2">
                                             <Field
                                                 name="techSkills"
@@ -353,7 +248,6 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                         </div>
 
                                         <div className="col-span-1 md:col-span-2">
-                                            <pre>{JSON.stringify(values.clientId)}</pre>
                                             <Autocomplete
                                                 inputValue={list.filterText}
                                                 isLoading={list.isLoading}

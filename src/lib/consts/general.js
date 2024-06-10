@@ -14,6 +14,31 @@ export const ACCOUNT_TYPES_BACKEND = [
     { label: 'Cta. sueldo', value:'CTA AHORROS'}
 ]
 
+export const DOCUMENT_TYPES_BACKEND = [
+    { value: 'Dni', label: 'DNI' },
+    { value: 'Carnet Extranjeria', label: 'Carnet extranjería' },
+    { value: 'Pasaporte', label: 'Pasaporte' },
+]
+
+export const ENGLISH_LEVEL_BACKEND = [
+        {
+            label: 'Básico',
+            value: 'Basico'
+        },
+        {
+            label: 'Intermedio',
+            value: 'Intermedio'
+        },
+        {
+            label: 'Avanzado',
+            value: 'Avanzado'
+        },
+        {
+            label: 'Nativo',
+            value: 'Nativo'
+        }
+]
+
 
 export const TABLE_NAME_FILES = {
     contractWorkers: 'contractWorkers',

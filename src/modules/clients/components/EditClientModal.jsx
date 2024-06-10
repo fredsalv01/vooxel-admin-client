@@ -39,6 +39,7 @@ export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
     console.log("🚀 ~ handleSubmit ~ values:", values)
+    delete values.id;
     try {
       setSubmitting(true);
       await axios.patch(`clients/${editItem.id}`, {
@@ -70,7 +71,7 @@ export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
           >
             {({ isSubmitting }) => (
               <Form>
-                <ModalHeader className="text-2xl">Agregar nuevo cliente</ModalHeader>
+                <ModalHeader className="text-2xl">Editar cliente</ModalHeader>
                 <ModalBody>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="col-span-1">
