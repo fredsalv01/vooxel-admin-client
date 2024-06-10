@@ -19,8 +19,6 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
         englishLevel: '',
         charge: '',
         birthdate: '',
-        contractType: '',
-        hiringDate: '',
         phoneNumber: '',
         address: '',
         district: '',
