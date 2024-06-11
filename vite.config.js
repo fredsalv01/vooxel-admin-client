@@ -15,5 +15,5 @@ export default defineConfig({
       },
     },
   },
-  base: "https://fredsalv01.vooxel-admin-client/",
+  base: "/",
 });
