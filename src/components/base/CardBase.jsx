@@ -39,7 +39,7 @@ export const CardBase = ({ title, async = false, skeletonlines = 6, className, c
                 <div className="space-y-3 p-3">
                     {Array(skeletonlines).fill(0).map((_, index) => (
                         <Skeleton className="rounded-lg" key={index}>
-                            <div className="h-5 w-full rounded-lg bg-secondary"></div>
+                            <div className="h-7 w-full rounded-lg bg-secondary"></div>
                         </Skeleton>
                     ))}
                 </div>
