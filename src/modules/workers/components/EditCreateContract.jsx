@@ -113,7 +113,7 @@ export const EditCreateContract = ({ itemId }) => {
     return (
         <>
             {isOpen && <EditCreateContractModal isOpen={isOpen} onOpenChange={onOpenChange} item={editItem} items={rows} parentId={itemId} fetchData={fetchData} />}
-            <CardBase title='Contractos' async={isLoading} skeletonlines={5}>
+            <CardBase title='Contratos' async={isLoading} skeletonlines={5}>
                 <Slot slot="header">
                     <Button size='sm' onPress={() => {
                         setEditItem({});
