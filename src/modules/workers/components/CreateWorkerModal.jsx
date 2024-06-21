@@ -6,6 +6,7 @@ import axios from '../../../axios/axios';
 import ToastNotification from '../../../lib/helpers/toast-notification';
 import * as Yup from 'yup';
 import axiosInstance from '../../../axios/axios';
+import { DOCUMENT_TYPES_BACKEND, ENGLISH_LEVEL_BACKEND, RECEIPTS_TYPES_BACKEND, SENIORITY_BACKEND } from '../../../lib/consts/general';
 
 export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
 
@@ -13,12 +14,15 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         name: '',
         apPat: '',
         apMat: '',
+        email: '',
         documentType: '',
         documentNumber: '',
         englishLevel: '',
+        seniority: '',
         charge: '',
         birthdate: '',
         contractType: '',
+        startDate: '',
         hiringDateContract: '',
         endDateContract: '',
         phoneNumber: '',
@@ -28,7 +32,6 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         department: '',
         familiarAssignment: '',
         techSkills: [],
-        // emergencyContacts: []
     };
 
     const validationSchema = Yup.object({
@@ -64,6 +67,9 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
         techSkills: Yup.array().of(
             Yup.string().required() // Example: require each element to be a string
         ).min(1, 'The array must have at least one element').required('This field is required'),
+        email: Yup.string().email().required(),
+        seniority: Yup.string().required(),
+        startDate: Yup.string().required(),
     });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
@@ -110,7 +116,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                     >
                         {({ isSubmitting, values }) => (
                             <Form className='grid overflow-y-auto' autoComplete='off'>
-                                <ModalHeader className="text-2xl">Agregar nuevo colaborador</ModalHeader>
+                                <ModalHeader className="text-2xl">Agregar nuevo colaborador {import.meta.env.API_URL}</ModalHeader>
                                 <ModalBody>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="col-span-1">
@@ -136,14 +142,17 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         </div>
                                         <div className="col-span-1">
                                             <Field
+                                                name="email"
+                                                label="Correo electrónico"
+                                                component={InputBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
                                                 name="documentType"
                                                 label="Tipo de documento"
                                                 component={SelectBase}
-                                                options={[
-                                                    { value: 'Dni', label: 'DNI' },
-                                                    { value: 'Pasaporte', label: 'PASAPORTE' },
-                                                    { value: 'Carnet Extranjeria', label: 'CARNET EXTRANJERÍA' },
-                                                ]}
+                                                options={DOCUMENT_TYPES_BACKEND}
                                             />
                                         </div>
                                         <div className="col-span-1">
@@ -155,27 +164,17 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         </div>
                                         <div className="col-span-1">
                                             <Field
+                                                name="startDate"
+                                                label="Fecha inicio de trabajo"
+                                                component={DatePickerBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
                                                 name="englishLevel"
                                                 label="Nivel de inglés"
                                                 component={SelectBase}
-                                                options={[
-                                                    {
-                                                        label: 'Básico',
-                                                        value: 'Basico'
-                                                    },
-                                                    {
-                                                        label: 'Intermedio',
-                                                        value: 'Intermedio'
-                                                    },
-                                                    {
-                                                        label: 'Avanzado',
-                                                        value: 'Avanzado'
-                                                    },
-                                                    {
-                                                        label: 'Nativo',
-                                                        value: 'Nativo'
-                                                    }
-                                                ]}
+                                                options={ENGLISH_LEVEL_BACKEND}
                                             />
                                         </div>
                                         <div className="col-span-1">
@@ -183,6 +182,14 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                                 name="charge"
                                                 label="Cargo"
                                                 component={InputBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
+                                                name="seniority"
+                                                label="Seniority"
+                                                component={SelectBase}
+                                                options={SENIORITY_BACKEND}
                                             />
                                         </div>
                                         <div className="col-span-1">
@@ -203,7 +210,11 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                             <Field
                                                 name="familiarAssignment"
                                                 label="Asignación familiar"
-                                                component={InputBase}
+                                                component={SelectBase}
+                                                options={[
+                                                    { label: 'Sí', value: 'SI' },
+                                                    { label: 'No', value: 'NO' },
+                                                ]}
                                             />
                                         </div>
                                         <div className="col-span-1 md:col-span-2">
@@ -274,20 +285,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                                 name="contractType"
                                                 label="Tipo de contrato"
                                                 component={SelectBase}
-                                                options={[
-                                                    {
-                                                        label: 'Recibo por Honorarios',
-                                                        value: 'RECIBOS POR HONORARIOS'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por planilla',
-                                                        value: 'CONTRATO POR PLANILLA'
-                                                    },
-                                                    {
-                                                        label: 'Contrato por obras',
-                                                        value: 'CONTRATO POR OBRAS'
-                                                    }
-                                                ]}
+                                                options={RECEIPTS_TYPES_BACKEND}
                                             />
                                         </div>
                                     </div>

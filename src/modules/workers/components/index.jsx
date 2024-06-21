@@ -8,3 +8,4 @@ export { EditCreateContract } from './EditCreateContract';
 export { EditCreateContractModal } from './EditCreateContractModal';
 export { EditCreateCertification } from './EditCreateCertification';
 export { EditCreateCertificationModal } from './EditCreateCertificationModal';
+export { VacationDetail } from './VacationDetail';

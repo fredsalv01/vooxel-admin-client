@@ -1,35 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Button, Card, CardBody, CardFooter, CardHeader, Chip, useDisclosure } from '@nextui-org/react';
+import { Button, Chip, useDisclosure } from '@nextui-org/react';
 
-import { useNavigate, useParams } from 'react-router-dom';
-import { EditIcon } from '../../../components/icons';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers, EditCreateBankAccount } from '../components';
-import axios from '../../../axios/axios';
 import { EditCreateContract } from '../components/EditCreateContract';
 import { EditCreateCertification } from '../components/EditCreateCertification';
 import { useFetchData } from '../../../hooks/useFetchData';
 import { CardBase } from '../../../components/base';
 import { GridDetailInfo } from '../../../components/GridDetailInfo';
 
-export const DetailWorkerPage = () => {
+export const WorkerDetailPage = () => {
 
     const navigate = useNavigate();
 
     const { id } = useParams();
-
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
-    const [item, setItem] = useState(null);
-
-
-
     const { loading, data, fetchData } = useFetchData({ url: `/workers/${id}` });
-
-    useEffect(() => {
-        if (!!data) {
-            setItem(data);
-            // getItemToEdit();
-        }
-    }, []);
 
     const detailWorker = useMemo(() => {
         if (!!data) {
@@ -74,11 +60,16 @@ export const DetailWorkerPage = () => {
 
     return (
         <div className='container bg-slate-100 ml-auto mr-auto'>
-            {isOpen && <EditWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} editItem={item} fetchData={() => { }} />}
+            {isOpen && <EditWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} editItem={data} fetchData={() => { }} />}
 
-            <Button onPress={onOpen} color="warning" className='mb-3'>
-                Editar
-            </Button>
+            <div className='flex justify-between'>
+                <Button onPress={onOpen} color="warning" className='mb-3' isDisabled={loading}>
+                    Editar
+                </Button>
+                <Link to={`/workers`} >
+                    Regresar
+                </Link>
+            </div>
             <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
                 {/* <p>Nombre: {item?.name}</p>
                 <p>Apellidos: {`${item?.apPat} ${item?.apMat}`}</p>

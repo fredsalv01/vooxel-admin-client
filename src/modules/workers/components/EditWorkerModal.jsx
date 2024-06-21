@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker, Autocomplete, AutocompleteSection, AutocompleteItem } from '@nextui-org/react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker, Autocomplete, AutocompleteSection, AutocompleteItem, Divider } from '@nextui-org/react';
 import { Formik, Form, Field } from 'formik';
 import { DatePickerBase, InputBase, SelectBase, InputTagBase, AutocompleteBase } from '../../../components/base';
 import { useAsyncList } from "@react-stately/data";
 import axios from '../../../axios/axios';
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
 import * as Yup from 'yup';
-import { BANKS_BACKEND, DOCUMENT_TYPES_BACKEND, ENGLISH_LEVEL_BACKEND } from '../../../lib/consts/general';
+import { BANKS_BACKEND, DOCUMENT_TYPES_BACKEND, ENGLISH_LEVEL_BACKEND, SENIORITY_BACKEND } from '../../../lib/consts/general';
+import { useQueryPromise } from '../../../hooks/useQueryPromise';
 
 export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) => {
 
@@ -27,6 +28,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
         familiarAssignment: '',
         techSkills: [],
         clientId: '',
+        chiefOfficerId: '',
     });
 
     useEffect(() => {
@@ -37,8 +39,11 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                 name: editItem?.name,
                 apPat: editItem?.apPat,
                 apMat: editItem?.apMat,
+                email: editItem?.email,
                 documentType: editItem?.documentType,
                 documentNumber: editItem?.documentNumber,
+                seniority: editItem?.seniority,
+                startDate: editItem?.startDate,
                 englishLevel: editItem?.englishLevel,
                 charge: editItem?.charge,
                 birthdate: editItem?.birthdate || '',
@@ -50,6 +55,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                 familiarAssignment: editItem?.familiarAssignment,
                 techSkills: editItem?.techSkills,
                 clientId: editItem?.clientInfo?.id.toString() || '',
+                chiefOfficerId: editItem?.chiefOfficerId.toString() || '',
             })
         }
     }, []);
@@ -86,9 +92,25 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
             Yup.string().required()
         ).min(1).required(),
         clientId: Yup.string().required(),
+        chiefOfficerId: Yup.string().required(),
+        email: Yup.string().email().required(),
+        seniority: Yup.string().required(),
+        startDate: Yup.string().required(),
     });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
+        console.log("🚀 ~ handleSubmit ~ values:", values)
+
+        // if (!editItem?.chiefOfficer && !values.chiefOfficerId) {
+        //     ToastNotification.showError('Agregar jefe de colaborador');
+        //     return;
+        // }
+
+        // if (!editItem?.clientInfo && !values.clientId) {
+        //     ToastNotification.showError('Agregar cliente de colaborador');
+        //     return;
+        // }
+
         delete values.id;
         delete values.isActive;
         try {
@@ -106,16 +128,37 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
         }
     };
 
-    // autocomplete
-    let list = useAsyncList({
-        async load({ signal, filterText }) {
-            // console.log("🚀 ~ load ~ signal:", signal)
-            const data = await axios.get('clients', { params: { input: filterText, isActive: true } });
-            return {
-                items: data.data.items.map((item) => ({ id: item.id, label: item.businessName })) || [],
-            };
-        },
-    });
+
+    const { data: clientsData } = useQueryPromise({ url: 'clients', key: 'clients' });
+
+    const computedClients = useMemo(() => {
+        return clientsData?.items.map((item) => ({ label: item.businessName, value: item.id })) || []
+    }, [clientsData]);
+
+    const { data: chiefOfficerData } = useQueryPromise({ url: 'workers', key: 'workers' });
+
+    const computedChiefOfficerData = useMemo(() => {
+        return chiefOfficerData?.items.map((item) => ({ label: `${item.name} ${item.apPat}`, value: item.id })) || []
+    }, [chiefOfficerData]);
+
+
+    // let listClients = useAsyncList({
+    //     async load({ signal, filterText }) {
+    //         const data = await axios.get('clients', { params: { input: filterText, isActive: true }, signal });
+    //         return {
+    //             items: data.data.items.map((item) => ({ id: item.id, label: item.businessName })) || [],
+    //         };
+    //     },
+    // });
+
+    // let listWokers = useAsyncList({
+    //     async load({ signal, filterText }) {
+    //         const data = await axios.get('workers', { params: { input: filterText, isActive: true }, signal });
+    //         return {
+    //             items: data.data.items.map((item) => ({ id: item.id, label: `${item.name} ${item.apPat}` })) || [],
+    //         };
+    //     },
+    // });
 
     return (
         <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
@@ -137,7 +180,7 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                 </ModalHeader>
                                 <ModalBody>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="col-span-1 md:col-span-2">
+                                        <div className="col-span-1">
                                             <Field
                                                 name="name"
                                                 label="Nombre(s)"
@@ -160,6 +203,13 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                         </div>
                                         <div className="col-span-1">
                                             <Field
+                                                name="email"
+                                                label="Correo electrónico"
+                                                component={InputBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
                                                 name="documentType"
                                                 label="Tipo de documento"
                                                 component={SelectBase}
@@ -171,6 +221,13 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                                 name="documentNumber"
                                                 label="Nro. de documento"
                                                 component={InputBase}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
+                                                name="startDate"
+                                                label="Fecha inicio de trabajo"
+                                                component={DatePickerBase}
                                             />
                                         </div>
                                         <div className="col-span-1">
@@ -190,6 +247,14 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                         </div>
                                         <div className="col-span-1">
                                             <Field
+                                                name="seniority"
+                                                label="Seniority"
+                                                component={SelectBase}
+                                                options={SENIORITY_BACKEND}
+                                            />
+                                        </div>
+                                        <div className="col-span-1">
+                                            <Field
                                                 name="birthdate"
                                                 label="Fecha de nacimiento"
                                                 component={DatePickerBase}
@@ -204,37 +269,13 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                         </div>
                                         <div className="col-span-1">
                                             <Field
-                                                name="address"
-                                                label="Dirección"
-                                                component={InputBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="department"
-                                                label="Departamento"
-                                                component={InputBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="district"
-                                                label="Distrito"
-                                                component={InputBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
-                                                name="province"
-                                                label="Provincia"
-                                                component={InputBase}
-                                            />
-                                        </div>
-                                        <div className="col-span-1">
-                                            <Field
                                                 name="familiarAssignment"
                                                 label="Asignación familiar"
-                                                component={InputBase}
+                                                component={SelectBase}
+                                                options={[
+                                                    { label: 'Sí', value: 'SI' },
+                                                    { label: 'No', value: 'NO' },
+                                                ]}
                                             />
                                         </div>
                                         <div className="col-span-1 md:col-span-2">
@@ -245,32 +286,83 @@ export const EditWorkerModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                                             />
                                         </div>
 
-                                        <div className="col-span-1 md:col-span-2">
-                                            <Autocomplete
-                                                inputValue={list.filterText}
-                                                isLoading={list.isLoading}
-                                                items={list.items}
-                                                label="Seleccionar cliente"
-                                                placeholder="buscar cliente..."
-                                                variant="bordered"
-                                                name="clientId"
-                                                onInputChange={(event) => {
-                                                    list.setFilterText(event)
-                                                }}
-                                                onSelectionChange={(event) => {
-                                                    // if (!!event) handleChange(event)
-                                                    setFieldValue('clientId', event)
-                                                }}
-                                                isRequired
-                                            >
-                                                {(item) =>
-                                                    <AutocompleteItem key={item.id} className="capitalize">
-                                                        {item.label}
-                                                    </AutocompleteItem>
-                                                }
-                                            </Autocomplete>
-                                        </div>
                                     </div>
+
+                                    <Divider />
+
+                                    <div>
+                                        {/* {editItem.clientInfo && <div className='mb-2 ms-2'>
+                                            <strong className='text-'>Cliente: </strong>  {editItem.clientInfo.businessName}
+                                        </div>}
+                                        <Autocomplete
+                                            inputValue={listClients.filterText}
+                                            isLoading={listClients.isLoading}
+                                            items={listClients.items}
+                                            label="Seleccionar cliente"
+                                            placeholder="buscar cliente..."
+                                            variant="bordered"
+                                            name="clientId"
+                                            onInputChange={(event) => {
+                                                console.log("🚀 ~ EditWorkerModal ~ event:", event)
+                                                listClients.setFilterText(event)
+                                            }}
+                                            allowsCustomValue={true}
+                                            onSelectionChange={($event) => {
+                                                setFieldValue('chiefOfficerId', $event);
+                                            }}
+                                        >
+                                            {(item) =>
+                                                <AutocompleteItem key={item.id} className="capitalize">
+                                                    {item.label}
+                                                </AutocompleteItem>
+                                            }
+                                        </Autocomplete> */}
+
+                                        <Field
+                                            name="clientId"
+                                            label="Cliente"
+                                            component={SelectBase}
+                                            options={computedClients}
+                                        />
+                                    </div>
+
+                                    <Divider />
+
+                                    <div>
+
+                                        <Field
+                                            name="chiefOfficerId"
+                                            label="Jefe"
+                                            component={SelectBase}
+                                            options={computedChiefOfficerData}
+                                        />
+                                        {/* {editItem.chiefOfficerId && <div className='mb-2 ms-2'>
+                                            <strong className='text-'>Jefe: </strong>  {editItem.chiefOfficer.name}
+                                        </div>}
+                                        <Autocomplete
+                                            inputValue={listWokers.filterText}
+                                            isLoading={listWokers.isLoading}
+                                            items={listWokers.items}
+                                            label="Seleccionar colaborador"
+                                            placeholder="buscar colaborador..."
+                                            variant="bordered"
+                                            name="chiefOfficerId"
+                                            onInputChange={(event) => {
+                                                listWokers.setFilterText(event)
+                                            }}
+                                            allowsCustomValue={true}
+                                            onSelectionChange={($event) => {
+                                                setFieldValue('chiefOfficerId', $event);
+                                            }}
+                                        >
+                                            {(item) =>
+                                                <AutocompleteItem key={item.id} className="capitalize">
+                                                    {item.label}
+                                                </AutocompleteItem>
+                                            }
+                                        </Autocomplete> */}
+                                    </div>
+
 
                                 </ModalBody>
                                 <ModalFooter className='flex justify-end'>

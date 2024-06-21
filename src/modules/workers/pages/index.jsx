@@ -1,2 +1,3 @@
 export { WorkerList } from './WorkerList'
-export { DetailWorkerPage } from './DetailWorkerPage'
+export { WorkerDetailPage } from './WorkerDetailPage'
+export { WorkerVacationsPage } from './WorkerVacationsPage'

@@ -3,17 +3,30 @@ import { toast } from 'react-toastify';
 
 export class ToastNotification {
 
+    static data = [];
+
     static showSuccess(messages) {
-        toast.success(<RenderMessage messages={messages} />, { autoClose: 5000 });
+        const toastId = toast.success(<RenderMessage messages={messages} />, { autoClose: 5000 });
+        this.data.push(toastId);
     }
 
     static showWarning(messages) {
-        toast.warning(<RenderMessage messages={messages} />, { autoClose: 5000 });
+        const toastId = toast.warning(<RenderMessage messages={messages} />, { autoClose: 5000 });
+        this.data.push(toastId);
     }
 
     static showError(messages) {
-        toast.error(<RenderMessage messages={messages} />, { autoClose: 5000 });
+        const toastId = toast.error(<RenderMessage messages={messages} />, { autoClose: 5000 });
+        this.data.push(toastId);
     }
+
+    static remove() {
+        this.data.forEach(element => {
+            toast.dismiss(element);
+        });
+        this.data = [];
+    }
+
 }
 
 const RenderMessage = ({ messages }) => {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { Card, CardBody, CardHeader, Divider, Skeleton } from '@nextui-org/react';
+import { Card, CardBody, CardFooter, CardHeader, Divider, Skeleton } from '@nextui-org/react';
 import { isSlot } from '../Slot';
-import clsx from 'clsx';
 
 /**
  * @typedef {Object} CardBaseProps

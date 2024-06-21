@@ -8,6 +8,12 @@ export const BANKS_BACKEND = [
     { label: 'Banco de la nación' ,value:"BANCO DE LA NACION"}
 ]
 
+export const SENIORITY_BACKEND = [
+    { label: 'Junior', value: 'Junior'},
+    { label: 'Semi Senior', value: 'Semi Senior'},
+    { label: 'Senior', value: 'Senior'},
+]
+
 export const ACCOUNT_TYPES_BACKEND = [
     { label: 'Cta. sueldo', value:'CTA SUELDO'},
     { label: 'Cta. CTS', value:'CTA CTS'},
@@ -38,6 +44,21 @@ export const ENGLISH_LEVEL_BACKEND = [
             value: 'Nativo'
         }
 ]
+
+export const RECEIPTS_TYPES_BACKEND = [
+    {
+        label: 'Recibo por Honorarios',
+        value: 'RECIBOS POR HONORARIOS'
+    },
+    {
+        label: 'Contrato por planilla',
+        value: 'CONTRATO POR PLANILLA'
+    },
+    {
+        label: 'Contrato por obras',
+        value: 'CONTRATO POR OBRAS'
+    }
+];
 
 
 export const TABLE_NAME_FILES = {

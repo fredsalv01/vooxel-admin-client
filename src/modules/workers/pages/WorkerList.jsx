@@ -367,7 +367,7 @@ export const WorkerList = () => {
   return (
     <>
       {/* Modal para crear colaborador */}
-      {isOpen && <CreateWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} list={() => { }} />}
+      {isOpen && <CreateWorkerModal isOpen={isOpen} onOpenChange={onOpenChange} fetchData={fetchData} />}
       <Table
         aria-label="Example table with custom cells, pagination and sorting"
         isHeaderSticky
