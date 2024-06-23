@@ -92,9 +92,9 @@ export const EditCreateContractWorker = ({ itemId }) => {
                                 <EditIcon />
                             </Button>}
                             <Button isIconOnly color='white' onClick={getFileInfo({ tag: TAGS_FILES.contract, rowTableId: item.id })} isLoading={isLoadingFile}
-                                isDisabled={![NO_HAS_FILES].includes(item.file)}
+                                isDisabled={[NO_HAS_FILES].includes(item.file)}
                             >
-                                <DownloadCloud currentColor={[NO_HAS_FILES].includes(item.file) ? '#00abfb' : '#d1d5db'} />
+                                <DownloadCloud currentColor={[NO_HAS_FILES].includes(item.file) ? '#d1d5db' : '#00abfb'} />
                             </Button>
                         </ButtonGroup>
                     </div>

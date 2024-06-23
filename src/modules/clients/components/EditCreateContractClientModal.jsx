@@ -32,7 +32,7 @@ export const EditCreateContractClientModal = ({ isOpen, onOpenChange, item = {},
 
     const isEditItem = useMemo(() => Object.keys(item).length > 0, [item]);
 
-    const { handleFileChange, handleFileUpload, handleFileUpdated } = useUploadFile({ tableName: TABLE_NAME_FILES.contractWorkers, goUpload: false });
+    const { handleFileChange, handleFileUpload, handleFileUpdated } = useUploadFile({ tableName: TABLE_NAME_FILES.contractClients, goUpload: false });
 
     const handleSubmit = async (values, setSubmitting, onClose) => {
         // console.log(JSON.stringify(values, null, 2));
@@ -50,7 +50,7 @@ export const EditCreateContractClientModal = ({ isOpen, onOpenChange, item = {},
             if (isEditItem) {
                 contractUpserted = await axiosInstance.patch(`contract-clients/${item.id}`, {
                     ...restValues,
-                    workerId: parentId
+                    clientId: parentId
                 });
 
                 ToastNotification.showSuccess('Contrato actualizado correctamente');
@@ -58,7 +58,7 @@ export const EditCreateContractClientModal = ({ isOpen, onOpenChange, item = {},
             } else {
                 contractUpserted = await axiosInstance.post(`contract-clients`, {
                     ...restValues,
-                    workerId: parentId
+                    clientId: parentId
                 });
                 ToastNotification.showSuccess('Contrato creado correctamente');
             }
@@ -108,7 +108,6 @@ export const EditCreateContractClientModal = ({ isOpen, onOpenChange, item = {},
                             <Form>
                                 <ModalHeader className="text-2xl">{title} contrato</ModalHeader>
                                 <ModalBody>
-                                    <pre>{JSON.stringify(initialValues)}</pre>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="col-span-1">
                                             <Field

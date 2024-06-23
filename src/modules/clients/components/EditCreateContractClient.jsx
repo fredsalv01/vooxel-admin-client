@@ -10,7 +10,7 @@ import InternationalizationDate from '../../../lib/helpers/internationalization-
 import { useFetchData } from '../../../hooks/useFetchData';
 import { EditCreateContractClientModal } from './';
 import { useUploadFile } from '../../../hooks/useUploadFile';
-import { TABLE_NAME_FILES, TAGS_FILES } from '../../../lib/consts/general';
+import { NO_HAS_FILES, TABLE_NAME_FILES, TAGS_FILES } from '../../../lib/consts/general';
 
 export const EditCreateContractClient = ({ itemId }) => {
 
@@ -20,7 +20,7 @@ export const EditCreateContractClient = ({ itemId }) => {
 
     const [rows, setRows] = useState([]);
 
-    const { getFileInfo, isLoading: isLoadingFile } = useUploadFile({ tableName: TABLE_NAME_FILES.contractWorkers });
+    const { getFileInfo, isLoading: isLoadingFile } = useUploadFile({ tableName: TABLE_NAME_FILES.contractClients });
 
     useEffect(() => {
         if (!!data) {
@@ -83,8 +83,10 @@ export const EditCreateContractClient = ({ itemId }) => {
                             {item.isActive && <Button isIconOnly color='white' className='p-0' onClick={() => handleEditContract(item)}>
                                 <EditIcon />
                             </Button>}
-                            <Button isIconOnly color='white' onClick={getFileInfo({ tag: TAGS_FILES.contract, rowTableId: item.id })} isLoading={isLoadingFile}>
-                                <DownloadCloud />
+                            <Button isIconOnly color='white' onClick={getFileInfo({ tag: TAGS_FILES.contract, rowTableId: item.id })} isLoading={isLoadingFile}
+                                isDisabled={[NO_HAS_FILES].includes(item.file)}
+                            >
+                                <DownloadCloud currentColor={[NO_HAS_FILES].includes(item.file) ? '#d1d5db' : '#00abfb'} />
                             </Button>
                         </ButtonGroup>
                     </div>

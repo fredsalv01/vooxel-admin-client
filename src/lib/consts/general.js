@@ -76,4 +76,4 @@ export const TAGS_FILES = {
     profile_photo: 'profile_photo',
 }
 
-export const NO_HAS_FILES = 'No se ha subido contrato' ? true : false;
+export const NO_HAS_FILES = 'No se ha subido contrato';
