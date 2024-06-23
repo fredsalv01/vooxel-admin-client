@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Button } from '@nextui-org/react';
 import { CardBase, FileInput } from '../../../components/base';
@@ -12,9 +12,22 @@ const typeFiles = [
     { label: 'Profile Foto', tag: TAGS_FILES.profile_photo },
 ]
 
-export const FilesWorkers = ({ itemId }) => {
+export const FilesWorkers = ({ itemId, filesCount, fetchData }) => {
 
-    const { handleFileChange, getFileInfo, isLoading } = useUploadFile({ tableName: 'worker', tableId: itemId });
+    const [hasFiles, setHasFiles] = useState(null);
+
+    useEffect(() => {
+        if (Object.keys(filesCount).length > 0) {
+            const newHasFiles = {};
+            typeFiles.forEach(({ tag }) => {
+                newHasFiles[tag] = filesCount[tag] > 0 ?? false;
+            });
+            setHasFiles(newHasFiles);
+        }
+
+    }, [filesCount]);
+
+    const { handleFileChange, getFileInfo, isLoading } = useUploadFile({ tableName: 'worker', tableId: itemId, reFetchData: fetchData });
 
     return (
         <CardBase title='Archivos del colaborador'>
@@ -27,8 +40,13 @@ export const FilesWorkers = ({ itemId }) => {
                     </div>
 
                     <div className="text-center">
-                        <Button isIconOnly color='white' onClick={getFileInfo({ tag })} isLoading={isLoading}>
-                            <DownloadCloud />
+                        {/* <pre>{JSON.stringify(hasFiles[tag])}</pre> */}
+                        <Button isIconOnly color='white'
+                            isDisabled={hasFiles && !hasFiles[tag]}
+                            onClick={getFileInfo({ tag })} isLoading={isLoading}>
+                            <DownloadCloud
+                                currentColor={hasFiles && hasFiles[tag] ? '#00abfb' : '#d1d5db'}
+                            />
                         </Button>
                     </div>
                 </div>

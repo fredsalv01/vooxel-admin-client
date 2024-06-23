@@ -1,2 +1,2 @@
 export { ClientList } from './ClientList'
-export { DetailClientPage } from './DetailClientPage'
+export { ClienteDetailPage } from './ClienteDetailPage'

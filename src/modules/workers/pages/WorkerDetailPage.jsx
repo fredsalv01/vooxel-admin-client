@@ -3,7 +3,7 @@ import { Button, Chip, useDisclosure } from '@nextui-org/react';
 
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers, EditCreateBankAccount } from '../components';
-import { EditCreateContract } from '../components/EditCreateContract';
+import { EditCreateContractWorker } from '../components/EditCreateContractWorker';
 import { EditCreateCertification } from '../components/EditCreateCertification';
 import { useFetchData } from '../../../hooks/useFetchData';
 import { CardBase } from '../../../components/base';
@@ -74,31 +74,13 @@ export const WorkerDetailPage = () => {
                 </Link>
             </div>
             <div className='grid md:grid-cols-2 grid-cols-1 gap-4'>
-                {/* <p>Nombre: {item?.name}</p>
-                <p>Apellidos: {`${item?.apPat} ${item?.apMat}`}</p>
-                <p>Cumpleaños: {item?.birthdate} </p>
-                <p>Tipo de documento": {item?.documentType}</p>
-                <p>Nro de documento": "72557613",</p>
-                <p>Cargo: {item?.charge} </p>
-                <p>Nivel de Inglés: {item?.englishLevel} </p>
-                <p>Tipode contrato: {item?.contractType} </p>
-                <p>Fecha de contratación: {item?.hiringDate} </p>
-                <p>Fecha de partida: {item?.leaveDate} </p>
-                <p>Celular: {item?.phoneNumber} </p>
-                <p>Dirección: {item?.address} </p>
-                <p>Distrito: {item?.district} </p>
-                <p>Provincia: {item?.province} </p>
-                <p>Departamento: {item?.department} </p>
-                <p>Asignación familiar: {item?.familiarAssignment} </p>
-                <p>Habilidades blandas: {item?.techSkills} </p>
-                <p> Estado: {item?.isActive ? 'Activo' : 'Inactivo'} </p> */}
                 <CardBase async={loading}>
                     <GridDetailInfo data={detailWorker} />
                 </CardBase>
 
-                <EditCreateContract itemId={id} />
+                <EditCreateContractWorker itemId={id} />
                 <EditCreateBankAccount itemId={id} />
-                <FilesWorkers itemId={id} />
+                {data && <FilesWorkers itemId={id} filesCount={data.filesCount || {}} fetchData={fetchData} />}
                 <EditCreateCertification itemId={id} />
                 <EditCreateEmergencyContact itemId={id} />
             </div>

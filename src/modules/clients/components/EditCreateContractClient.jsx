@@ -8,13 +8,13 @@ import Slot from '../../../components/Slot';
 import InternationalizationDate from '../../../lib/helpers/internationalization-date';
 
 import { useFetchData } from '../../../hooks/useFetchData';
-import { EditCreateContractModal } from './EditCreateContractModal';
+import { EditCreateContractClientModal } from './';
 import { useUploadFile } from '../../../hooks/useUploadFile';
 import { TABLE_NAME_FILES, TAGS_FILES } from '../../../lib/consts/general';
 
-export const EditCreateContract = ({ itemId }) => {
+export const EditCreateContractClient = ({ itemId }) => {
 
-    const { data, isLoading, fetchData } = useFetchData({ url: `/contract-workers/${itemId}` });
+    const { data, isLoading, fetchData } = useFetchData({ url: `/contract-clients/${itemId}` });
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const [editItem, setEditItem] = useState({});
 
@@ -35,16 +35,12 @@ export const EditCreateContract = ({ itemId }) => {
 
     const columns = [
         {
-            key: "hiringDate",
+            key: "startDate",
             label: "Fecha inicio",
         },
         {
             key: "endDate",
             label: "Fecha fin",
-        },
-        {
-            key: "contractType",
-            label: "Tipo de contrato",
         },
         {
             key: "isActive",
@@ -66,14 +62,10 @@ export const EditCreateContract = ({ itemId }) => {
         const cellValue = item[columnKey]
 
         switch (columnKey) {
-            case 'hiringDate':
+            case 'startDate':
             case 'endDate':
                 return InternationalizationDate().formatDate(new Date(cellValue));
 
-            case 'contractType':
-                return (<div className='text-xs'>
-                    {cellValue}
-                </div>);
             case 'isActive':
                 return (<Chip
                     className="capitalize border-none gap-1 text-default-600"
@@ -112,7 +104,7 @@ export const EditCreateContract = ({ itemId }) => {
 
     return (
         <>
-            {isOpen && <EditCreateContractModal isOpen={isOpen} onOpenChange={onOpenChange} item={editItem} items={rows} parentId={itemId} fetchData={fetchData} />}
+            {isOpen && <EditCreateContractClientModal isOpen={isOpen} onOpenChange={onOpenChange} item={editItem} items={rows} parentId={itemId} fetchData={fetchData} />}
             <CardBase title='Contratos' async={isLoading} skeletonlines={5}>
                 <Slot slot="header">
                     <Button size='sm' onPress={() => {
@@ -139,6 +131,6 @@ export const EditCreateContract = ({ itemId }) => {
     )
 }
 
-EditCreateContract.propTypes = {
+EditCreateContractClient.propTypes = {
     itemId: PropTypes.string.isRequired
 }

@@ -10,7 +10,7 @@ import axiosInstance from '../../../axios/axios';
 import { useUploadFile } from '../../../hooks/useUploadFile';
 import { TABLE_NAME_FILES, TAGS_FILES } from '../../../lib/consts/general';
 
-export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items, parentId, fetchData }) => {
+export const EditCreateContractWorkerModal = ({ isOpen, onOpenChange, item = {}, items, parentId, fetchData }) => {
     const [title, setTitle] = useState('Agregar');
 
     const [initialValues, setInitialValues] = useState({
@@ -113,7 +113,7 @@ export const EditCreateContractModal = ({ isOpen, onOpenChange, item = {}, items
                             <Form>
                                 <ModalHeader className="text-2xl">{title} contrato</ModalHeader>
                                 <ModalBody>
-                                    <pre>{JSON.stringify(initialValues)}</pre>
+                                    {/* <pre>{JSON.stringify(initialValues)}</pre> */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="col-span-1">
                                             <Field

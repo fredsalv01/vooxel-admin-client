@@ -2,11 +2,11 @@ import React, { useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useFetchData } from '../../../hooks/useFetchData';
 import { Button, Chip, useDisclosure } from '@nextui-org/react';
-import { EditClientModal } from '../components';
+import { EditClientModal, EditCreateContractClient } from '../components';
 import { CardBase } from '../../../components/base';
 import { GridDetailInfo } from '../../../components/GridDetailInfo';
 
-export const DetailClientPage = () => {
+export const ClienteDetailPage = () => {
 
     const { id } = useParams();
 
@@ -52,6 +52,8 @@ export const DetailClientPage = () => {
                 <CardBase async={loading}>
                     <GridDetailInfo data={detailClient} />
                 </CardBase>
+
+                <EditCreateContractClient itemId={id} />
             </div>
 
         </div>

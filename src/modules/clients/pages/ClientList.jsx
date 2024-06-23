@@ -1,27 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import axios from '../../../axios/axios'
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    Input,
     Button,
-    DropdownTrigger,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Pagination,
     useDisclosure,
-    Tabs,
-    Tab,
-    Card,
-    CardBody,
-    Select,
-    SelectItem,
-    Tooltip
 } from '@nextui-org/react'
 import { PlusIcon } from '../../../components/icons/PlusIcon'
 import { CreateClientModal } from '../components'
@@ -29,6 +9,7 @@ import { TableList } from '../../../components/base'
 import { useQueryPromise } from '../../../hooks/useQueryPromise'
 import Slot from '../../../components/Slot'
 import { EditIcon } from '../../../components/icons'
+import { useFetchData } from '../../../hooks/useFetchData'
 
 
 
@@ -55,9 +36,12 @@ const INITIAL_VISIBLE_COLUMNS = [
 
 export const ClientList = () => {
 
-    const { isOpen, onOpen, onOpenChange } = useDisclosure();
+    const [page, setPage] = useState(1);
+    const limit = 10;
 
-    const { data, isFetching, refetch, isSuccess } = useQueryPromise({ url: 'clients', key: 'clients' });
+    const { data, isFetching, refetch, isSuccess } = useQueryPromise({ url: 'clients', key: 'clients', page, limit });
+
+    const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const switchRenderCell = (item, columnKey) => {
         const cellValue = item[columnKey];
         switch (columnKey) {

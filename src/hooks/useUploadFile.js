@@ -7,9 +7,10 @@ import {ToastNotification} from "../lib/helpers/toast-notification-temp";
  * @param {Object} params - The parameters for the function.
  * @param {string} params.tableName - The name of the table.
  * @param {number} params.tableId - The ID of the table.
+ * @param {reFetchData} params.reFetchData - The function to refetch the data.
  * @returns
  */
-export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
+export const useUploadFile = ({ tableName, tableId = 0, goUpload = true, reFetchData = () => void 0 }) => {
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -60,9 +61,9 @@ export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
                 }
 
                 if (tableId) body.tableId = tableId 
-
                 const response = await axiosInstance.post('/files', body);
                 ToastNotification.showSuccess('Archivo subido correctamente');
+                fetchData();
                 return response.data;
             } else {
                 const errorText = await resp.text(); // Leer el cuerpo de la respuesta para obtener detalles del error
@@ -83,6 +84,7 @@ export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
             setIsLoading(true);
             await axiosInstance.patch(`/files/${fileId}`, { tableId: updateTableId });
             ToastNotification.showSuccess('Archivo actualizado correctamente');
+            fetchData();
         } catch (error) {
             console.error('Error en la subida', error); // Debugging: Capturar y registrar errores
             ToastNotification.showError('Fallo al subir el archivo');
@@ -125,6 +127,12 @@ export const useUploadFile = ({ tableName, tableId = 0, goUpload = true }) => {
             setIsLoading(false);
         }
     };
+
+    const fetchData = async () => {
+        if (reFetchData) {
+            await reFetchData();
+        }
+    }
 
 
     return {
