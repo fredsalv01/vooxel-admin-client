@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Button, Chip, useDisclosure } from '@nextui-org/react';
 
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers, EditCreateBankAccount } from '../components';
+import { EditWorkerModal, EditCreateEmergencyContact, FilesWorkers, EditCreateBankAccount, GridHabilities } from '../components';
 import { EditCreateContractWorker } from '../components/EditCreateContractWorker';
 import { EditCreateCertification } from '../components/EditCreateCertification';
 import { useFetchData } from '../../../hooks/useFetchData';
@@ -37,15 +37,7 @@ export const WorkerDetailPage = () => {
                 'Departamento': data.department,
                 'Asignación': data.familiarAssignment,
                 'Habilidades':
-                    data.techSkills.map((item, index) => (
-                        <div
-                            key={index}
-                            className="w-auto h-8 flex items-center justify-center text-white bg-blue-500
-                                text-sm list-none rounded-lg py-2 px-1"
-                        >
-                            <span className="my-2 uppercase">{item}</span>
-                        </div>
-                    ))
+                    data.techSkills.length && <GridHabilities items={data.techSkills} />
                 ,
                 'Estado':
                     <Chip

@@ -8,4 +8,5 @@ export { EditCreateContractWorker } from './EditCreateContractWorker';
 export { EditCreateContractWorkerModal } from './EditCreateContractWorkerModal';
 export { EditCreateCertification } from './EditCreateCertification';
 export { EditCreateCertificationModal } from './EditCreateCertificationModal';
+export { GridHabilities } from './GridHabilities';
 export { VacationDetail } from './VacationDetail';

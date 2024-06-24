@@ -10,6 +10,7 @@ import { useQueryPromise } from '../../../hooks/useQueryPromise'
 import Slot from '../../../components/Slot'
 import { EditIcon } from '../../../components/icons'
 import { useFetchData } from '../../../hooks/useFetchData'
+import { Link } from 'react-router-dom'
 
 
 
@@ -35,11 +36,7 @@ const INITIAL_VISIBLE_COLUMNS = [
 ]
 
 export const ClientList = () => {
-
-    const [page, setPage] = useState(1);
-    const limit = 10;
-
-    const { data, isFetching, refetch, isSuccess } = useQueryPromise({ url: 'clients', key: 'clients', page, limit });
+    const { data, isFetching, refetch, isSuccess, paginationProps, updatingList, setQuerSearch } = useQueryPromise({ url: 'clients', key: 'clients' });
 
     const { isOpen, onOpen, onOpenChange } = useDisclosure();
     const switchRenderCell = (item, columnKey) => {
@@ -51,9 +48,9 @@ export const ClientList = () => {
                 )
             case 'actions':
                 return (
-                    <a href={`/clients/${item.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                    <Link to={`/clients/${item.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
                         <EditIcon />
-                    </a>
+                    </Link>
                 )
             default:
                 return cellValue;
@@ -65,7 +62,9 @@ export const ClientList = () => {
             {/* Modal para crear cliente */}
             {isOpen && <CreateClientModal isOpen={isOpen} onOpenChange={onOpenChange} fetchData={refetch} />}
 
-            <TableList items={data?.items || []} headersTable={headersTable} switchFn={switchRenderCell} initialColumns={INITIAL_VISIBLE_COLUMNS} isLoading={isFetching} >
+            <TableList items={data?.items || []} headersTable={headersTable} switchFn={switchRenderCell} initialColumns={INITIAL_VISIBLE_COLUMNS} isLoading={isFetching} paginationProps={paginationProps}
+                updatingList={updatingList} setQuerSearch={setQuerSearch}
+            >
                 <Slot slot="topContent">
                     <Button onPress={onOpen} color="primary" endContent={<PlusIcon />} onClick={onOpen}>
                         Agregar

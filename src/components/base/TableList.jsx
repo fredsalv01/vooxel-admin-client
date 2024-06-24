@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react';
 import {
     Table,
     TableHeader,
@@ -15,14 +15,13 @@ import {
     Pagination,
     Spinner
 } from '@nextui-org/react';
-import { useQuery } from '@tanstack/react-query';
 import { ChevronDownIcon, PlusIcon, SearchIcon } from '../icons';
 import { capitalize } from '../../lib/helpers/utils';
-import axios from 'axios';
 import { TableTopContent } from './TableTopContent';
 import { isSlot } from '../Slot';
+import { TableBottomContent } from './TableBottomContent';
 
-export const TableList = ({ items = [], headersTable, initialColumns, switchFn, isLoading, children }) => {
+export const TableList = ({ items = [], headersTable, initialColumns, switchFn, isLoading, paginationProps, updatingList, setQuerSearch, children }) => {
     const topContentSlot = React.Children.toArray(children).find(child => isSlot('topContent', child));
 
     const [selectedKeys, setSelectedKeys] = useState(new Set([]));
@@ -30,38 +29,41 @@ export const TableList = ({ items = [], headersTable, initialColumns, switchFn, 
 
     const headerColumns = useMemo(() => {
         if (visibleColumns === 'all') return headersTable;
-        return headersTable.filter((header) => Array.from(visibleColumns).includes(header.uid));
+        const columns = headersTable.filter((column) => Array.from(visibleColumns).includes(column.uid));
+        return columns && columns.length > 0 ? columns : headersTable;
     }, [visibleColumns, headersTable]);
 
-    // Handler to update visible columns
-    const handleVisibleColumnsChange = (newVisibleColumns) => {
-        setVisibleColumns(newVisibleColumns);
-    };
+    const renderCell = useCallback((item, columnKey) => switchFn(item, columnKey), [switchFn]);
 
-    const renderCell = useCallback((item, columnKey) => switchFn(item, columnKey), []);
+    const computedTopContent = useMemo(() => (
+        <TableTopContent
+            visibleColumns={visibleColumns}
+            headersTable={headersTable}
+            setVisibleColumns={setVisibleColumns}
+            setQuerSearch={setQuerSearch}
+        >
+            {topContentSlot && topContentSlot.props.children}
+        </TableTopContent>
+    ), [visibleColumns, headersTable, setQuerSearch, topContentSlot]);
+
+    const computedBottomContent = useMemo(() => (
+        <TableBottomContent paginationProps={paginationProps} updatingList={updatingList} />
+    ), [paginationProps, updatingList]);
 
     return (
         <>
             <Table
                 aria-label="Example table with custom cells, pagination and sorting"
                 isHeaderSticky
-                // bottomContent={bottomContent}
-                // bottomContentPlacement="outside"
-                classNames={{
-                    wrapper: 'max-h-[382px]'
-                }}
+                bottomContent={computedBottomContent}
+                bottomContentPlacement="outside"
+                classNames={{ wrapper: 'max-h-[382px]' }}
                 selectedKeys={selectedKeys}
-                // sortDescriptor={sortDescriptor}
-                topContent={
-                    <TableTopContent visibleColumns={visibleColumns} headersTable={headerColumns} onVisibleColumnsChange={handleVisibleColumnsChange} >
-                        {topContentSlot && topContentSlot.props.children}
-                    </TableTopContent>
-                }
+                topContent={computedTopContent}
                 topContentPlacement="outside"
                 onSelectionChange={setSelectedKeys}
-            // onSortChange={setSortDescriptor}
             >
-                <TableHeader columns={headerColumns} >
+                <TableHeader columns={headerColumns}>
                     {(column) => (
                         <TableColumn
                             key={column.uid}
@@ -72,7 +74,9 @@ export const TableList = ({ items = [], headersTable, initialColumns, switchFn, 
                         </TableColumn>
                     )}
                 </TableHeader>
-                <TableBody emptyContent={'Ningun colaborador encontrado'} items={items}
+                <TableBody
+                    emptyContent={'Ningun colaborador encontrado'}
+                    items={items}
                     isLoading={isLoading}
                     loadingContent={<Spinner label="Loading..." />}
                 >

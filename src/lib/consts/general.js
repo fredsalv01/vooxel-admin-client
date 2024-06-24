@@ -76,4 +76,9 @@ export const TAGS_FILES = {
     profile_photo: 'profile_photo',
 }
 
+export const SECOND = 1000;
+export const MINUTE = 60 * SECOND;
+export const HOUR = 60 * MINUTE;
+export const DAY = 24 * HOUR;
+
 export const NO_HAS_FILES = 'No se ha subido contrato';

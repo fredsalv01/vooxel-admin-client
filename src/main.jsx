@@ -12,6 +12,9 @@ import './plugins/yup'
 import './plugins/fontawesome';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { MINUTE } from './lib/consts/general'
+
+
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -19,8 +22,10 @@ const queryClient = new QueryClient({
             refetchOnWindowFocus: false,
             refetchOnMount: false,
             retries: 3,
-            keepPreviousData: true,
-            refetchOnReconnect: true
+            keepPreviousData: false,
+            refetchOnReconnect: true,
+            // gcTime: MINUTE * 1,
+            staleTime: MINUTE * 1,
         },
     },
 });

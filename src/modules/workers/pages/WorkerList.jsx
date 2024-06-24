@@ -21,7 +21,7 @@ import {
 import { ChevronDownIcon, PlusIcon, SearchIcon, EditIcon } from '../../../components/icons'
 import { statusOptions } from '../../../utils/data-types/data'
 import { capitalize } from '../../../lib/helpers/utils'
-import { CreateWorkerModal } from '../components'
+import { CreateWorkerModal, GridHabilities } from '../components'
 import debounce from 'lodash.debounce';
 
 const columns = [
@@ -115,8 +115,9 @@ export const WorkerList = () => {
 
   const headerColumns = useMemo(() => {
     if (visibleColumns === 'all') return columns
-
-    return columns.filter((column) => Array.from(visibleColumns).includes(column.uid))
+    const filterColumns = columns.filter((column) => Array.from(visibleColumns).includes(column.uid))
+    console.log("🚀 ~ headerColumns ~ filterColumns:", filterColumns)
+    return filterColumns
   }, [visibleColumns])
 
   const filteredItems = useMemo(() => {
@@ -193,14 +194,15 @@ export const WorkerList = () => {
       case 'charge':
         return (
           <div>{worker.charge}</div>
-          // <Chip className="capitalize" color={statusColorMap[worker.status]} size="sm" variant="flat">
-          //   {cellValue}
-          // </Chip>
         )
       case 'contractType':
         return (
           (worker.contractType === 'No tiene contrato') ? (<div className="text-red-600">No tiene contrato</div>) :
             (<div className="text-xs">{worker.contractType}</div>)
+        )
+      case 'techSkills':
+        return (
+          worker.techSkills && <GridHabilities items={worker.techSkills} />
         )
       case 'actions':
         return (

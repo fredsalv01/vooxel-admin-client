@@ -20,7 +20,7 @@ export const FilesWorkers = ({ itemId, filesCount, fetchData }) => {
         if (Object.keys(filesCount).length > 0) {
             const newHasFiles = {};
             typeFiles.forEach(({ tag }) => {
-                newHasFiles[tag] = filesCount[tag] > 0 ?? false;
+                newHasFiles[tag] = (filesCount && filesCount[tag] > 0) ? true : false;
             });
             setHasFiles(newHasFiles);
         }
