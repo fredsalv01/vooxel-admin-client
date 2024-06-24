@@ -48,7 +48,7 @@ export default function Navbar() {
 						</>
 					)}
 				</Popover> */}
-				<Popover className="relative">
+				{/* <Popover className="relative">
 					{({ open }) => (
 						<>
 							<Popover.Button
@@ -77,8 +77,8 @@ export default function Navbar() {
 							</Transition>
 						</>
 					)}
-				</Popover>
-				<Menu as="div" className="relative">
+				</Popover> */}
+				{/* <Menu as="div" className="relative">
 					<div>
 						<Menu.Button className="ml-2 bg-gray-800 flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-neutral-400">
 							<span className="sr-only">Open user menu</span>
@@ -140,7 +140,7 @@ export default function Navbar() {
 							</Menu.Item>
 						</Menu.Items>
 					</Transition>
-				</Menu>
+				</Menu> */}
 			</div>
 		</div>
 	)
