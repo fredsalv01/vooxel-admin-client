@@ -15,9 +15,9 @@ export const SENIORITY_BACKEND = [
 ]
 
 export const ACCOUNT_TYPES_BACKEND = [
-    { label: 'Cta. sueldo', value:'CTA SUELDO'},
+    { label: 'Cta. Sueldo', value:'CTA SUELDO'},
     { label: 'Cta. CTS', value:'CTA CTS'},
-    { label: 'Cta. sueldo', value:'CTA AHORROS'}
+    { label: 'Cta. Ahorros', value:'CTA AHORROS'}
 ]
 
 export const DOCUMENT_TYPES_BACKEND = [
@@ -75,6 +75,21 @@ export const TAGS_FILES = {
     psychological_test: 'psychological_test',
     profile_photo: 'profile_photo',
 }
+
+export const VACATION_DETAIL_TYPE_BACKEND = [
+    {
+        label: 'Compradas',
+        value: 'compradas'
+    },
+    {
+        label: 'Tomadas',
+        value: 'tomadas'
+    },
+    {
+        label: 'Pendientes',
+        value: 'pendientes'
+    }
+]
 
 export const SECOND = 1000;
 export const MINUTE = 60 * SECOND;

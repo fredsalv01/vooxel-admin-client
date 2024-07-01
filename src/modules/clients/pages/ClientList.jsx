@@ -20,8 +20,6 @@ const headersTable = [
     { name: 'Ruc', uid: 'ruc' },
     { name: 'Celular', uid: 'phone' },
     { name: 'Correo', uid: 'email' },
-    // { name: 'Fecha inicio', uid: 'contractStartDate' },
-    // { name: 'Fecha fin', uid: 'contractEndDate' },
     { name: 'Acciones', uid: 'actions' }
 ]
 
@@ -71,36 +69,6 @@ export const ClientList = () => {
                     </Button>
                 </Slot>
             </TableList>
-            {/* <Table
-                aria-label="Example table with custom cells, pagination and sorting"
-                isHeaderSticky
-                bottomContent={bottomContent}
-                bottomContentPlacement="outside"
-                classNames={{
-                    wrapper: 'max-h-[382px]'
-                }}
-                selectedKeys={selectedKeys}
-                topContent={topContent}
-                topContentPlacement="outside"
-                onSelectionChange={setSelectedKeys}
-            >
-                <TableHeader headersTable={showHeadersTable}>
-                    {(column,) => (
-                        <TableColumn
-                            key={column.uid}
-                            align={column.uid === 'actions' ? 'center' : 'start'}
-                            allowsSorting={column.sortable}
-                        >
-                            {column.name}
-                        </TableColumn>
-                    )}
-                </TableHeader>
-                <TableBody emptyContent={'No data'} items={listItems}>
-                    {(item) => (
-                        <TableRow key={item.id}>{(columnKey) => <TableCell>{renderCell(item, columnKey)}</TableCell>}</TableRow>
-                    )}
-                </TableBody>
-            </Table> */}
         </>
     )
 }

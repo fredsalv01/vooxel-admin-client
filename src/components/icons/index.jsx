@@ -7,3 +7,4 @@ export { SearchIcon } from "./SearchIcon";
 export { VerticalDotsIcon } from "./VerticalDotsIcon";
 export { SpinnerButton } from "./SpinnerButton";
 export { DownloadCloud } from "./DownloadCloud";
+export { VacationIcon } from "./VacationIcon";

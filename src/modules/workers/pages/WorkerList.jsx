@@ -18,11 +18,12 @@ import {
   Spinner,
   Tooltip
 } from '@nextui-org/react'
-import { ChevronDownIcon, PlusIcon, SearchIcon, EditIcon } from '../../../components/icons'
+import { ChevronDownIcon, PlusIcon, SearchIcon, EditIcon, VacationIcon } from '../../../components/icons'
 import { statusOptions } from '../../../utils/data-types/data'
 import { capitalize } from '../../../lib/helpers/utils'
 import { CreateWorkerModal, GridHabilities } from '../components'
 import debounce from 'lodash.debounce';
+import { Link } from 'react-router-dom'
 
 const columns = [
   { name: 'Nro', uid: 'nro' },
@@ -218,11 +219,12 @@ export const WorkerList = () => {
                 <DropdownItem aria-label="Desactive">Desactivar</DropdownItem>
               </DropdownMenu>
             </Dropdown> */}
-
-
-            <a href={`/workers/${worker.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+            <Link to={`/workers/${worker.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
               <EditIcon />
-            </a>
+            </Link>
+            <Link to={`/workers/${worker.id}/vacations`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+              <VacationIcon />
+            </Link>
           </div>
         )
       default:

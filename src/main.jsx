@@ -13,9 +13,6 @@ import './plugins/fontawesome';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { MINUTE } from './lib/consts/general'
-
-
-
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -31,7 +28,22 @@ const queryClient = new QueryClient({
 });
 
 
-const root = ReactDOM.createRoot(document.getElementById('root'))
+// const root = ReactDOM.createRoot(document.getElementById('root'));
+// root.render(
+//     <NextUIProvider>
+//         <Provider store={store}>
+//             <I18nProvider locale="es-PE">
+//                 <QueryClientProvider client={queryClient}>
+//                     <App />
+//                     <ToastContainer />
+//                     <ReactQueryDevtools initialIsOpen={false} />
+//                 </QueryClientProvider>
+//             </I18nProvider>
+//         </Provider>
+//     </NextUIProvider>
+// );
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>
         <NextUIProvider>
@@ -46,4 +58,4 @@ root.render(
             </Provider>
         </NextUIProvider>
     </React.StrictMode>
-)
+);
