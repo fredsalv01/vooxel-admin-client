@@ -10,6 +10,7 @@ import { UserList } from './modules/users/pages/UserList'
 import { ClientList, ClienteDetailPage } from './modules/clients/pages'
 import { ClientServiceList } from './modules/client-services/pages/ClientServiceList'
 import { BillingList } from './modules/billing/pages/BillingList'
+import { CreateBilling } from './modules/billing/pages/CreateBilling'
 
 function App() {
     return (
@@ -34,6 +35,7 @@ function App() {
                     <Route path="clients" element={<ClientList />} />
                     <Route path="services" element={<ClientServiceList />} />
                     <Route path="billing" element={<BillingList />} />
+                    <Route path="billing/create" element={<CreateBilling />} />
                 </Route>
             </Routes>
         </Router>
