@@ -116,7 +116,7 @@ export const WorkerVacationsPage = () => {
                     vacationId={item.id}
                     fetchData={() => {
                       fetchData();
-                      getWorkerDetails.fetchData();
+                      getWorkerDetails.refetch();
                     }}
                   ></FormDataWorkerVacation>
                 </Slot>
