@@ -222,9 +222,13 @@ export const WorkerList = () => {
             <Link to={`/workers/${worker.id}/detail`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
               <EditIcon />
             </Link>
-            <Link to={`/workers/${worker.id}/vacations`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
-              <VacationIcon />
-            </Link>
+
+            {
+              worker.contractType !== 'No tiene contrato' &&
+              <Link to={`/workers/${worker.id}/vacations`} className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                <VacationIcon />
+              </Link>
+            }
           </div>
         )
       default:

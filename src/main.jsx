@@ -27,22 +27,6 @@ const queryClient = new QueryClient({
     },
 });
 
-
-// const root = ReactDOM.createRoot(document.getElementById('root'));
-// root.render(
-//     <NextUIProvider>
-//         <Provider store={store}>
-//             <I18nProvider locale="es-PE">
-//                 <QueryClientProvider client={queryClient}>
-//                     <App />
-//                     <ToastContainer />
-//                     <ReactQueryDevtools initialIsOpen={false} />
-//                 </QueryClientProvider>
-//             </I18nProvider>
-//         </Provider>
-//     </NextUIProvider>
-// );
-
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     <React.StrictMode>

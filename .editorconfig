@@ -1,0 +1,14 @@
+# top-most EditorConfig file
+root = true
+
+# Matches multiple files with wildcard (*)
+[*]
+indent_style = space
+indent_size = 2
+
+# Matches JavaScript files
+[*.js]
+indent_style = space
+indent_size = 2
+
+# You can add more specific file type configurations below
