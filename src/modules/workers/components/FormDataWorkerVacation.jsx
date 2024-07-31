@@ -14,13 +14,14 @@ export const FormDataWorkerVacation = ({
 }) => {
   const [form, setForm] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  console.log("🚀 ~ useEffect ~ vacationsDetailActive:", vacationsDetailActive);
 
   useEffect(() => {
-    if (vacationsDetailActive) {
-      const { vacationDetails } = vacationsDetailActive;
-      setForm([...vacationDetails]);
+    if (!!vacationsDetailActive && vacationsDetailActive.length) {
+      // const { vacationDetails } = vacationsDetailActive;
+      setForm(vacationsDetailActive);
     }
-  }, []);
+  }, [vacationsDetailActive]);
 
   const addRow = () => {
     let newForm = [];
@@ -121,22 +122,25 @@ export const FormDataWorkerVacation = ({
           Agregar
         </Button>
       </div>
-      <div
-        className="grid overflow-auto "
-        style={{ maxHeight: "calc(100vh - 450px)" }}
-      >
-        {form.map((item, index) => (
-          <React.Fragment key={index}>
-            <VacationDetail
-              row={item}
-              indexRow={index}
-              onChangeForm={(newItem) => handleChange(newItem, index)}
-              onDeleteRow={onDelete}
-              form={form}
-            />
-          </React.Fragment>
-        ))}
-      </div>
+
+      {form.length && (
+        <div
+          className="grid overflow-auto "
+          style={{ maxHeight: "calc(100vh - 450px)" }}
+        >
+          {form.map((item, index) => (
+            <React.Fragment key={index}>
+              <VacationDetail
+                row={item}
+                indexRow={index}
+                onChangeForm={(newItem) => handleChange(newItem, index)}
+                onDeleteRow={onDelete}
+                form={form}
+              />
+            </React.Fragment>
+          ))}
+        </div>
+      )}
       <div className="mt-4 flex flex-1 justify-end">
         <Button onPress={onSubmit} color="success" isLoading={isLoading}>
           Actualizar
@@ -147,7 +151,7 @@ export const FormDataWorkerVacation = ({
 };
 // validate props
 FormDataWorkerVacation.propTypes = {
-  vacationsDetailActive: PropTypes.object,
+  vacationsDetailActive: PropTypes.array,
   vacationId: PropTypes.number,
   fetchData: PropTypes.func,
 };

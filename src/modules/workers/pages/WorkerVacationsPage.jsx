@@ -13,8 +13,8 @@ import { useWorker } from "../hooks/useWorker";
 export const WorkerVacationsPage = () => {
   const { id: worderId } = useParams();
 
-  const [vacDetailActive, setVacDetailActive] = useState([]);
-  const [vacDetailInactive, setVacDetailInactive] = useState([]);
+  const [vacDetailActive, setVacDetailActive] = useState({});
+  // const [vacDetailInactive, setVacDetailInactive] = useState([]);
   const [totalExpiredDays, setTotalExpiredDays] = useState(0);
 
   const { data: vacationsWorker, fetchData } = useFetchData({
@@ -27,38 +27,39 @@ export const WorkerVacationsPage = () => {
 
   useEffect(() => {
     if (!!vacationsWorker) {
-      const { arrVacDetailActive, arrVacDetailInactive } =
-        vacationsWorker.reduce(
-          (acc, item) => {
-            if (item.isActive) {
-              const details = item.vacationDetails.map((detail) => {
-                return {
-                  days: detail.quantity,
-                  ...detail,
-                };
-              });
+      // const { arrVacDetailActive, arrVacDetailInactive } =
+      //   vacationsWorker.reduce(
+      //     (acc, item) => {
+      //       if (vacDetailActive.isActive) {
+      //         const details = vacDetailActive.vacationDetails.map((detail) => {
+      //           return {
+      //             days: detail.quantity,
+      //             ...detail,
+      //           };
+      //         });
 
-              item.vacationDetails = details;
+      //         vacDetailActive.vacationDetails = details;
 
-              acc.arrVacDetailActive.push(item);
-            } else {
-              acc.arrVacDetailInactive.push(item);
-            }
-            return acc;
-          },
-          { arrVacDetailActive: [], arrVacDetailInactive: [] },
-        );
+      //         acc.arrVacDetailActive.push(item);
+      //       } else {
+      //         acc.arrVacDetailInactive.push(item);
+      //       }
+      //       return acc;
+      //     },
+      //     { arrVacDetailActive: [], arrVacDetailInactive: [] },
+      //   );
 
-      setVacDetailActive([...arrVacDetailActive]);
-      setVacDetailInactive([...arrVacDetailInactive]);
+      setVacDetailActive(vacationsWorker);
+      setTotalExpiredDays(vacationsWorker.expiredDays);
+      // setVacDetailInactive([...arrVacDetailInactive]);
 
-      if (arrVacDetailActive.length > 0) {
-        const total = arrVacDetailActive.reduce((acc, item) => {
-          return (acc += item.expiredDays);
-        }, 0);
+      // if (arrVacDetailActive.length > 0) {
+      //   const total = arrVacDetailActive.reduce((acc, item) => {
+      //     return (acc += vacDetailActive.expiredDays);
+      //   }, 0);
 
-        setTotalExpiredDays(total);
-      }
+      //   setTotalExpiredDays(total);
+      // }
     }
   }, [vacationsWorker]);
 
@@ -83,45 +84,44 @@ export const WorkerVacationsPage = () => {
               <strong>Días espirados:</strong> <br /> {totalExpiredDays}
             </p>
           </div>
-          {vacDetailActive.length > 0 &&
-            vacDetailActive.map((item, index) => (
-              <CardBase title="Vacaciones" key={`data-active-${index}`}>
-                <Slot slot="header">
-                  <Chip
-                    className="gap-1 border-none capitalize text-default-600"
-                    color={item.isActive ? "success" : "danger"}
-                    size="sm"
-                    variant="dot"
-                  >
-                    {item.isActive ? "Activas" : "Inactivas"}
-                  </Chip>
-                </Slot>
-                <Slot slot="body">
-                  <div className="my-3 flex flex-wrap justify-between rounded-md border border-blue-600 px-4 py-2">
-                    <div>Acumuladas: {item.accumulatedVacations}</div>
-                    <div className="text-2xl font-semibold text-blue-600">
-                      <FontAwesomeIcon icon="fa-solid fa-minus" />
-                    </div>
-                    <div>Tomadas: {item.takenVacations}</div>
-                    <div className="text-2xl font-semibold text-blue-600">
-                      <FontAwesomeIcon icon="fa-solid fa-equals" />
-                    </div>
-                    <div>Pendientes: {item.remainingVacations}</div>
-                  </div>
 
-                  {/* <Divider className='mb-3'></Divider> */}
+          <CardBase title="Vacaciones">
+            <Slot slot="header">
+              <Chip
+                className="gap-1 border-none capitalize text-default-600"
+                color={vacDetailActive.isActive ? "success" : "danger"}
+                size="sm"
+                variant="dot"
+              >
+                {vacDetailActive.isActive ? "Activas" : "Inactivas"}
+              </Chip>
+            </Slot>
+            <Slot slot="body">
+              {/* {JSON.stringify(vacDetailActive)} */}
+              <div className="my-3 flex flex-wrap justify-between rounded-md border border-blue-600 px-4 py-2">
+                <div>Acumuladas: {vacDetailActive.accumulatedVacations}</div>
+                <div className="text-2xl font-semibold text-blue-600">
+                  <FontAwesomeIcon icon="fa-solid fa-minus" />
+                </div>
+                <div>Tomadas: {vacDetailActive.takenVacations}</div>
+                <div className="text-2xl font-semibold text-blue-600">
+                  <FontAwesomeIcon icon="fa-solid fa-equals" />
+                </div>
+                <div>Pendientes: {vacDetailActive.remainingVacations}</div>
+              </div>
 
-                  <FormDataWorkerVacation
-                    vacationsDetailActive={item}
-                    vacationId={item.id}
-                    fetchData={() => {
-                      fetchData();
-                      getWorkerDetails.refetch();
-                    }}
-                  ></FormDataWorkerVacation>
-                </Slot>
-              </CardBase>
-            ))}
+              {vacDetailActive && (
+                <FormDataWorkerVacation
+                  vacationsDetailActive={vacDetailActive.vacationDetails}
+                  vacationId={vacDetailActive.id}
+                  fetchData={() => {
+                    fetchData();
+                    getWorkerDetails.refetch();
+                  }}
+                ></FormDataWorkerVacation>
+              )}
+            </Slot>
+          </CardBase>
         </div>
       )}
     </div>
