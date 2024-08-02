@@ -14,11 +14,9 @@ export const FormDataWorkerVacation = ({
 }) => {
   const [form, setForm] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  console.log("🚀 ~ useEffect ~ vacationsDetailActive:", vacationsDetailActive);
 
   useEffect(() => {
-    if (!!vacationsDetailActive && vacationsDetailActive.length) {
-      // const { vacationDetails } = vacationsDetailActive;
+    if (!!vacationsDetailActive && vacationsDetailActive.length > 0) {
       setForm(vacationsDetailActive);
     }
   }, [vacationsDetailActive]);
@@ -101,8 +99,8 @@ export const FormDataWorkerVacation = ({
         items: [...newDates, ...oldDates],
       });
 
-      ToastNotification.showSuccess("Vacaciones actualizadas");
       fetchData();
+      ToastNotification.showSuccess("Vacaciones actualizadas");
     } catch (error) {
       console.error(error);
     } finally {
@@ -123,7 +121,7 @@ export const FormDataWorkerVacation = ({
         </Button>
       </div>
 
-      {form.length && (
+      
         <div
           className="grid overflow-auto "
           style={{ maxHeight: "calc(100vh - 450px)" }}
@@ -140,7 +138,7 @@ export const FormDataWorkerVacation = ({
             </React.Fragment>
           ))}
         </div>
-      )}
+      
       <div className="mt-4 flex flex-1 justify-end">
         <Button onPress={onSubmit} color="success" isLoading={isLoading}>
           Actualizar

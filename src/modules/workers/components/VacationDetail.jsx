@@ -14,7 +14,7 @@ export const VacationDetail = ({
 }) => {
   const [item, setItem] = useState(row);
   const [settingDays, setSettingDays] = useState(item.id > 0 ? true : false);
-  const [manualDays, setManualDays] = useState(item.days || 0);
+  const [manualDays, setManualDays] = useState(item.quantity || 0);
 
   useEffect(() => {
     setItem(row);
@@ -59,7 +59,6 @@ export const VacationDetail = ({
     if (!checkDates()) return 0;
     let days = 0;
     if (item.startDate && item.endDate) {
-      console.log("🚀 ~ calculateDays ~ item:", item);
       const startDate = new Date(item.startDate);
       const endDate = new Date(item.endDate);
       days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
@@ -110,8 +109,6 @@ export const VacationDetail = ({
 
     return manualDays;
   }, [item.startDate, item.endDate, settingDays, manualDays]);
-
-  const validateAllInputCompleted = () => {};
 
   return (
     <div className="custom-shadow mx-2 my-4 grid grid-cols-1 rounded-md py-4 md:grid-cols-10">
