@@ -45,7 +45,7 @@ export const WorkerDetailPage = () => {
         Provincia: data.province,
         Departamento: data.department,
         Asignación: data.familiarAssignment,
-        Habilidades: data.techSkills.length && (
+        Habilidades: data.techSkills && (
           <GridHabilities items={data.techSkills} />
         ),
         Estado: (
