@@ -220,7 +220,7 @@ export const CreateWorkerModal = ({ isOpen, onOpenChange, fetchData }) => {
                                         <div className="col-span-1 md:col-span-2">
                                             <Field
                                                 name="techSkills"
-                                                label="Habilidades blandas"
+                                                label="Habilidades"
                                                 component={InputTagBase}
                                             />
                                         </div>
