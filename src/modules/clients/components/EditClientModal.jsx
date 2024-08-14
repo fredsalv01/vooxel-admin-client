@@ -1,24 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, ModalContent, ModalHeader, ModalBody, Button, ModalFooter, DatePicker, Autocomplete, AutocompleteSection, AutocompleteItem } from '@nextui-org/react';
-import { Formik, Form, Field, setIn } from 'formik';
-import { InputBase } from '../../../components/base';
+import React, { useEffect, useState } from "react";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  Button,
+  ModalFooter,
+  DatePicker,
+  Autocomplete,
+  AutocompleteSection,
+  AutocompleteItem,
+} from "@nextui-org/react";
+import { Formik, Form, Field, setIn } from "formik";
+import { InputBase } from "../../../components/base";
 import { useAsyncList } from "@react-stately/data";
-import axios from '../../../axios/axios';
-import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
-import * as Yup from 'yup';
+import axios from "../../../axios/axios";
+import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
+import * as Yup from "yup";
 
-export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) => {
-
+export const EditClientModal = ({
+  isOpen,
+  onOpenChange,
+  editItem,
+  fetchData,
+}) => {
   const [initialValues, setInitialValues] = useState({
-    fullName: '',
-    businessName: '',
-    ruc: '',
-    phone: '',
-    email: '',
+    businessName: "",
+    ruc: "",
+    phone: "",
+    email: "",
   });
 
   const validationSchema = Yup.object({
-    fullName: Yup.string().required(),
     businessName: Yup.string().required(),
     ruc: Yup.string().required(),
     phone: Yup.string().required(),
@@ -28,37 +41,43 @@ export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
   useEffect(() => {
     setInitialValues({
       ...editItem,
-      fullName: editItem.fullName || '',
-      businessName: editItem.businessName || '',
-      ruc: editItem.ruc || '',
-      phone: editItem.phone || '',
-      email: editItem.email || '',
+      fullName: editItem.fullName || "",
+      businessName: editItem.businessName || "",
+      ruc: editItem.ruc || "",
+      phone: editItem.phone || "",
+      email: editItem.email || "",
     });
-
   }, []);
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values)
+    console.log("🚀 ~ handleSubmit ~ values:", values);
     delete values.id;
     try {
       setSubmitting(true);
       await axios.patch(`clients/${editItem.id}`, {
         ...values,
       });
-      ToastNotification.showSuccess('Colaborador actualizado correctamente');
+      ToastNotification.showSuccess("Colaborador actualizado correctamente");
       fetchData();
       onClose();
     } catch (error) {
-      console.log('Error', error);
-      if (error.response.status === 400) ToastNotification.showError(error.response.data.message);
-      else ToastNotification.showError('Error al crear el colaborador');
+      console.log("Error", error);
+      if (error.response.status === 400)
+        ToastNotification.showError(error.response.data.message);
+      else ToastNotification.showError("Error al crear el colaborador");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <Modal size="2xl" placement="top-center" isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
+    <Modal
+      size="2xl"
+      placement="top-center"
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      scrollBehavior="inside"
+    >
       <ModalContent>
         {(onClose) => (
           <Formik
@@ -73,14 +92,7 @@ export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
               <Form>
                 <ModalHeader className="text-2xl">Editar cliente</ModalHeader>
                 <ModalBody>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="col-span-1">
-                      <Field
-                        name="fullName"
-                        label="Nombre"
-                        component={InputBase}
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="col-span-1">
                       <Field
                         name="businessName"
@@ -89,11 +101,7 @@ export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                       />
                     </div>
                     <div className="col-span-1">
-                      <Field
-                        name="ruc"
-                        label="RUC"
-                        component={InputBase}
-                      />
+                      <Field name="ruc" label="RUC" component={InputBase} />
                     </div>
                     <div className="col-span-1">
                       <Field
@@ -112,7 +120,12 @@ export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
                   </div>
                 </ModalBody>
                 <ModalFooter>
-                  <Button color="primary" type='submit' isLoading={isSubmitting} size="lg">
+                  <Button
+                    color="primary"
+                    type="submit"
+                    isLoading={isSubmitting}
+                    size="lg"
+                  >
                     Guardar
                   </Button>
                 </ModalFooter>
@@ -123,4 +136,4 @@ export const EditClientModal = ({ isOpen, onOpenChange, editItem, fetchData }) =
       </ModalContent>
     </Modal>
   );
-}
+};

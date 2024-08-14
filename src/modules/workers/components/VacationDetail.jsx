@@ -10,7 +10,6 @@ export const VacationDetail = ({
   indexRow,
   onChangeForm,
   onDeleteRow,
-  form,
 }) => {
   const [item, setItem] = useState(row);
   const [settingDays, setSettingDays] = useState(item.id > 0 ? true : false);
@@ -63,35 +62,30 @@ export const VacationDetail = ({
       const endDate = new Date(item.endDate);
       days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
     }
-    setItem({ ...item, days });
+    setItem({ ...item, quantity: days });
     return days;
   };
 
   const deleteRow = async () => {
-    if (form.length > 1) {
-      if (row.id > 0 && row.vacationType !== "pendientes") {
-        ToastNotification.showWarning("No puede eliminar estas vacaciones");
-        return;
-      }
-
-      if (row.id > 0) {
-        try {
-          await axiosInstance.delete(`/vacation-details/${row.id}`);
-          ToastNotification.showSuccess("Vacaciones pendientes eliminadas");
-          onDeleteRow(indexRow);
-          return;
-        } catch (error) {
-          console.log("Error", error);
-          ToastNotification.showError(
-            "Error al eliminar vacaciones pendientes",
-          );
-        }
-      }
-
-      onDeleteRow(indexRow);
-    } else {
-      ToastNotification.showError("No se puede eliminar la única fila");
+    // if (form.length > 1) {
+    if (row.id > 0 && row.vacationType !== "pendientes") {
+      ToastNotification.showWarning("No puede eliminar estas vacaciones");
+      return;
     }
+
+    if (row.id > 0) {
+      try {
+        await axiosInstance.delete(`/vacation-details/${row.id}`);
+        ToastNotification.showSuccess("Vacaciones pendientes eliminadas");
+        onDeleteRow(indexRow);
+        return;
+      } catch (error) {
+        console.log("Error", error);
+        ToastNotification.showError("Error al eliminar vacaciones pendientes");
+      }
+    }
+
+    onDeleteRow(indexRow);
   };
 
   const days = useMemo(() => {

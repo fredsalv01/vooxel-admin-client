@@ -46,16 +46,6 @@ export const FormDataWorkerVacation = ({
 
   const onDelete = async (index) => {
     const newForm = form.filter((_, i) => i !== index);
-
-    // if (newForm.id > 0 && newForm.vacationType == ) {
-    //   try {
-    //     const resp = await axiosInstance.delete(`/vacation-details/${newForm.id}`);
-
-    //   } catch (error) {
-    //     console.error(error);
-    //   }
-    // }
-
     setForm(newForm);
   };
 
@@ -121,24 +111,22 @@ export const FormDataWorkerVacation = ({
         </Button>
       </div>
 
-      
-        <div
-          className="grid overflow-auto "
-          style={{ maxHeight: "calc(100vh - 450px)" }}
-        >
-          {form.map((item, index) => (
-            <React.Fragment key={index}>
-              <VacationDetail
-                row={item}
-                indexRow={index}
-                onChangeForm={(newItem) => handleChange(newItem, index)}
-                onDeleteRow={onDelete}
-                form={form}
-              />
-            </React.Fragment>
-          ))}
-        </div>
-      
+      <div
+        className="grid overflow-auto "
+        style={{ maxHeight: "calc(100vh - 450px)" }}
+      >
+        {form.map((item, index) => (
+          <React.Fragment key={index}>
+            <VacationDetail
+              row={item}
+              indexRow={index}
+              onChangeForm={(newItem) => handleChange(newItem, index)}
+              onDeleteRow={onDelete}
+            />
+          </React.Fragment>
+        ))}
+      </div>
+
       <div className="mt-4 flex flex-1 justify-end">
         <Button onPress={onSubmit} color="success" isLoading={isLoading}>
           Actualizar
