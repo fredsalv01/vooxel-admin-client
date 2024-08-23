@@ -89,7 +89,10 @@ export const FormDataWorkerVacation = ({
         items: [...newDates, ...oldDates],
       });
 
-      fetchData();
+      // setTimeout(() => {
+      //   fetchData();
+      // }, 2000);
+
       ToastNotification.showSuccess("Vacaciones actualizadas");
     } catch (error) {
       console.error(error);

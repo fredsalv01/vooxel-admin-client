@@ -10,56 +10,29 @@ import Slot from "../../../components/Slot";
 import { useFetchData } from "../../../hooks/useFetchData";
 import { useWorker } from "../hooks/useWorker";
 
+import ReactLoading from "react-loading";
+
 export const WorkerVacationsPage = () => {
   const { id: worderId } = useParams();
 
   const [vacDetailActive, setVacDetailActive] = useState({});
-  // const [vacDetailInactive, setVacDetailInactive] = useState([]);
   const [totalExpiredDays, setTotalExpiredDays] = useState(0);
 
-  const { data: vacationsWorker, fetchData } = useFetchData({
+  const {
+    data: vacationsWorker,
+    fetchData,
+    loading,
+  } = useFetchData({
     url: `vacations/workerId/${worderId}`,
   });
 
   const { getWorkerDetails } = useWorker(worderId);
 
-  // const [historyData, sethistoryData] = useState([]);
-
   useEffect(() => {
     if (!!vacationsWorker) {
-      // const { arrVacDetailActive, arrVacDetailInactive } =
-      //   vacationsWorker.reduce(
-      //     (acc, item) => {
-      //       if (vacDetailActive.isActive) {
-      //         const details = vacDetailActive.vacationDetails.map((detail) => {
-      //           return {
-      //             days: detail.quantity,
-      //             ...detail,
-      //           };
-      //         });
-
-      //         vacDetailActive.vacationDetails = details;
-
-      //         acc.arrVacDetailActive.push(item);
-      //       } else {
-      //         acc.arrVacDetailInactive.push(item);
-      //       }
-      //       return acc;
-      //     },
-      //     { arrVacDetailActive: [], arrVacDetailInactive: [] },
-      //   );
-
+      console.log("🚀 ~ useEffect ~ vacationsWorker:", vacationsWorker);
       setVacDetailActive(vacationsWorker);
       setTotalExpiredDays(vacationsWorker.expiredDays);
-      // setVacDetailInactive([...arrVacDetailInactive]);
-
-      // if (arrVacDetailActive.length > 0) {
-      //   const total = arrVacDetailActive.reduce((acc, item) => {
-      //     return (acc += vacDetailActive.expiredDays);
-      //   }, 0);
-
-      //   setTotalExpiredDays(total);
-      // }
     }
   }, [vacationsWorker]);
 
@@ -85,43 +58,54 @@ export const WorkerVacationsPage = () => {
             </p>
           </div>
 
-          <CardBase title="Vacaciones">
-            <Slot slot="header">
-              <Chip
-                className="gap-1 border-none capitalize text-default-600"
-                color={vacDetailActive.isActive ? "success" : "danger"}
-                size="sm"
-                variant="dot"
-              >
-                {vacDetailActive.isActive ? "Activas" : "Inactivas"}
-              </Chip>
-            </Slot>
-            <Slot slot="body">
-              {/* {JSON.stringify(vacDetailActive)} */}
-              <div className="my-3 flex flex-wrap justify-between rounded-md border border-blue-600 px-4 py-2">
-                <div>Acumuladas: {vacDetailActive.accumulatedVacations}</div>
-                <div className="text-2xl font-semibold text-blue-600">
-                  <FontAwesomeIcon icon="fa-solid fa-minus" />
+          {loading ? (
+            <div className="flex justify-center">
+              <ReactLoading
+                type={"balls"}
+                color={"#16a34a"}
+                height={300}
+                width={300}
+              />
+            </div>
+          ) : (
+            <CardBase title="Vacaciones">
+              <Slot slot="header">
+                <Chip
+                  className="gap-1 border-none capitalize text-default-600"
+                  color={vacDetailActive.isActive ? "success" : "danger"}
+                  size="sm"
+                  variant="dot"
+                >
+                  {vacDetailActive.isActive ? "Activas" : "Inactivas"}
+                </Chip>
+              </Slot>
+              <Slot slot="body">
+                {/* {JSON.stringify(vacDetailActive)} */}
+                <div className="my-3 flex flex-wrap justify-between rounded-md border border-blue-600 px-4 py-2">
+                  <div>Acumuladas: {vacDetailActive.accumulatedVacations}</div>
+                  <div className="text-2xl font-semibold text-blue-600">
+                    <FontAwesomeIcon icon="fa-solid fa-minus" />
+                  </div>
+                  <div>Tomadas: {vacDetailActive.takenVacations}</div>
+                  <div className="text-2xl font-semibold text-blue-600">
+                    <FontAwesomeIcon icon="fa-solid fa-equals" />
+                  </div>
+                  <div>Pendientes: {vacDetailActive.remainingVacations}</div>
                 </div>
-                <div>Tomadas: {vacDetailActive.takenVacations}</div>
-                <div className="text-2xl font-semibold text-blue-600">
-                  <FontAwesomeIcon icon="fa-solid fa-equals" />
-                </div>
-                <div>Pendientes: {vacDetailActive.remainingVacations}</div>
-              </div>
 
-              {vacDetailActive && (
-                <FormDataWorkerVacation
-                  vacationsDetailActive={vacDetailActive.vacationDetails}
-                  vacationId={vacDetailActive.id}
-                  fetchData={() => {
-                    fetchData();
-                    getWorkerDetails.refetch();
-                  }}
-                ></FormDataWorkerVacation>
-              )}
-            </Slot>
-          </CardBase>
+                {vacDetailActive && (
+                  <FormDataWorkerVacation
+                    vacationsDetailActive={vacDetailActive.vacationDetails}
+                    vacationId={vacDetailActive.id}
+                    fetchData={() => {
+                      fetchData();
+                      getWorkerDetails.refetch();
+                    }}
+                  ></FormDataWorkerVacation>
+                )}
+              </Slot>
+            </CardBase>
+          )}
         </div>
       )}
     </div>

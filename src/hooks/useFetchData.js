@@ -7,20 +7,12 @@ export const useFetchData = ({ url, options = {}, dependencies = [] }) => {
   const [error, setError] = useState(null);
   const [data, setData] = useState(null);
 
-  // const fetchData = async () => {
-  //   const resp = await axiosInstance.get(`${url}`);
-  //   return resp.data;
-  // };
-
-  // const { loading, error, data } = useAsync(async () => {
-  //   return await fetchData();
-  // }, dependencies);
-
   const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await axiosInstance.get(url, options);
+      console.log("🚀 ~ fetchData ~ response:", response);
       setData(response.data);
     } catch (error) {
       console.error("Error fetching data:", error);

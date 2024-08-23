@@ -34,7 +34,6 @@ export const VacationDetail = ({
     } else {
       setSettingDays(false);
     }
-    console.log("🚀 ~ handleChange ~ value:", value);
 
     const newItem = {
       ...item,
@@ -80,7 +79,6 @@ export const VacationDetail = ({
         onDeleteRow(indexRow);
         return;
       } catch (error) {
-        console.log("Error", error);
         ToastNotification.showError("Error al eliminar vacaciones pendientes");
       }
     }
