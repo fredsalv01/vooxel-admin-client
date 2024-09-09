@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Button, useDisclosure } from "@nextui-org/react";
+import {
+  Button,
+  useDisclosure,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  getKeyValue,
+} from "@nextui-org/react";
 import { PlusIcon } from "../../../components/icons/PlusIcon";
-import { CreateClientModal } from "../components";
+import { CreateClientModal, EditCreateContactClientModal } from "../components";
 import { TableList } from "../../../components/base";
 import { useQueryPromise } from "../../../hooks/useQueryPromise";
 import Slot from "../../../components/Slot";
@@ -38,6 +48,7 @@ export const ClientList = () => {
   } = useQueryPromise({ url: "clients", key: "clients" });
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
   const switchRenderCell = (item, columnKey) => {
     const cellValue = item[columnKey];
     switch (columnKey) {

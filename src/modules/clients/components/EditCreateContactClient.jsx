@@ -14,31 +14,31 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
-import { DownloadCloud, EditIcon, PlusIcon } from "../../../components/icons";
+import {
+  DownloadCloud,
+  EditIcon,
+  DeleteIcon,
+  PlusIcon,
+} from "../../../components/icons";
 import Slot from "../../../components/Slot";
 import InternationalizationDate from "../../../lib/helpers/internationalization-date";
 
 import { useFetchData } from "../../../hooks/useFetchData";
-import { EditCreateContractClientModal } from "./";
-import { useUploadFile } from "../../../hooks/useUploadFile";
+import { EditCreateContactClientModal } from "./";
 import {
   NO_HAS_FILES,
   TABLE_NAME_FILES,
   TAGS_FILES,
 } from "../../../lib/consts/general";
 
-export const EditCreateContractClient = ({ itemId }) => {
+export const EditCreateContactClient = ({ itemId }) => {
   const { data, isLoading, fetchData } = useFetchData({
-    url: `/contract-clients/${itemId}`,
+    url: `/contact/client/${itemId}`,
   });
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [editItem, setEditItem] = useState({});
 
   const [rows, setRows] = useState([]);
-
-  const { getFileInfo, isLoading: isLoadingFile } = useUploadFile({
-    tableName: TABLE_NAME_FILES.contractClients,
-  });
 
   useEffect(() => {
     if (!!data) {
@@ -53,26 +53,36 @@ export const EditCreateContractClient = ({ itemId }) => {
 
   const columns = [
     {
-      key: "startDate",
-      label: "Fecha inicio",
+      key: "name",
+      label: "Nombre",
     },
     {
-      key: "endDate",
-      label: "Fecha fin",
+      key: "phone",
+      label: "Teléfono",
     },
-    {
-      key: "isActive",
-      label: "Estado",
-    },
+    // {
+    //   key: "isActive",
+    //   label: "Estado",
+    // },
     {
       key: "actions",
       label: "Acciones",
     },
   ];
 
-  const handleEditContract = (item) => {
+  const handleEditContact = (item) => {
     setEditItem(item);
     onOpen();
+  };
+
+  const handleDeleteContact = async (item) => {
+    // try {
+    // } catch (error) {
+    // }
+    // const response = await axiosInstance.delete(`contact/${item.id}`);
+    // if (response.status === 200) {
+    //   fetchData();
+    //   ToastNotification.showSuccess("Contacto eliminado correctamente
   };
 
   const renderCell = useCallback(
@@ -80,50 +90,25 @@ export const EditCreateContractClient = ({ itemId }) => {
       const cellValue = item[columnKey];
 
       switch (columnKey) {
-        case "startDate":
-        case "endDate":
-          return InternationalizationDate().formatDate(new Date(cellValue));
-
-        case "isActive":
-          return (
-            <Chip
-              className="gap-1 border-none capitalize text-default-600"
-              color={cellValue ? "success" : "danger"}
-              size="sm"
-              variant="dot"
-            >
-              {cellValue ? "Activo" : "Inactivo"}
-            </Chip>
-          );
         case "actions":
           return (
             <div className="flex justify-center">
               <ButtonGroup>
-                {item.isActive && (
-                  <Button
-                    isIconOnly
-                    color="white"
-                    className="p-0"
-                    onClick={() => handleEditContract(item)}
-                  >
-                    <EditIcon />
-                  </Button>
-                )}
                 <Button
                   isIconOnly
                   color="white"
-                  onClick={getFileInfo({
-                    tag: TAGS_FILES.contract,
-                    rowTableId: item.id,
-                  })}
-                  isLoading={isLoadingFile}
-                  isDisabled={[NO_HAS_FILES].includes(item.file)}
+                  className="p-0"
+                  onClick={() => handleEditContact(item)}
                 >
-                  <DownloadCloud
-                    currentColor={
-                      [NO_HAS_FILES].includes(item.file) ? "#d1d5db" : "#00abfb"
-                    }
-                  />
+                  <EditIcon />
+                </Button>
+                <Button
+                  isIconOnly
+                  color="white"
+                  className="p-0 text-danger"
+                  onClick={() => handleDeleteContact(item)}
+                >
+                  <DeleteIcon />
                 </Button>
               </ButtonGroup>
             </div>
@@ -146,7 +131,7 @@ export const EditCreateContractClient = ({ itemId }) => {
   return (
     <>
       {isOpen && (
-        <EditCreateContractClientModal
+        <EditCreateContactClientModal
           isOpen={isOpen}
           onOpenChange={onOpenChange}
           item={editItem}
@@ -155,7 +140,7 @@ export const EditCreateContractClient = ({ itemId }) => {
           fetchData={fetchData}
         />
       )}
-      <CardBase title="Contratos" async={isLoading} skeletonlines={5}>
+      <CardBase title="Contactos" async={isLoading} skeletonlines={5}>
         <Slot slot="header">
           <Button
             size="sm"
@@ -171,7 +156,7 @@ export const EditCreateContractClient = ({ itemId }) => {
         </Slot>
         <Slot slot="body">
           <Table
-            aria-label="Table contracts's clients"
+            aria-label="Table contact's clients"
             isStriped
             classNames={classNames}
           >
@@ -196,6 +181,6 @@ export const EditCreateContractClient = ({ itemId }) => {
   );
 };
 
-EditCreateContractClient.propTypes = {
+EditCreateContactClient.propTypes = {
   itemId: PropTypes.string.isRequired,
 };
