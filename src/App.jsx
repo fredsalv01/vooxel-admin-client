@@ -1,23 +1,24 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Layout from "./components/shared/Layout";
-import Dashboard from "./modules/dashboard/Dashboard";
-import { Login, Register } from "./auth";
-import ProtectedRoute from "./components/validation/requireAuth";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
+import Layout from './components/shared/Layout'
+import Dashboard from './modules/dashboard/Dashboard'
+import { Login, Register } from './auth'
+import ProtectedRoute from './components/validation/requireAuth'
 
 import {
   WorkerList,
   WorkerDetailPage,
   WorkerVacationsPage,
-} from "./modules/workers/pages";
+} from './modules/workers/pages'
 
-import { UserList } from "./modules/users/pages/UserList";
-import { ClientList, ClienteDetailPage } from "./modules/clients/pages";
-import { ClientServiceList } from "./modules/client-services/pages/ClientServiceList";
+import { UserList } from './modules/users/pages/UserList'
+import { ClientList, ClientDetailPage } from './modules/clients/pages'
 import {
   BillingList,
   CreateBillingPage,
   EditBillingPage,
-} from "./modules/billing/pages";
+} from './modules/billing/pages'
+
+import { ProjectList } from './modules/projects/pages'
 
 function App() {
   return (
@@ -29,7 +30,7 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Layout />{" "}
+              <Layout />{' '}
             </ProtectedRoute>
           }
         >
@@ -41,16 +42,16 @@ function App() {
             path="workers/:id/vacations"
             element={<WorkerVacationsPage />}
           />
-          <Route path="clients/:id/detail" element={<ClienteDetailPage />} />
+          <Route path="clients/:id/detail" element={<ClientDetailPage />} />
           <Route path="clients" element={<ClientList />} />
-          <Route path="services" element={<ClientServiceList />} />
           <Route path="billing" element={<BillingList />} />
           <Route path="billing/create" element={<CreateBillingPage />} />
-          <Route path="billing/:id/edit" element={<CreateBillingPage />} />
+          <Route path="billing/:id/edit" element={<EditBillingPage />} />
+          <Route path="projects" element={<ProjectList />} />
         </Route>
       </Routes>
     </Router>
-  );
+  )
 }
 
-export default App;
+export default App
