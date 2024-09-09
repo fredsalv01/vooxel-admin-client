@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import PropTypes from "prop-types";
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import PropTypes from 'prop-types'
 
-import { CardBase } from "../../../components/base";
+import { CardBase } from '../../../components/base'
 import {
   Button,
   ButtonGroup,
-  Chip,
   Table,
   TableBody,
   TableCell,
@@ -13,84 +12,84 @@ import {
   TableHeader,
   TableRow,
   useDisclosure,
-} from "@nextui-org/react";
-import {
-  DownloadCloud,
-  EditIcon,
-  DeleteIcon,
-  PlusIcon,
-} from "../../../components/icons";
-import Slot from "../../../components/Slot";
-import InternationalizationDate from "../../../lib/helpers/internationalization-date";
+} from '@nextui-org/react'
+import { EditIcon, DeleteIcon, PlusIcon } from '../../../components/icons'
+import Slot from '../../../components/Slot'
 
-import { useFetchData } from "../../../hooks/useFetchData";
-import { EditCreateContactClientModal } from "./";
-import {
-  NO_HAS_FILES,
-  TABLE_NAME_FILES,
-  TAGS_FILES,
-} from "../../../lib/consts/general";
+import axiosInstance from '../../../axios/axios'
+import { useFetchData } from '../../../hooks/useFetchData'
+import { EditCreateContactClientModal } from './'
+import { Alerts } from '../../../lib/helpers/alerts'
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
 
 export const EditCreateContactClient = ({ itemId }) => {
   const { data, isLoading, fetchData } = useFetchData({
     url: `/contact/client/${itemId}`,
-  });
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [editItem, setEditItem] = useState({});
+  })
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+  const [editItem, setEditItem] = useState({})
 
-  const [rows, setRows] = useState([]);
+  const [rows, setRows] = useState([])
 
   useEffect(() => {
     if (!!data) {
       const newRows = data.map((item, index) => {
         return {
           ...item,
-        };
-      });
-      setRows(newRows);
+        }
+      })
+      setRows(newRows)
     }
-  }, [data]);
+  }, [data])
 
   const columns = [
     {
-      key: "name",
-      label: "Nombre",
+      key: 'name',
+      label: 'Nombre',
     },
     {
-      key: "phone",
-      label: "Teléfono",
+      key: 'phone',
+      label: 'Teléfono',
     },
     // {
     //   key: "isActive",
     //   label: "Estado",
     // },
     {
-      key: "actions",
-      label: "Acciones",
+      key: 'actions',
+      label: 'Acciones',
     },
-  ];
+  ]
 
   const handleEditContact = (item) => {
-    setEditItem(item);
-    onOpen();
-  };
+    setEditItem(item)
+    onOpen()
+  }
 
   const handleDeleteContact = async (item) => {
-    // try {
-    // } catch (error) {
-    // }
-    // const response = await axiosInstance.delete(`contact/${item.id}`);
-    // if (response.status === 200) {
-    //   fetchData();
-    //   ToastNotification.showSuccess("Contacto eliminado correctamente
-  };
+    const { isConfirmed } = await Alerts.confirmAlert()
+    if (!isConfirmed) return
+
+    try {
+      Alerts.showLoading()
+      await axiosInstance.delete(`contact/${item.id}`)
+      ToastNotification.showSuccess('Contacto eliminado correctamente')
+      fetchData()
+    } catch (error) {
+      if (error.response.status === 400)
+        ToastNotification.showError(error.response.data.message)
+      else ToastNotification.showError('Error al eliminar el contacto')
+    } finally {
+      Alerts.close()
+    }
+  }
 
   const renderCell = useCallback(
     (item, columnKey) => {
-      const cellValue = item[columnKey];
+      const cellValue = item[columnKey]
 
       switch (columnKey) {
-        case "actions":
+        case 'actions':
           return (
             <div className="flex justify-center">
               <ButtonGroup>
@@ -112,21 +111,21 @@ export const EditCreateContactClient = ({ itemId }) => {
                 </Button>
               </ButtonGroup>
             </div>
-          );
+          )
         default:
-          return cellValue;
+          return cellValue
       }
     },
     [rows],
-  );
+  )
 
   const classNames = useMemo(
     () => ({
-      wrapper: ["shadow-none", "p-0"],
-      th: ["text-center"],
+      wrapper: ['shadow-none', 'p-0'],
+      th: ['text-center'],
     }),
     [],
-  );
+  )
 
   return (
     <>
@@ -145,8 +144,8 @@ export const EditCreateContactClient = ({ itemId }) => {
           <Button
             size="sm"
             onPress={() => {
-              setEditItem({});
-              onOpen();
+              setEditItem({})
+              onOpen()
             }}
             color="primary"
             endContent={<PlusIcon />}
@@ -178,9 +177,9 @@ export const EditCreateContactClient = ({ itemId }) => {
         </Slot>
       </CardBase>
     </>
-  );
-};
+  )
+}
 
 EditCreateContactClient.propTypes = {
   itemId: PropTypes.string.isRequired,
-};
+}

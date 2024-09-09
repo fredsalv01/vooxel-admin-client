@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Modal,
   ModalContent,
@@ -6,15 +6,13 @@ import {
   ModalBody,
   Button,
   ModalFooter,
-} from "@nextui-org/react";
-import { Formik, Form, Field } from "formik";
-import * as Yup from "yup";
+} from '@nextui-org/react'
+import { Formik, Form, Field } from 'formik'
+import * as Yup from 'yup'
 
-import axiosInstance from "../../../axios/axios";
-import { DatePickerBase, InputBase } from "../../../components/base";
-import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
-import { useUploadFile } from "../../../hooks/useUploadFile";
-import { TABLE_NAME_FILES, TAGS_FILES } from "../../../lib/consts/general";
+import axiosInstance from '../../../axios/axios'
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
+import { InputBase } from '../../../components/base'
 
 export const EditCreateContactClientModal = ({
   isOpen,
@@ -24,73 +22,73 @@ export const EditCreateContactClientModal = ({
   parentId,
   fetchData,
 }) => {
-  const [title, setTitle] = useState("Agregar");
+  const [title, setTitle] = useState('Agregar')
 
   const [initialValues, setInitialValues] = useState({
-    name: "",
-    phone: "",
-    designed_area: "",
-  });
+    name: '',
+    phone: '',
+    designed_area: '',
+  })
 
   const validationSchema = Yup.object({
     name: Yup.string().required(),
     phone: Yup.string().required(),
     designed_area: Yup.string().required(),
-  });
+  })
 
   const updateValidationSchema = Yup.object({
     name: Yup.string().required(),
     phone: Yup.string().required(),
     designed_area: Yup.string().required(),
-  });
+  })
 
-  const isEditItem = useMemo(() => Object.keys(item).length > 0, [item]);
+  const isEditItem = useMemo(() => Object.keys(item).length > 0, [item])
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
     try {
-      setSubmitting(true);
-      let contactUpserted;
+      setSubmitting(true)
+      console.log('🚀 ~ handleSubmit ~ parentId:', parentId)
 
       if (isEditItem) {
-        contactUpserted = await axiosInstance.patch(`contact/${item.id}`, {
+        await axiosInstance.patch(`contact/${item.id}`, {
           ...values,
-          clientId: parentId,
-        });
+        })
 
-        ToastNotification.showSuccess("Contacto actualizado correctamente");
+        ToastNotification.showSuccess('Contacto actualizado correctamente')
       } else {
-        contactUpserted = await axiosInstance.post(`contact`, {
+        await axiosInstance.post(`contact`, {
           ...values,
           clientId: parentId,
-        });
-        ToastNotification.showSuccess("Contacto creado correctamente");
+        })
+        ToastNotification.showSuccess('Contacto creado correctamente')
       }
 
-      fetchData();
-      onClose();
+      fetchData()
+      onClose()
     } catch (error) {
-      console.log("Error upserting contract", error);
+      console.log('Error upserting contract', error)
       if (error.response.status === 400)
-        ToastNotification.showError(error.response.data.message);
+        ToastNotification.showError(error.response.data.message)
       else
         ToastNotification.showError(
-          `Error al ${isEditItem ? "editar" : "crear"} el Contacto`,
-        );
+          `Error al ${isEditItem ? 'editar' : 'crear'} el Contacto`,
+        )
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   useEffect(() => {
     if (isEditItem) {
-      setTitle("Editar");
+      setTitle('Editar')
 
       setInitialValues({
-        startDate: item.startDate,
-        endDate: item.endDate,
-      });
+        name: item.name,
+        phone: item.phone,
+        designed_area: item.designed_area,
+      })
     }
-  }, []);
+  }, [])
 
   return (
     <Modal
@@ -152,5 +150,5 @@ export const EditCreateContactClientModal = ({
         )}
       </ModalContent>
     </Modal>
-  );
-};
+  )
+}
