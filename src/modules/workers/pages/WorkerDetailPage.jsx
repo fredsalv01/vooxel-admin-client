@@ -62,7 +62,7 @@ export const WorkerDetailPage = () => {
   }, [getWorkerDetails])
 
   return (
-    <div className="bg-slate-100 p-4">
+    <div className="container bg-blue-100 p-4">
       {isOpen && (
         <EditWorkerModal
           isOpen={isOpen}

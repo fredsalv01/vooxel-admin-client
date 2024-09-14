@@ -28,18 +28,21 @@ export const EditCreateContactClientModal = ({
     name: '',
     phone: '',
     designed_area: '',
+    email: '',
   })
 
   const validationSchema = Yup.object({
     name: Yup.string().required(),
     phone: Yup.string().required(),
     designed_area: Yup.string().required(),
+    email: Yup.string().email().required(),
   })
 
   const updateValidationSchema = Yup.object({
     name: Yup.string().required(),
     phone: Yup.string().required(),
     designed_area: Yup.string().required(),
+    email: Yup.string().email().required(),
   })
 
   const isEditItem = useMemo(() => Object.keys(item).length > 0, [item])
@@ -121,7 +124,14 @@ export const EditCreateContactClientModal = ({
                     <div className="col-span-1">
                       <Field
                         name="phone"
-                        label="Teléfono"
+                        label="Celular"
+                        component={InputBase}
+                      />
+                    </div>
+                    <div className="col-span-1">
+                      <Field
+                        name="email"
+                        label="Correo electrónico"
                         component={InputBase}
                       />
                     </div>

@@ -49,12 +49,16 @@ export const EditCreateContactClient = ({ itemId }) => {
     },
     {
       key: 'phone',
-      label: 'Teléfono',
+      label: 'Celular',
     },
-    // {
-    //   key: "isActive",
-    //   label: "Estado",
-    // },
+    {
+      key: 'email',
+      label: 'Correo electrónico',
+    },
+    {
+      key: 'designed_area',
+      label: 'Área',
+    },
     {
       key: 'actions',
       label: 'Acciones',

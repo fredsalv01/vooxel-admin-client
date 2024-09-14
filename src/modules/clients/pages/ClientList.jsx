@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react'
 import {
   Button,
   useDisclosure,
@@ -9,50 +9,48 @@ import {
   TableRow,
   TableCell,
   getKeyValue,
-} from "@nextui-org/react";
-import { PlusIcon } from "../../../components/icons/PlusIcon";
-import { CreateClientModal, EditCreateContactClientModal } from "../components";
-import { TableList } from "../../../components/base";
-import { useQueryPromise } from "../../../hooks/useQueryPromise";
-import Slot from "../../../components/Slot";
-import { EditIcon } from "../../../components/icons";
-import { useFetchData } from "../../../hooks/useFetchData";
-import { Link } from "react-router-dom";
+} from '@nextui-org/react'
+import { PlusIcon } from '../../../components/icons/PlusIcon'
+import { CreateClientModal } from '../components'
+import { TableList } from '../../../components/base'
+import { useQueryPromise } from '../../../hooks/useQueryPromise'
+import Slot from '../../../components/Slot'
+import { EditIcon } from '../../../components/icons'
+import { Link } from 'react-router-dom'
 
 const headersTable = [
-  { name: "Razon social", uid: "businessName" },
-  { name: "Ruc", uid: "ruc" },
-  { name: "Celular", uid: "phone" },
-  { name: "Correo", uid: "email" },
-  { name: "Acciones", uid: "actions" },
-];
+  { name: 'Razon social', uid: 'businessName' },
+  { name: 'Ruc', uid: 'ruc' },
+  { name: 'Celular', uid: 'phone' },
+  { name: 'Correo', uid: 'email' },
+  { name: 'Acciones', uid: 'actions' },
+]
 
 const INITIAL_VISIBLE_COLUMNS = [
-  "Nro",
-  "businessName",
-  "ruc",
-  "phone",
-  "email",
-  "actions",
-];
+  'Nro',
+  'businessName',
+  'ruc',
+  'phone',
+  'email',
+  'actions',
+]
 
 export const ClientList = () => {
   const {
     data,
     isFetching,
     refetch,
-    isSuccess,
     paginationProps,
     updatingList,
     setQuerSearch,
-  } = useQueryPromise({ url: "clients", key: "clients" });
+  } = useQueryPromise({ url: 'clients', key: 'clients' })
 
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
   const switchRenderCell = (item, columnKey) => {
-    const cellValue = item[columnKey];
+    const cellValue = item[columnKey]
     switch (columnKey) {
-      case "actions":
+      case 'actions':
         return (
           <Link
             to={`/clients/${item.id}/detail`}
@@ -60,15 +58,14 @@ export const ClientList = () => {
           >
             <EditIcon />
           </Link>
-        );
+        )
       default:
-        return cellValue;
+        return cellValue
     }
-  };
+  }
 
   return (
     <>
-      {/* Modal para crear cliente */}
       {isOpen && (
         <CreateClientModal
           isOpen={isOpen}
@@ -78,6 +75,7 @@ export const ClientList = () => {
       )}
 
       <TableList
+        title="Clientes"
         items={data?.items || []}
         headersTable={headersTable}
         switchFn={switchRenderCell}
@@ -99,5 +97,5 @@ export const ClientList = () => {
         </Slot>
       </TableList>
     </>
-  );
-};
+  )
+}

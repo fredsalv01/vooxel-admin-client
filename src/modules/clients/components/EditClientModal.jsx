@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react'
 import {
   Modal,
   ModalContent,
@@ -6,17 +6,13 @@ import {
   ModalBody,
   Button,
   ModalFooter,
-  DatePicker,
-  Autocomplete,
-  AutocompleteSection,
-  AutocompleteItem,
-} from "@nextui-org/react";
-import { Formik, Form, Field, setIn } from "formik";
-import { InputBase } from "../../../components/base";
-import { useAsyncList } from "@react-stately/data";
-import axios from "../../../axios/axios";
-import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
-import * as Yup from "yup";
+} from '@nextui-org/react'
+import { Formik, Form, Field } from 'formik'
+import * as Yup from 'yup'
+
+import { InputBase } from '../../../components/base'
+import axios from '../../../axios/axios'
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
 
 export const EditClientModal = ({
   isOpen,
@@ -25,50 +21,48 @@ export const EditClientModal = ({
   fetchData,
 }) => {
   const [initialValues, setInitialValues] = useState({
-    businessName: "",
-    ruc: "",
-    phone: "",
-    email: "",
-  });
+    businessName: '',
+    ruc: '',
+    phone: '',
+    address: '',
+  })
 
   const validationSchema = Yup.object({
     businessName: Yup.string().required(),
     ruc: Yup.string().required(),
     phone: Yup.string().required(),
-    email: Yup.string().required(),
-  });
+    address: Yup.string().required(),
+  })
 
   useEffect(() => {
     setInitialValues({
       ...editItem,
-      fullName: editItem.fullName || "",
-      businessName: editItem.businessName || "",
-      ruc: editItem.ruc || "",
-      phone: editItem.phone || "",
-      email: editItem.email || "",
-    });
-  }, []);
+      businessName: editItem.businessName || '',
+      ruc: editItem.ruc || '',
+      phone: editItem.phone || '',
+      address: editItem.address || '',
+    })
+  }, [])
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values);
-    delete values.id;
+    delete values.id
     try {
-      setSubmitting(true);
+      setSubmitting(true)
       await axios.patch(`clients/${editItem.id}`, {
         ...values,
-      });
-      ToastNotification.showSuccess("Colaborador actualizado correctamente");
-      fetchData();
-      onClose();
+      })
+      ToastNotification.showSuccess('Colaborador actualizado correctamente')
+      fetchData()
+      onClose()
     } catch (error) {
-      console.log("Error", error);
+      console.log('Error', error)
       if (error.response.status === 400)
-        ToastNotification.showError(error.response.data.message);
-      else ToastNotification.showError("Error al crear el colaborador");
+        ToastNotification.showError(error.response.data.message)
+      else ToastNotification.showError('Error al crear el colaborador')
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <Modal
@@ -112,8 +106,8 @@ export const EditClientModal = ({
                     </div>
                     <div className="col-span-1">
                       <Field
-                        name="email"
-                        label="Correo electrónico"
+                        name="address"
+                        label="Dirección"
                         component={InputBase}
                       />
                     </div>
@@ -135,5 +129,5 @@ export const EditClientModal = ({
         )}
       </ModalContent>
     </Modal>
-  );
-};
+  )
+}

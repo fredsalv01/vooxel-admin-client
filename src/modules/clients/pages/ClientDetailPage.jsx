@@ -22,7 +22,7 @@ export const ClientDetailPage = () => {
         'Razón social': data.businessName,
         RUC: data.ruc,
         Celular: data.phone,
-        'Correo electrónico': data.email,
+        Dirección: data?.address,
         Estado: (
           <Chip
             className="gap-1 border-none capitalize text-default-600"

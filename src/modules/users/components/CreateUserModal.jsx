@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 import {
   Modal,
   ModalContent,
@@ -6,51 +6,51 @@ import {
   ModalBody,
   Button,
   ModalFooter,
-} from "@nextui-org/react";
-import { Formik, Form, Field } from "formik";
-import { InputBase } from "../../../components/base";
-import axios from "../../../axios/axios";
-import ToastNotification from "../../../lib/helpers/toast-notification";
-import * as Yup from "yup";
+} from '@nextui-org/react'
+import { Formik, Form, Field } from 'formik'
+import { InputBase } from '../../../components/base'
+import axios from '../../../axios/axios'
+import ToastNotification from '../../../lib/helpers/toast-notification'
+import * as Yup from 'yup'
 
 export const CreateUserModal = ({ isOpen, onOpenChange, fetchData }) => {
   const initialValues = {
-    username: "",
-    password: "",
-    retypedPassword: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-  };
+    username: '',
+    password: '',
+    retypedPassword: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+  }
 
   const validationSchema = Yup.object({
     username: Yup.string().required(),
     password: Yup.string().required(),
     retypedPassword: Yup.string()
       .required()
-      .oneOf([Yup.ref("password")]),
+      .oneOf([Yup.ref('password')]),
     firstName: Yup.string().required(),
     lastName: Yup.string().required(),
     email: Yup.string().required().email(),
-  });
+  })
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
-    console.log(JSON.stringify(values, null, 2));
+    console.log(JSON.stringify(values, null, 2))
     try {
-      setSubmitting(true);
-      await axios.post("users", { ...values });
-      new ToastNotification("Usuario creado correctamente").showSuccess();
-      fetchData();
-      onClose();
+      setSubmitting(true)
+      await axios.post('users', { ...values })
+      new ToastNotification('Usuario creado correctamente').showSuccess()
+      fetchData()
+      onClose()
     } catch (error) {
       if (error.response.status === 400)
-        new ToastNotification(error.response.data.message).showError();
-      else new ToastNotification("Error al crear el usuario").showError();
-      console.log("Error", error);
+        new ToastNotification(error.response.data.message).showError()
+      else new ToastNotification('Error al crear el usuario').showError()
+      console.log('Error', error)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <Modal
@@ -141,5 +141,5 @@ export const CreateUserModal = ({ isOpen, onOpenChange, fetchData }) => {
         )}
       </ModalContent>
     </Modal>
-  );
-};
+  )
+}

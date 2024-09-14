@@ -1,25 +1,36 @@
-import { Button, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input } from '@nextui-org/react'
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Input,
+} from '@nextui-org/react'
+
 import { ChevronDownIcon, SearchIcon } from '../icons'
-import { capitalize } from '../../lib/helpers/utils';
+import { capitalize } from '../../lib/helpers/utils'
 
-export const TableTopContent = ({ visibleColumns, headersTable, setVisibleColumns, setQuerSearch, children }) => {
-
-  const [inputSearch, setInputSearch] = useState();
+export const TableTopContent = ({
+  title,
+  visibleColumns,
+  headersTable,
+  setVisibleColumns,
+  setQuerSearch,
+  children,
+}) => {
+  const [inputSearch, setInputSearch] = useState()
 
   const onSearchChange = (value) => {
-    setInputSearch(value);
-    setQuerSearch(value);
+    setInputSearch(value)
+    setQuerSearch(value)
   }
-
-  // const handleVisibleColumnsChange = (keys) => {
-  //   console.log("🚀 ~ handleVisibleColumnsChange ~ keys:", keys)
-  //   onVisibleColumnsChange(keys);
-  // };
 
   return (
     <div>
-      <div className="gap-3 flex flex-wrap md:flex-nowrap justify-between">
+      <div className="flex flex-wrap justify-between gap-3 md:flex-nowrap">
+        <h2 className="text-xl font-semibold">{title}</h2>
+
         <Input
           isClearable
           placeholder="Buscar..."
@@ -28,12 +39,15 @@ export const TableTopContent = ({ visibleColumns, headersTable, setVisibleColumn
           onClear={() => onClear()}
           onValueChange={onSearchChange}
           type="search"
-          className="lg:min-w-[500px] w-full md:w-auto"
+          className="w-full md:w-auto lg:min-w-[500px]"
         />
-        <div className="flex gap-3 justify-end">
+        <div className="flex justify-end gap-3">
           <Dropdown>
             <DropdownTrigger className="hidden sm:flex">
-              <Button endContent={<ChevronDownIcon className="text-small" />} variant="flat">
+              <Button
+                endContent={<ChevronDownIcon className="text-small" />}
+                variant="flat"
+              >
                 Columnas
               </Button>
             </DropdownTrigger>

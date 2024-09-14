@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 import {
   Modal,
   ModalContent,
@@ -7,54 +7,56 @@ import {
   Button,
   ModalFooter,
   Divider,
-} from "@nextui-org/react";
-import { Formik, Form, Field } from "formik";
-import { DatePickerBase, InputBase } from "../../../components/base";
-import axios from "../../../axios/axios";
-import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
-import * as Yup from "yup";
+} from '@nextui-org/react'
+import { Formik, Form, Field } from 'formik'
+import { DatePickerBase, InputBase } from '../../../components/base'
+import axios from '../../../axios/axios'
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
+import * as Yup from 'yup'
 
 export const CreateClientModal = ({ isOpen, onOpenChange, fetchData }) => {
   const initialValues = {
-    businessName: "",
-    ruc: "",
-    phone: "",
-    email: "",
-  };
+    businessName: '',
+    ruc: '',
+    phone: '',
+    address: '',
+    startDateContract: '',
+    endDateContract: '',
+  }
 
   const validationSchema = Yup.object({
     businessName: Yup.string().required(),
     ruc: Yup.string().required(),
     phone: Yup.string().required(),
-    email: Yup.string().required(),
-  });
+    address: Yup.string().required(),
+    startDateContract: Yup.string().required(),
+    endDateContract: Yup.string().required(),
+  })
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
-    console.log(JSON.stringify(values, null, 2));
-
-    const { startDateContract, endDateContract, ...args } = values;
+    const { startDateContract, endDateContract, ...args } = values
 
     try {
-      setSubmitting(true);
-      const clientCreated = await axios.post("clients", { ...args });
+      setSubmitting(true)
+      const clientCreated = await axios.post('clients', { ...args })
 
-      await axios.post("contract-clients", {
+      await axios.post('contract-clients', {
         clientId: clientCreated.data.id,
         startDate: startDateContract,
         endDate: endDateContract,
-      });
-      ToastNotification.showSuccess("Cliente creado correctamente");
-      fetchData();
-      onClose();
+      })
+      ToastNotification.showSuccess('Cliente creado correctamente')
+      fetchData()
+      onClose()
     } catch (error) {
-      console.log("Error", error);
+      console.log('Error', error)
       if (error.response.status === 400)
-        ToastNotification.showError(error.response.data.message);
-      else ToastNotification.showError("Error al crear el cliente");
+        ToastNotification.showError(error.response.data.message)
+      else ToastNotification.showError('Error al crear el cliente')
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <Modal
@@ -99,8 +101,8 @@ export const CreateClientModal = ({ isOpen, onOpenChange, fetchData }) => {
                     </div>
                     <div className="col-span-1">
                       <Field
-                        name="email"
-                        label="Correo electrónico"
+                        name="address"
+                        label="Dirección"
                         component={InputBase}
                       />
                     </div>
@@ -142,5 +144,5 @@ export const CreateClientModal = ({ isOpen, onOpenChange, fetchData }) => {
         )}
       </ModalContent>
     </Modal>
-  );
-};
+  )
+}

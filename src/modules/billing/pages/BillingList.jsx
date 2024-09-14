@@ -43,7 +43,7 @@ export const BillingList = () => {
         return (
           <Link
             to={`/workers/${item.id}/detail`}
-            className="cursor-pointer text-lg text-default-400 active:opacity-50"
+            className="text-lg cursor-pointer text-default-400 active:opacity-50"
           >
             <EditIcon />
           </Link>
@@ -56,6 +56,7 @@ export const BillingList = () => {
   return (
     <>
       <TableList
+        title="Facturación"
         items={data?.items || []}
         headersTable={headersTable}
         switchFn={switchRenderCell}

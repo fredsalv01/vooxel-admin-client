@@ -1,92 +1,115 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react'
 import {
-    Table,
-    TableHeader,
-    TableColumn,
-    TableBody,
-    TableRow,
-    TableCell,
-    Input,
-    Button,
-    DropdownTrigger,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem,
-    Pagination,
-    Spinner
-} from '@nextui-org/react';
-import { ChevronDownIcon, PlusIcon, SearchIcon } from '../icons';
-import { capitalize } from '../../lib/helpers/utils';
-import { TableTopContent } from './TableTopContent';
-import { isSlot } from '../Slot';
-import { TableBottomContent } from './TableBottomContent';
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
+  TableCell,
+  Spinner,
+} from '@nextui-org/react'
+import { TableTopContent } from './TableTopContent'
+import { isSlot } from '../Slot'
+import { TableBottomContent } from './TableBottomContent'
 
-export const TableList = ({ items = [], headersTable, initialColumns, switchFn, isLoading, paginationProps, updatingList, setQuerSearch, children }) => {
-    const topContentSlot = React.Children.toArray(children).find(child => isSlot('topContent', child));
+export const TableList = ({
+  title = '',
+  items = [],
+  headersTable,
+  initialColumns,
+  switchFn,
+  isLoading,
+  paginationProps,
+  updatingList,
+  setQuerSearch,
+  children,
+}) => {
+  const topContentSlot = React.Children.toArray(children).find((child) =>
+    isSlot('topContent', child),
+  )
 
-    const [selectedKeys, setSelectedKeys] = useState(new Set([]));
-    const [visibleColumns, setVisibleColumns] = useState(new Set(initialColumns));
+  const [selectedKeys, setSelectedKeys] = useState(new Set([]))
+  const [visibleColumns, setVisibleColumns] = useState(new Set(initialColumns))
 
-    const headerColumns = useMemo(() => {
-        if (visibleColumns === 'all') return headersTable;
-        const columns = headersTable.filter((column) => Array.from(visibleColumns).includes(column.uid));
-        return columns && columns.length > 0 ? columns : headersTable;
-    }, [visibleColumns, headersTable]);
+  const headerColumns = useMemo(() => {
+    if (visibleColumns === 'all') return headersTable
+    const columns = headersTable.filter((column) =>
+      Array.from(visibleColumns).includes(column.uid),
+    )
+    return columns && columns.length > 0 ? columns : headersTable
+  }, [visibleColumns, headersTable])
 
-    const renderCell = useCallback((item, columnKey) => switchFn(item, columnKey), [switchFn]);
+  const renderCell = useCallback(
+    (item, columnKey) => switchFn(item, columnKey),
+    [switchFn],
+  )
 
-    const computedTopContent = useMemo(() => (
-        <TableTopContent
-            visibleColumns={visibleColumns}
-            headersTable={headersTable}
-            setVisibleColumns={setVisibleColumns}
-            setQuerSearch={setQuerSearch}
-        >
-            {topContentSlot && topContentSlot.props.children}
-        </TableTopContent>
-    ), [visibleColumns, headersTable, setQuerSearch, topContentSlot]);
+  const computedTopContent = useMemo(
+    () => (
+      <TableTopContent
+        title={title}
+        visibleColumns={visibleColumns}
+        headersTable={headersTable}
+        setVisibleColumns={setVisibleColumns}
+        setQuerSearch={setQuerSearch}
+      >
+        {topContentSlot && topContentSlot.props.children}
+      </TableTopContent>
+    ),
+    [visibleColumns, headersTable, setQuerSearch, topContentSlot],
+  )
 
-    const computedBottomContent = useMemo(() => (
-        <TableBottomContent paginationProps={paginationProps} updatingList={updatingList} />
-    ), [paginationProps, updatingList]);
+  const computedBottomContent = useMemo(
+    () => (
+      <TableBottomContent
+        paginationProps={paginationProps}
+        updatingList={updatingList}
+      />
+    ),
+    [paginationProps, updatingList],
+  )
 
-    return (
-        <>
-            <Table
-                aria-label="Example table with custom cells, pagination and sorting"
-                isHeaderSticky
-                bottomContent={computedBottomContent}
-                bottomContentPlacement="outside"
-                classNames={{ wrapper: 'max-h-[382px]' }}
-                selectedKeys={selectedKeys}
-                topContent={computedTopContent}
-                topContentPlacement="outside"
-                onSelectionChange={setSelectedKeys}
+  return (
+    <>
+      <Table
+        aria-label="Example table with custom cells, pagination and sorting"
+        isHeaderSticky
+        bottomContent={computedBottomContent}
+        bottomContentPlacement="outside"
+        classNames={{ wrapper: 'max-h-[382px]' }}
+        selectedKeys={selectedKeys}
+        topContent={computedTopContent}
+        topContentPlacement="outside"
+        onSelectionChange={setSelectedKeys}
+      >
+        <TableHeader columns={headerColumns}>
+          {(column) => (
+            <TableColumn
+              key={column.uid}
+              align={column.uid === 'actions' ? 'center' : 'start'}
+              allowsSorting={column.sortable}
             >
-                <TableHeader columns={headerColumns}>
-                    {(column) => (
-                        <TableColumn
-                            key={column.uid}
-                            align={column.uid === 'actions' ? 'center' : 'start'}
-                            allowsSorting={column.sortable}
-                        >
-                            {column.name}
-                        </TableColumn>
-                    )}
-                </TableHeader>
-                <TableBody
-                    emptyContent={'Ningun colaborador encontrado'}
-                    items={items}
-                    isLoading={isLoading}
-                    loadingContent={<Spinner label="Loading..." />}
-                >
-                    {(item) => (
-                        <TableRow key={item.id}>
-                            {(columnKey) => <TableCell key={columnKey}>{renderCell(item, columnKey)}</TableCell>}
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-        </>
-    );
-};
+              {column.name}
+            </TableColumn>
+          )}
+        </TableHeader>
+        <TableBody
+          emptyContent={'Ningun colaborador encontrado'}
+          items={items}
+          isLoading={isLoading}
+          loadingContent={<Spinner label="Loading..." />}
+        >
+          {(item) => (
+            <TableRow key={item.id}>
+              {(columnKey) => (
+                <TableCell key={columnKey}>
+                  {renderCell(item, columnKey)}
+                </TableCell>
+              )}
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </>
+  )
+}
