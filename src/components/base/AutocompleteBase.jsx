@@ -1,65 +1,78 @@
-// TODO: autocomplete stand by
-import React, { useState, useEffect } from 'react';
-import { Autocomplete, AutocompleteItem } from "@nextui-org/react";
-import axios from 'axios'; // Assuming you use axios for API calls
-import { useAsyncList } from '@react-stately/data';
+import React, { useState, useEffect } from 'react'
+import { Autocomplete, AutocompleteItem } from '@nextui-org/react'
+import axiosInstance from '../../axios/axios'
+import { useInfiniteQuery } from '@tanstack/react-query'
+
+const fetchItems = async ({ pageParam = 1 }) => {
+  const { data } = await axiosInstance.get(`clients`, {
+    params: {
+      page: pageParam,
+      limit: 10,
+      isActive: true,
+    },
+  })
+  console.log('🚀 ~ fetchItems ~ data:', data)
+  return data
+}
 
 export const AutocompleteBase = ({
-    label,
-    placeholder,
-    url, // URL for fetching data
-    // params, // Optional query parameters for the API call
-    field,
-    form,
-    ...props
+  label,
+  placeholder,
+  // url, // URL for fetching data
+  // params, // Optional query parameters for the API call
+  ...props
 }) => {
-    const hasError = (form.errors[field.name] && form.touched[field.name]) || false;
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+    error,
+  } = useInfiniteQuery({
+    queryKey: ['items'],
+    queryFn: fetchItems,
+    getNextPageParam: (lastPage, allPages) => {
+      console.log('🚀 ~ lastPage, allPages:', { lastPage, allPages })
+      if (lastPage.meta.currentPage < lastPage.meta.totalPages) {
+        return lastPage.meta.currentPage + 1
+      } else {
+        return undefined // No more pages to fetch
+      }
+    },
+  })
 
+  if (status === 'loading') return <div>Loading...</div>
+  if (status === 'error') return <div>Error: {error.message}</div>
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [options, setOptions] = useState([]);
-    const [filterText, setFilterText] = useState('');
+  const [filterText, setFilterText] = useState('')
 
-    const fetchData = async () => {
-        setIsLoading(true);
-        try {
-            const response = await axios.get(url, { params: { input: filterText, isActive: true } });
-            console.log("🚀 ~ fetchData ~ response:", response)
+  // Transform the data
+  const transformedOptions = (data) => {
+    if (!data || !data.length) {
+      return []
+    }
+    return data.flatMap((page) =>
+      page.items.map((item) => ({ id: item.id, name: item.businessName })),
+    )
+  }
+  // data?.pages.flatMap((page) =>
+  //   page.items.map((item) => ({ id: item.id, name: item.businessName })),
+  // ) || []
+  // console.log('🚀 ~ transformedOptions ~ page:', page)
 
-            // const fetchedOptions = response.data.items.map((item) => ({
-            //     value: item.id, // Assuming ID is the value for the form field
-            //     label: item.fullName, // Customize based on your data structure
-            // }));
-            // setOptions(fetchedOptions);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            // Handle errors (e.g., display an error message)
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []); // Fetch data on component mount
-
-    return (
-        <Autocomplete
-            {...props}
-            inputValue={filterText}
-            isLoading={isLoading}
-            items={options}
-            label={label}
-            placeholder={placeholder}
-            variant="bordered"
-            onInputChange={setFilterText}
-            onSelectionChange={(key) => form.setFieldValue(field.name, key)}
-        >
-            {(item) => (
-                <AutocompleteItem key={item.id} className="capitalize">
-                    {item.label}
-                </AutocompleteItem>
-            )}
-        </Autocomplete>
-    );
-};
+  return (
+    <Autocomplete
+      {...props}
+      label={label}
+      placeholder={placeholder}
+      onInputChange={(e) => setFilterText(e.target.value)}
+      options={transformedOptions(data || [])}
+      renderItem={(item) => (
+        <AutocompleteItem key={item.id} value={item.name}>
+          {item.name}
+        </AutocompleteItem>
+      )}
+    />
+  )
+}

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Formik, Form, Field, useFormikContext } from 'formik'
-import { Button, Checkbox, Textarea } from '@nextui-org/react'
+import { Autocomplete, AutocompleteItem, Button, Checkbox, Textarea } from '@nextui-org/react'
 import * as Yup from 'yup'
 
 import {
@@ -8,7 +8,23 @@ import {
   DatePickerBase,
   InputBase,
   SelectBase,
+  AutocompleteBase,
 } from '../../../components/base'
+
+
+type FormValues = {
+  client: string
+  document_type: string
+  document_number: string
+  start_date: string
+  payment_deadline: string
+  service_id: string
+  description: string
+  purchase_order_number: string
+  currency: string
+  total: string
+  currencyValue: string
+}
 
 export const CreateBillingPage = () => {
   const [clientOptions, setClienteOptions] = useState([]) // get ?
@@ -16,7 +32,7 @@ export const CreateBillingPage = () => {
   const [documentTypeOptions, setDocumentTypeOptions] = useState([]) // get ?
   const [hasHes, setHasHes] = useState(false) // get ?
 
-  const [initialValues, setInitialValues] = useState({
+  const [initialValues, setInitialValues] = useState<FormValues>({
     // year: '', // con el año y mes se calcula el periodo, no se si es importante mostrarlo
     // month: '',
     client: '', // jala el ruc
@@ -48,7 +64,7 @@ export const CreateBillingPage = () => {
   const tax = 1.18
 
   const AmountCalculation = () => {
-    const { values } = useFormikContext() // Access Formik values
+    const { values }: { values: FormValues } = useFormikContext() // Access Formik values
 
     const amount = useMemo(() => {
       if (!!values.total && parseFloat(values.total) > 0) {
@@ -79,7 +95,7 @@ export const CreateBillingPage = () => {
     )
   }
 
-  const handleSubmit = (values, setSubmitting, onClose) => {
+  const handleSubmit = (values: FormValues, setSubmitting: (isSubmitting: boolean) => void) => {
     console.log('🚀 ~ handleSubmit ~ values:', values)
   }
   return (
@@ -90,7 +106,7 @@ export const CreateBillingPage = () => {
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values, { setSubmitting }) =>
-          handleSubmit(values, setSubmitting, onClose)
+          handleSubmit(values, setSubmitting)
         }
         enableReinitialize
       >
@@ -110,12 +126,19 @@ export const CreateBillingPage = () => {
                   component={InputBase}
                 />
                 <div className="col-span-2">
-                  <Field
+                  {/* <Field
                     name="client"
                     label="Cliente"
                     component={SelectBase}
                     options={clientOptions}
-                  />
+                  /> */}
+
+
+                    <AutocompleteBase
+                      label="Cliente"
+                      placeholder="Buscar cliente"
+                    />
+                  
                 </div>
 
                 <div className="col-span-2">
