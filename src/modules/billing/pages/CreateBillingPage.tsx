@@ -17,18 +17,17 @@ type FormValues = {
   document_number: string
   start_date: string
   payment_deadline: string
-  service_id: string
+  serviceType: string
   description: string
   purchase_order_number: string
   currency: string
   total: string
   currencyValue: string
+  status: any
+  statusDate: Date | null
 }
 
 export const CreateBillingPage = () => {
-  const [clientOptions, setClienteOptions] = useState([]) // get ?
-  const [serviceOptions, setServiceOptions] = useState([]) // get ?
-  const [documentTypeOptions, setDocumentTypeOptions] = useState([]) // get ?
   const [hasHes, setHasHes] = useState(false) // get ?
 
   const [initialValues, setInitialValues] = useState<FormValues>({
@@ -39,7 +38,7 @@ export const CreateBillingPage = () => {
     document_number: '',
     start_date: '',
     payment_deadline: '',
-    service_id: '', // tabla de servicios
+    serviceType: '', // tabla de servicios
     description: '',
     purchase_order_number: '',
     currency: '', // enum dolares o soles,
@@ -50,6 +49,8 @@ export const CreateBillingPage = () => {
     // fecha de vencimiento se calcula con el payment_deadline
     // dias acumulados es para la tabla de facturacion para saber la mora en caso que aun no se ha pagado, igual debe mostrarse ?
     currencyValue: '',
+    status: false,
+    statusDate: null,
   })
 
   const validationSchema = Yup.object({
@@ -62,9 +63,10 @@ export const CreateBillingPage = () => {
 
   const tax = 1.18
 
-  const AmountCalculation = () => {
+  const AmountCalculated = () => {
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
     const [hasIGV, setHasIGV] = useState(true)
+    // si es no igv entonces el deposito es el 100% para el backend
 
     const amount = useMemo(() => {
       if (!!values.total && parseFloat(values.total) > 0) {
@@ -74,12 +76,13 @@ export const CreateBillingPage = () => {
     }, [values.total, tax])
 
     const IGV = useMemo(() => {
+      let result = '0'
       if (!!values.total && parseFloat(values.total) > 0) {
-        return (
+        result = (
           parseFloat(values.total) - parseFloat(parseInt(amount) ? amount : '0')
         ).toFixed(2)
       }
-      return '0'
+      return result
     }, [values.total, tax])
 
     return (
@@ -112,6 +115,54 @@ export const CreateBillingPage = () => {
     )
   }
 
+  const ExpirationDateCalculated = () => {
+    const { values }: { values: FormValues } = useFormikContext() // Access Formik values
+
+    const expirationDate = useMemo(() => {
+      if (!!values.payment_deadline && !!values.start_date) {
+        const startDate = new Date(values.start_date)
+        const paymentDeadline = parseInt(values.payment_deadline)
+        const expirationDate = new Date(
+          startDate.setDate(startDate.getDate() + paymentDeadline),
+        )
+        const expDate = expirationDate.toISOString().split('T')[0]
+        const [year, month, day] = expDate.split('-')
+
+        if (year && month && day) {
+          return `${day}/${month}/${year}`
+        }
+
+        return
+      }
+      return '--'
+    }, [values.payment_deadline, values.start_date])
+
+    return (
+      <div className="flex flex-col p-1">
+        <label className="font-bold">Fecha de Vencimiento</label>
+        <p>{expirationDate}</p>
+      </div>
+    )
+  }
+
+  const StatusDateCalculated = () => {
+    const { values }: { values: FormValues } = useFormikContext()
+
+    return (
+      <>
+        {values.status !== 'pending' ? (
+          <Field
+            name="dateStatus"
+            label="Fecha del estado"
+            component={DatePickerBase}
+          />
+        ) : (
+          <div></div>
+        )}
+      </>
+    )
+  }
+
   const handleSubmit = (
     values: FormValues,
     setSubmitting: (isSubmitting: boolean) => void,
@@ -130,7 +181,7 @@ export const CreateBillingPage = () => {
         }
         enableReinitialize
       >
-        {({ isSubmitting }) => (
+        {({ isSubmitting, values }) => (
           <Form>
             <div className="grid grid-cols-1 md:grid-cols-2">
               <section className="grid grid-cols-1 gap-4 border-0 border-green-500 pr-4 md:grid-cols-2 md:border-r-2">
@@ -138,7 +189,13 @@ export const CreateBillingPage = () => {
                   name="document_type"
                   label="Tipo de doc."
                   component={SelectBase}
-                  options={documentTypeOptions}
+                  options={[
+                    { label: 'Factura', value: 'FACTURA' },
+                    { label: 'Boleta', value: 'BOLETA' },
+                    { label: 'Letra', value: 'LT' },
+                    { label: 'Nota de débito', value: 'ND' },
+                    { label: 'Nota de crédito', value: 'NC' },
+                  ]}
                 />
                 <Field
                   name="document_number"
@@ -196,11 +253,29 @@ export const CreateBillingPage = () => {
                   placeholder="30 días"
                   component={InputBase}
                 />
+                <ExpirationDateCalculated />
                 <Field
-                  name="service_id"
+                  name="serviceType"
                   label="Servicio"
                   component={SelectBase}
-                  options={serviceOptions}
+                  options={[
+                    {
+                      label: 'Consultoría',
+                      value: 'CONSULTORIA',
+                    },
+                    {
+                      label: 'Licencia',
+                      value: 'LICENCIA',
+                    },
+                    {
+                      label: 'Capacitación',
+                      value: 'CAPACITACION',
+                    },
+                    {
+                      label: 'otros',
+                      value: 'OTROS',
+                    },
+                  ]}
                 />
                 <Field
                   name="currency"
@@ -211,22 +286,29 @@ export const CreateBillingPage = () => {
                     { label: 'Dólares', value: 'USD' },
                   ]}
                 />
-                <Field
-                  name="payment_deadline"
-                  label="Plazo de pago"
-                  placeholder="30 días"
-                  component={InputBase}
-                />
+
                 <Field
                   name="currencyValue"
                   label="Tipo de cambio"
                   component={InputBase}
                 />
 
-                <div>Estado: Pendiente</div>
+                <Field
+                  name="status"
+                  label="Estado"
+                  component={SelectBase}
+                  options={[
+                    { label: 'Pendiente', value: 'pending' },
+                    { label: 'Cancelado', value: 'canceled' },
+                    { label: 'Anulado', value: 'anulado' },
+                    { label: 'Factoring', value: 'factoring' },
+                  ]}
+                />
 
-                <div className="col-span-1">
-                  <AmountCalculation />
+                <StatusDateCalculated />
+
+                <div className="col-span-2">
+                  <AmountCalculated />
                 </div>
               </section>
             </div>
