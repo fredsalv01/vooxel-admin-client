@@ -21,8 +21,8 @@ import { Link } from 'react-router-dom'
 const headersTable = [
   { name: 'Razon social', uid: 'businessName' },
   { name: 'Ruc', uid: 'ruc' },
-  { name: 'Celular', uid: 'phone' },
-  { name: 'Correo', uid: 'email' },
+  { name: 'Teléfono', uid: 'phone' },
+  { name: 'Dirección', uid: 'address' },
   { name: 'Acciones', uid: 'actions' },
 ]
 
@@ -31,7 +31,7 @@ const INITIAL_VISIBLE_COLUMNS = [
   'businessName',
   'ruc',
   'phone',
-  'email',
+  'address',
   'actions',
 ]
 

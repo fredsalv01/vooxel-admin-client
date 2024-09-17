@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Formik, Form, Field, useFormikContext } from 'formik'
-import { Autocomplete, AutocompleteItem, Button, Checkbox, Textarea } from '@nextui-org/react'
+import { Button, Checkbox, Textarea } from '@nextui-org/react'
 import * as Yup from 'yup'
 
 import {
@@ -8,9 +8,8 @@ import {
   DatePickerBase,
   InputBase,
   SelectBase,
-  AutocompleteBase,
+  Select2,
 } from '../../../components/base'
-
 
 type FormValues = {
   client: string
@@ -45,7 +44,7 @@ export const CreateBillingPage = () => {
     purchase_order_number: '',
     currency: '', // enum dolares o soles,
     // amount: '',  // se calcula con el total y el igv
-    //IGV: '', // se calcula con el total y el igv
+    // IGV: '', // se calcula con el total y el igv
     total: '', // por debajo se calcular la conversion en soles y dolares.
     // status: '', // enum pendiente, pagado, anulado al momento de crear es pendiente. luego en editar se podra cambiar segun el plazo de pago o simplemente anulado
     // fecha de vencimiento se calcula con el payment_deadline
@@ -65,6 +64,7 @@ export const CreateBillingPage = () => {
 
   const AmountCalculation = () => {
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
+    const [hasIGV, setHasIGV] = useState(true)
 
     const amount = useMemo(() => {
       if (!!values.total && parseFloat(values.total) > 0) {
@@ -85,17 +85,37 @@ export const CreateBillingPage = () => {
     return (
       <div className="flex flex-col items-end justify-end">
         <div className="mb-3">
-          <strong>Monto:</strong> {amount}
+          <strong>Monto Neto:</strong> {amount}
         </div>
-        <div className="mb-3">
-          <strong>IGV:</strong> {IGV}
+        <div className="mb-3 flex">
+          <Checkbox
+            className="mr-4"
+            isSelected={hasIGV}
+            onValueChange={setHasIGV}
+            size="md"
+          >
+            {hasIGV ? 'Con' : 'Sin'} IGV
+          </Checkbox>
+          {hasIGV && (
+            <p className="font-semibold">
+              IGV: <span className="font-normal">{IGV}</span>
+            </p>
+          )}
         </div>
-        <Field name="total" label="Total" component={InputBase} type="number" />
+        <Field
+          name="total"
+          label="Monto Total"
+          component={InputBase}
+          type="number"
+        />
       </div>
     )
   }
 
-  const handleSubmit = (values: FormValues, setSubmitting: (isSubmitting: boolean) => void) => {
+  const handleSubmit = (
+    values: FormValues,
+    setSubmitting: (isSubmitting: boolean) => void,
+  ) => {
     console.log('🚀 ~ handleSubmit ~ values:', values)
   }
   return (
@@ -126,19 +146,12 @@ export const CreateBillingPage = () => {
                   component={InputBase}
                 />
                 <div className="col-span-2">
-                  {/* <Field
+                  <Field
                     name="client"
+                    placeholder="Buscar Cliente..."
                     label="Cliente"
-                    component={SelectBase}
-                    options={clientOptions}
-                  /> */}
-
-
-                    <AutocompleteBase
-                      label="Cliente"
-                      placeholder="Buscar cliente"
-                    />
-                  
+                    component={Select2}
+                  />
                 </div>
 
                 <div className="col-span-2">

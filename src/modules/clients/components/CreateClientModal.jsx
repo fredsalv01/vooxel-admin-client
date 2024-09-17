@@ -95,7 +95,7 @@ export const CreateClientModal = ({ isOpen, onOpenChange, fetchData }) => {
                     <div className="col-span-1">
                       <Field
                         name="phone"
-                        label="Celular"
+                        label="Teléfono"
                         component={InputBase}
                       />
                     </div>
