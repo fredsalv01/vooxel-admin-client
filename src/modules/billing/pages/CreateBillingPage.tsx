@@ -70,20 +70,20 @@ export const CreateBillingPage = () => {
 
     const amount = useMemo(() => {
       if (!!values.total && parseFloat(values.total) > 0) {
-        return (parseFloat(values.total) / tax).toFixed(2)
+        return (parseFloat(values.total) / (hasIGV ? tax : 1)).toFixed(2)
       }
       return '0'
-    }, [values.total, tax])
+    }, [values.total, tax, hasIGV])
 
     const IGV = useMemo(() => {
       let result = '0'
-      if (!!values.total && parseFloat(values.total) > 0) {
+      if (!!values.total && parseFloat(values.total) > 0 && hasIGV) {
         result = (
           parseFloat(values.total) - parseFloat(parseInt(amount) ? amount : '0')
         ).toFixed(2)
       }
       return result
-    }, [values.total, tax])
+    }, [values.total, tax, hasIGV])
 
     return (
       <div className="flex flex-col items-end justify-end">

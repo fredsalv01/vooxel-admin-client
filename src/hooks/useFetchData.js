@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import axiosInstance from "../axios/axios";
-import useAsync from "./useAsync";
 
 export const useFetchData = ({ url, options = {}, dependencies = [] }) => {
   const [loading, setLoading] = useState(true);

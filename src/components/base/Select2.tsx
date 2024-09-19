@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import AsyncSelect from 'react-select/async'
+import axiosInstance from '../../axios/axios'
+import { debounce } from '../../lib/helpers/utils'
 
 type Select2Props = {
   name: string
@@ -23,21 +25,22 @@ export const Select2: React.FC<Select2Props> = ({
 
   const fetchOptions = async (inputValue: string) => {
     try {
-      const resp = await fetch(
-        `https://rickandmortyapi.com/api/character/?name=${inputValue}&status=alive&page=${page}`,
-      )
-
-      const data = await resp.json()
+      const { data } = await axiosInstance.get('clients', {
+        params: {
+          isActive: true,
+          input: inputValue,
+        },
+      })
       console.log('🚀 ~ fetchOptions ~ data:', data)
 
-      if (!data.info.next) {
-        console.log('🚀 ~ fetchOptions ~ data:', data)
-        setHasMore(false)
-      }
+      // if (!data.meta.) {
+      //   console.log('🚀 ~ fetchOptions ~ data:', data)
+      //   setHasMore(false)
+      // }
 
-      return data.results.map((character: any) => ({
-        value: character.id,
-        label: `${character.name} - ${character.id}`,
+      return data.items.map((item: any) => ({
+        value: item.id,
+        label: `${item.businessName} - ${item.id}`,
       }))
     } catch (error) {
       console.error(error)
@@ -49,7 +52,7 @@ export const Select2: React.FC<Select2Props> = ({
     inputValue: string,
     callback: (options: { value: number; label: string }[]) => void,
   ) => {
-    fetchOptions(inputValue).then(callback)
+    return debounce(fetchOptions(inputValue).then(callback), 300)
   }
 
   const handleMenuScrollToBottom = () => {
