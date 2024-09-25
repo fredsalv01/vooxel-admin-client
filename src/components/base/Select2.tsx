@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import AsyncSelect from 'react-select/async'
-import axiosInstance from '../../axios/axios'
-import { debounce } from '../../lib/helpers/utils'
+import { debounce } from 'lodash'
 
 type Select2Props = {
   name: string
@@ -12,48 +11,38 @@ type Select2Props = {
   [key: string]: any
 }
 
+type Option = {
+  value: number | string
+  label: string
+}
+
 export const Select2: React.FC<Select2Props> = ({
   name,
   label,
   placeholder,
   field,
   form,
+  fetchOptions,
   ...props
 }) => {
   const [page, setPage] = useState<number>(1)
   const [hasMore, setHasMore] = useState<boolean>(true)
 
-  const fetchOptions = async (inputValue: string) => {
-    try {
-      const { data } = await axiosInstance.get('clients', {
-        params: {
-          isActive: true,
-          input: inputValue,
-        },
-      })
-      console.log('🚀 ~ fetchOptions ~ data:', data)
+  const hasError =
+    (form.errors[field.name] && form.touched[field.name]) || false
 
-      // if (!data.meta.) {
-      //   console.log('🚀 ~ fetchOptions ~ data:', data)
-      //   setHasMore(false)
-      // }
+  const debouncedFetchOptions = useCallback(
+    debounce((inputValue: string, callback: (options: Option[]) => void) => {
+      fetchOptions(inputValue).then((options: Option[]) => {
+        callback(options);
+      });
+    }, 300),
+    []
+  );
 
-      return data.items.map((item: any) => ({
-        value: item.id,
-        label: `${item.businessName} - ${item.id}`,
-      }))
-    } catch (error) {
-      console.error(error)
-      return []
-    }
-  }
-
-  const loadOptions = (
-    inputValue: string,
-    callback: (options: { value: number; label: string }[]) => void,
-  ) => {
-    return debounce(fetchOptions(inputValue).then(callback), 300)
-  }
+  const loadOptions = (inputValue: string, callback: (options: Option[]) => void) => {
+    debouncedFetchOptions(inputValue, callback);
+  };
 
   const handleMenuScrollToBottom = () => {
     console.log('🚀 ~ handleMenuScrollToBottom ~ hasMore:', hasMore)
@@ -64,6 +53,7 @@ export const Select2: React.FC<Select2Props> = ({
 
   const handleChange = (option: any) => {
     console.log('🚀 ~ handleChange ~ option:', option)
+    form.setFieldValue(name, option.value)
   }
 
   return (
@@ -81,10 +71,20 @@ export const Select2: React.FC<Select2Props> = ({
             ...provided,
             zIndex: 999,
           }),
+          control: (provided: any) => ({ 
+            ...provided,
+            borderColor: hasError ? '#f31260' : '#e5e7eb',
+            border: hasError ? '2px solid #f31260' : '2px solid #e5e7eb',
+            borderRadius: '0.65rem',
+          })
         }}
         onChange={handleChange}
       />
-      <span className="small mt-2 text-xs text-danger">hola</span>
+      <span className="small mt-2 text-xs" style={
+        hasError ? { display: 'block', color: '#f31260' } : { display: 'none' }
+      }>
+        {hasError && form.errors[field.name]}
+      </span>
     </>
   )
 }

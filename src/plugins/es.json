@@ -25,5 +25,12 @@
   "endDateContract": "fecha fin de contrato",
   "startDateContract": "fecha inicio de contrato",
   "address": "dirección",
-  "currency": "moneda"
+  "currency": "moneda",
+  "purchase_order_number": "nro. de orden de compra",
+  "client": "cliente",
+  "service": "servicio",
+  "serviceType": "tipo de servicio",
+  "currencyValue": "Tipo de cambio",
+  "document_type": "tipo de documento",
+  "description": "descripción"
 }

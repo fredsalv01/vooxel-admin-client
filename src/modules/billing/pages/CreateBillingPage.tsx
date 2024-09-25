@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Formik, Form, Field, useFormikContext } from 'formik'
-import { Button, Checkbox, Textarea } from '@nextui-org/react'
+import { Button, Checkbox } from '@nextui-org/react'
+import axiosInstance from '../../../axios/axios'
 import * as Yup from 'yup'
 
 import {
@@ -9,15 +10,17 @@ import {
   InputBase,
   SelectBase,
   Select2,
+  TextareaBase,
 } from '../../../components/base'
+import { BillingRequestPost } from '@/interfaces/billing.interface'
 
 type FormValues = {
-  client: string
+  client: number,
   document_type: string
   document_number: string
   start_date: string
   payment_deadline: string
-  serviceType: string
+  serviceType: number
   description: string
   purchase_order_number: string
   currency: string
@@ -25,20 +28,24 @@ type FormValues = {
   currencyValue: string
   status: any
   statusDate: Date | null
+  hes: string
 }
 
 export const CreateBillingPage = () => {
   const [hasHes, setHasHes] = useState(false) // get ?
+  const [amountIgv, setAmountIgv] = useState(0)
+  const [finalAmout, setFinalAmount] = useState(0)
+  const [finalExpirationDate, setFinalExpirationDate] = useState('')
 
   const [initialValues, setInitialValues] = useState<FormValues>({
     // year: '', // con el año y mes se calcula el periodo, no se si es importante mostrarlo
     // month: '',
-    client: '', // jala el ruc
+    client: -1, // jala el ruc
     document_type: '', // tabla tipos
     document_number: '',
     start_date: '',
     payment_deadline: '',
-    serviceType: '', // tabla de servicios
+    serviceType: -1, // tabla de servicios
     description: '',
     purchase_order_number: '',
     currency: '', // enum dolares o soles,
@@ -51,28 +58,42 @@ export const CreateBillingPage = () => {
     currencyValue: '',
     status: false,
     statusDate: null,
+    hes: '',
   })
 
   const validationSchema = Yup.object({
-    bankName: Yup.string().required(),
-    AccountType: Yup.string().required(),
-    bankAccountNumber: Yup.string().required(),
-    cci: Yup.string().required(),
+    client: Yup.string().required(),
+    document_type: Yup.string().required(),
+    document_number: Yup.string().required(),
+    start_date: Yup.string().required(),
+    payment_deadline: Yup.string().required(),
+    serviceType: Yup.string().required(),
+    description: Yup.string().required(),
+    purchase_order_number: Yup.string().required(),
     currency: Yup.string().required(),
+    total: Yup.string().required(),
+    currencyValue: Yup.string().required(),
+    status: Yup.string().required(),
+    statusDate: Yup.date().required(),
+    hes: Yup.string().when('hasHes', (hasHes, schema) => 
+      hasHes ? schema.required() : schema.notRequired()
+    ),
   })
 
   const tax = 1.18
 
+  const [hasIGV, setHasIGV] = useState(true)
+
   const AmountCalculated = () => {
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
-    const [hasIGV, setHasIGV] = useState(true)
-    // si es no igv entonces el deposito es el 100% para el backend
 
     const amount = useMemo(() => {
+      let result = '0'
       if (!!values.total && parseFloat(values.total) > 0) {
-        return (parseFloat(values.total) / (hasIGV ? tax : 1)).toFixed(2)
+        result = (parseFloat(values.total) / (hasIGV ? tax : 1)).toFixed(2)
       }
-      return '0'
+      setFinalAmount(parseFloat(result))
+      return result
     }, [values.total, tax, hasIGV])
 
     const IGV = useMemo(() => {
@@ -82,6 +103,7 @@ export const CreateBillingPage = () => {
           parseFloat(values.total) - parseFloat(parseInt(amount) ? amount : '0')
         ).toFixed(2)
       }
+      setAmountIgv(parseFloat(result))
       return result
     }, [values.total, tax, hasIGV])
 
@@ -126,6 +148,7 @@ export const CreateBillingPage = () => {
           startDate.setDate(startDate.getDate() + paymentDeadline),
         )
         const expDate = expirationDate.toISOString().split('T')[0]
+        setFinalExpirationDate(expDate)
         const [year, month, day] = expDate.split('-')
 
         if (year && month && day) {
@@ -138,8 +161,8 @@ export const CreateBillingPage = () => {
     }, [values.payment_deadline, values.start_date])
 
     return (
-      <div className="flex flex-col p-1">
-        <label className="font-bold">Fecha de Vencimiento</label>
+      <div className="flex flex-col">
+        <label className="font-semibold">Fecha de Vencimiento</label>
         <p>{expirationDate}</p>
       </div>
     )
@@ -167,8 +190,72 @@ export const CreateBillingPage = () => {
     values: FormValues,
     setSubmitting: (isSubmitting: boolean) => void,
   ) => {
-    console.log('🚀 ~ handleSubmit ~ values:', values)
+    
+
+
+    const body: BillingRequestPost = {
+      clientId: values.client,
+      documentType: values.document_type,
+      documentNumber: values.document_number,
+      startDate: values.start_date,
+      paymentDeadline: values.payment_deadline,
+      serviceId: values.serviceType,
+      descripcion: values.description,
+      purchaseOrderNumber: values.purchase_order_number,
+      currency: values.currency,
+      currencyValue: parseInt(parseFloat(values.currencyValue).toFixed(2)),
+      amount: finalAmout,
+      hasIGV: hasIGV,
+      igv: amountIgv,
+      total: parseFloat(values.total),
+      billingState: values.status,
+      expirationDate: finalExpirationDate,
+      hashes: hasHes,
+      hes: values.hes,
+    }
   }
+
+
+  const fetchClients = async (inputValue: string, page: number) => {
+    try {
+      const { data } = await axiosInstance.get('clients', {
+        params: {
+          isActive: true,
+          input: inputValue,
+          page
+        },
+      })
+
+      return data.items.map((item: any) => ({
+        value: item.id,
+        label: item.businessName,
+      }))
+
+    } catch (error) {
+      console.error(error)
+      return []
+    }
+  }
+
+  const fetchBillingServices = async (inputValue: string, page: number) => { 
+    try {
+      const { data } = await axiosInstance.get('billing-service', {
+        params: {
+          input: inputValue,
+        },
+      })
+
+      return data.map((item: any) => ({
+        value: item.id,
+        label: item.name,
+      }))
+
+    } catch (error) {
+      console.error(error)
+      return []
+    }
+  }
+
   return (
     <CardBase className="container">
       <h2 className="mb-4 text-2xl font-semibold">Crear Venta</h2>
@@ -207,6 +294,7 @@ export const CreateBillingPage = () => {
                     name="client"
                     placeholder="Buscar Cliente..."
                     label="Cliente"
+                    fetchOptions={fetchClients}
                     component={Select2}
                   />
                 </div>
@@ -230,14 +318,16 @@ export const CreateBillingPage = () => {
                 </div>
                 {hasHes && (
                   <div className="col-span-1">
-                    <Field name="Hes" label="HES" component={InputBase} />
+                    <Field name="hes" label="HES" component={InputBase} />
                   </div>
                 )}
                 <div className="col-span-2">
                   <Field
                     name="description"
                     label="Descripción"
-                    component={Textarea}
+                    component={
+                      TextareaBase
+                    }
                   />
                 </div>
               </section>
@@ -254,36 +344,23 @@ export const CreateBillingPage = () => {
                   component={InputBase}
                 />
                 <ExpirationDateCalculated />
-                <Field
-                  name="serviceType"
-                  label="Servicio"
-                  component={SelectBase}
-                  options={[
-                    {
-                      label: 'Consultoría',
-                      value: 'CONSULTORIA',
-                    },
-                    {
-                      label: 'Licencia',
-                      value: 'LICENCIA',
-                    },
-                    {
-                      label: 'Capacitación',
-                      value: 'CAPACITACION',
-                    },
-                    {
-                      label: 'otros',
-                      value: 'OTROS',
-                    },
-                  ]}
-                />
+
+                <div className="col-span-1">
+                  <Field
+                    name="serviceType"
+                    placeholder="Buscar servicio..."
+                    label="Servicio"
+                    fetchOptions={fetchBillingServices}
+                    component={Select2}
+                  />
+                </div>
                 <Field
                   name="currency"
                   label="Moneda"
                   component={SelectBase}
                   options={[
-                    { label: 'Soles', value: 'PEN' },
-                    { label: 'Dólares', value: 'USD' },
+                    { label: 'Soles', value: 'SOLES' },
+                    { label: 'Dólares', value: 'DOLARES' },
                   ]}
                 />
 

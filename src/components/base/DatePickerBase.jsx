@@ -10,7 +10,6 @@ export const DatePickerBase = ({
   ...props
 }) => {
   const handleDatePickerInput = (newValue) => {
-    console.log('🚀 ~ handleDatePickerInput ~ newValue:', newValue)
     const { year, month, day } = newValue
     const date = `${year}-${('0' + month).slice(-2)}-${('0' + day).slice(-2)}`
     form.setFieldValue(field.name, date)
