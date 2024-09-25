@@ -199,7 +199,7 @@ export const CreateBillingPage = () => {
       description: values.description,
       purchaseOrderNumber: values.purchase_order_number,
       currency: values.currency,
-      currencyValue: parseInt(parseFloat(values.currencyValue).toFixed(2)),
+      currencyValue: parseFloat(values.currencyValue) * 100 / 100,
       amount: finalAmount,
       hasIGV: hasIGV,
       igv: IGV,
