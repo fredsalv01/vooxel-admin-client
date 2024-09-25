@@ -3,7 +3,7 @@ export type BillingRequestPost = {
   documentType: string;
   documentNumber: string;
   startDate: string;
-  paymentDeadline: string;
+  paymentDeadline: number;
   serviceId: number;
   descripcion: string;
   purchaseOrderNumber: string;
@@ -11,7 +11,7 @@ export type BillingRequestPost = {
   currencyValue: number;
   amount: number;
   hasIGV: boolean;
-  igv: number;
+  igv: string;
   total: number;
   billingState: string;
   expirationDate: string;

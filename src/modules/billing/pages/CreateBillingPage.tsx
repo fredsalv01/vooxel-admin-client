@@ -1,8 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Formik, Form, Field, useFormikContext } from 'formik'
 import { Button, Checkbox } from '@nextui-org/react'
-import axiosInstance from '../../../axios/axios'
 import * as Yup from 'yup'
+
+import axiosInstance from '../../../axios/axios'
+import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
 
 import {
   CardBase,
@@ -26,16 +28,16 @@ type FormValues = {
   currency: string
   total: string
   currencyValue: string
-  status: any
+  status: string
   statusDate: Date | null
   hes: string
 }
 
 export const CreateBillingPage = () => {
   const [hasHes, setHasHes] = useState(false) // get ?
-  const [amountIgv, setAmountIgv] = useState(0)
-  const [finalAmout, setFinalAmount] = useState(0)
-  const [finalExpirationDate, setFinalExpirationDate] = useState('')
+  const tax = 1.18
+
+  const [hasIGV, setHasIGV] = useState(true)
 
   const [initialValues, setInitialValues] = useState<FormValues>({
     // year: '', // con el año y mes se calcula el periodo, no se si es importante mostrarlo
@@ -56,7 +58,7 @@ export const CreateBillingPage = () => {
     // fecha de vencimiento se calcula con el payment_deadline
     // dias acumulados es para la tabla de facturacion para saber la mora en caso que aun no se ha pagado, igual debe mostrarse ?
     currencyValue: '',
-    status: false,
+    status: '',
     statusDate: null,
     hes: '',
   })
@@ -74,38 +76,33 @@ export const CreateBillingPage = () => {
     total: Yup.string().required(),
     currencyValue: Yup.string().required(),
     status: Yup.string().required(),
-    statusDate: Yup.date().required(),
-    hes: Yup.string().when('hasHes', (hasHes, schema) => 
-      hasHes ? schema.required() : schema.notRequired()
-    ),
+    statusDate: Yup.date().when('status', (status: string[], schema) => {
+      console.log("🚀 ~ CreateBillingPage ~ status:", status)
+      return status.includes('pending') ? schema.required() : schema.notRequired()
+    })
   })
 
-  const tax = 1.18
+  const calculateAmount = (total: string, hasIGV: boolean) => {
+    if (!!total && parseFloat(total) > 0) {
+      const tax = 1.18;
+      return (parseFloat(total) / (hasIGV ? tax : 1)).toFixed(2);
+    }
+    return '0';
+  };
 
-  const [hasIGV, setHasIGV] = useState(true)
+  const calculateIGV = (total: string, amount: string) => {
+    if (!!total && parseFloat(total) > 0 && hasIGV) {
+      return (parseFloat(total) - parseFloat(amount)).toFixed(2);
+    }
+    return '0';
+  };
 
   const AmountCalculated = () => {
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
 
-    const amount = useMemo(() => {
-      let result = '0'
-      if (!!values.total && parseFloat(values.total) > 0) {
-        result = (parseFloat(values.total) / (hasIGV ? tax : 1)).toFixed(2)
-      }
-      setFinalAmount(parseFloat(result))
-      return result
-    }, [values.total, tax, hasIGV])
+    const amount = useMemo(() => calculateAmount(values.total, hasIGV), [values.total, tax, hasIGV])
 
-    const IGV = useMemo(() => {
-      let result = '0'
-      if (!!values.total && parseFloat(values.total) > 0 && hasIGV) {
-        result = (
-          parseFloat(values.total) - parseFloat(parseInt(amount) ? amount : '0')
-        ).toFixed(2)
-      }
-      setAmountIgv(parseFloat(result))
-      return result
-    }, [values.total, tax, hasIGV])
+    const IGV = useMemo(() => calculateIGV(values.total, amount), [values.total, tax, hasIGV])
 
     return (
       <div className="flex flex-col items-end justify-end">
@@ -137,28 +134,24 @@ export const CreateBillingPage = () => {
     )
   }
 
-  const ExpirationDateCalculated = () => {
-    const { values }: { values: FormValues } = useFormikContext() // Access Formik values
+  const calculateExpirationDate = (paymentDeadlineValue: string, startDateValue: string) => {
 
-    const expirationDate = useMemo(() => {
-      if (!!values.payment_deadline && !!values.start_date) {
-        const startDate = new Date(values.start_date)
-        const paymentDeadline = parseInt(values.payment_deadline)
+    if (!!paymentDeadlineValue && !!startDateValue) {
+          const startDate = new Date(startDateValue)
+        const paymentDeadline = parseInt(paymentDeadlineValue)
         const expirationDate = new Date(
           startDate.setDate(startDate.getDate() + paymentDeadline),
         )
-        const expDate = expirationDate.toISOString().split('T')[0]
-        setFinalExpirationDate(expDate)
-        const [year, month, day] = expDate.split('-')
+      console.log("🚀 ~ calculateExpirationDate ~ expirationDate:", expirationDate)
+      return expirationDate.toISOString().split('T')[0];
+    }
+    return '--';
+  }
 
-        if (year && month && day) {
-          return `${day}/${month}/${year}`
-        }
+  const ExpirationDateCalculated = () => {
+    const { values }: { values: FormValues } = useFormikContext() // Access Formik values
 
-        return
-      }
-      return '--'
-    }, [values.payment_deadline, values.start_date])
+    const expirationDate = useMemo(() => calculateExpirationDate(values.payment_deadline, values.start_date), [values.payment_deadline, values.start_date])
 
     return (
       <div className="flex flex-col">
@@ -186,32 +179,45 @@ export const CreateBillingPage = () => {
     )
   }
 
-  const handleSubmit = (
+  const handleSubmit = async (
     values: FormValues,
     setSubmitting: (isSubmitting: boolean) => void,
   ) => {
+    setSubmitting(true);
+    const amount = calculateAmount(values.total, hasIGV);
+    const IGV = calculateIGV(values.total, amount);
+    const finalAmount = parseFloat(values.total);
+    const finalExpirationDate = calculateExpirationDate(values.payment_deadline, values.start_date);
     
-
-
     const body: BillingRequestPost = {
       clientId: values.client,
       documentType: values.document_type,
       documentNumber: values.document_number,
       startDate: values.start_date,
-      paymentDeadline: values.payment_deadline,
+      paymentDeadline: parseInt(values.payment_deadline),
       serviceId: values.serviceType,
       descripcion: values.description,
       purchaseOrderNumber: values.purchase_order_number,
       currency: values.currency,
       currencyValue: parseInt(parseFloat(values.currencyValue).toFixed(2)),
-      amount: finalAmout,
+      amount: finalAmount,
       hasIGV: hasIGV,
-      igv: amountIgv,
+      igv: IGV,
       total: parseFloat(values.total),
       billingState: values.status,
       expirationDate: finalExpirationDate,
       hashes: hasHes,
       hes: values.hes,
+    }
+
+    try {
+      await axiosInstance.post('billing', body);
+      ToastNotification.showSuccess('Venta creada correctamente');
+    } catch (error) {
+      console.log(error);
+      ToastNotification.showError('Error al crear la venta');
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -375,10 +381,10 @@ export const CreateBillingPage = () => {
                   label="Estado"
                   component={SelectBase}
                   options={[
-                    { label: 'Pendiente', value: 'pending' },
-                    { label: 'Cancelado', value: 'canceled' },
-                    { label: 'Anulado', value: 'anulado' },
-                    { label: 'Factoring', value: 'factoring' },
+                    { label: 'Pendiente', value: 'PENDIENTE' },
+                    { label: 'Cancelado', value: 'CANCELADO' },
+                    { label: 'Anulado', value: 'ANULADO' },
+                    { label: 'Factoring', value: 'FACTORING' },
                   ]}
                 />
 

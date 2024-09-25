@@ -17,7 +17,6 @@ type Option = {
 }
 
 export const Select2: React.FC<Select2Props> = ({
-  name,
   label,
   placeholder,
   field,
@@ -53,7 +52,7 @@ export const Select2: React.FC<Select2Props> = ({
 
   const handleChange = (option: any) => {
     console.log('🚀 ~ handleChange ~ option:', option)
-    form.setFieldValue(name, option.value)
+    form.setFieldValue(field.name, option.value)
   }
 
   return (
