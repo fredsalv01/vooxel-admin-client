@@ -29,7 +29,7 @@ type FormValues = {
   total: string
   currencyValue: string
   status: string
-  statusDate: Date | null
+  statusDate: string
   hes: string
 }
 
@@ -59,7 +59,7 @@ export const CreateBillingPage = () => {
     // dias acumulados es para la tabla de facturacion para saber la mora en caso que aun no se ha pagado, igual debe mostrarse ?
     currencyValue: '',
     status: '',
-    statusDate: null,
+    statusDate: '',
     hes: '',
   })
 
@@ -78,7 +78,7 @@ export const CreateBillingPage = () => {
     status: Yup.string().required(),
     statusDate: Yup.date().when('status', (status: string[], schema) => {
       console.log("🚀 ~ CreateBillingPage ~ status:", status)
-      return status.includes('pending') ? schema.required() : schema.notRequired()
+      return status.includes('PENDIENTE') ? schema.required() : schema.notRequired()
     })
   })
 
@@ -166,9 +166,9 @@ export const CreateBillingPage = () => {
 
     return (
       <>
-        {values.status !== 'pending' ? (
+        {values.status !== 'PENDIENTE' ? (
           <Field
-            name="dateStatus"
+            name="statusDate"
             label="Fecha del estado"
             component={DatePickerBase}
           />
@@ -196,7 +196,7 @@ export const CreateBillingPage = () => {
       startDate: values.start_date,
       paymentDeadline: parseInt(values.payment_deadline),
       serviceId: values.serviceType,
-      descripcion: values.description,
+      description: values.description,
       purchaseOrderNumber: values.purchase_order_number,
       currency: values.currency,
       currencyValue: parseInt(parseFloat(values.currencyValue).toFixed(2)),
@@ -205,6 +205,7 @@ export const CreateBillingPage = () => {
       igv: IGV,
       total: parseFloat(values.total),
       billingState: values.status,
+      billingStateDate: values.statusDate,
       expirationDate: finalExpirationDate,
       hashes: hasHes,
       hes: values.hes,
