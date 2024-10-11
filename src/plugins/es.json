@@ -32,5 +32,7 @@
   "serviceType": "tipo de servicio",
   "currencyValue": "Tipo de cambio",
   "document_type": "tipo de documento",
-  "description": "descripción"
+  "description": "descripción",
+  "conversionRate": "tipo de cambio",
+  "state2": "estado"
 }

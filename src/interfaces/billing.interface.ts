@@ -8,7 +8,7 @@ export type BillingRequestPost = {
   description: string;
   purchaseOrderNumber: string;
   currency: string;
-  currencyValue: number;
+  conversionRate: number;
   amount: number;
   hasIGV: boolean;
   igv: string;

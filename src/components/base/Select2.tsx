@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import AsyncSelect from 'react-select/async'
 import { debounce } from 'lodash'
 
@@ -22,8 +22,10 @@ export const Select2: React.FC<Select2Props> = ({
   field,
   form,
   fetchOptions,
+  selectedItem = {},
   ...props
 }) => {
+  const [selectedOption, setSelectedOption] = useState<Option | null>(null);
   const [page, setPage] = useState<number>(1)
   const [hasMore, setHasMore] = useState<boolean>(true)
 
@@ -55,6 +57,17 @@ export const Select2: React.FC<Select2Props> = ({
     form.setFieldValue(field.name, option.value)
   }
 
+  // useEffect(() => {
+  //   // Set initial value if form value is already set
+  //   if (!!selectedItem && Object.keys(selectedItem).length) {
+  //     // const initialOption = {
+  //     //   value: form.values[field.name],
+  //     //   label: form.values[field.name], // Adjust this if you have a different label
+  //     // };
+  //     setSelectedOption(selectedItem);
+  //   }
+  // }, [field.name, form.values, fetchOptions]);
+
   return (
     <>
       <p className="mb-1 font-semibold">{label}</p>
@@ -64,6 +77,7 @@ export const Select2: React.FC<Select2Props> = ({
         cacheOptions
         loadOptions={loadOptions}
         defaultOptions
+        // value={selectedOption}
         onMenuScrollToBottom={handleMenuScrollToBottom}
         styles={{
           menu: (provided: any) => ({

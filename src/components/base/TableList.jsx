@@ -72,11 +72,12 @@ export const TableList = ({
   return (
     <>
       <Table
+        isStriped
         aria-label="Example table with custom cells, pagination and sorting"
         isHeaderSticky
         bottomContent={computedBottomContent}
         bottomContentPlacement="outside"
-        classNames={{ wrapper: 'max-h-[382px]' }}
+        classNames={{ wrapper: '' }}
         selectedKeys={selectedKeys}
         topContent={computedTopContent}
         topContentPlacement="outside"

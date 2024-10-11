@@ -1,11 +1,12 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Formik, Form, Field, useFormikContext } from 'formik'
 import { Button, Checkbox } from '@nextui-org/react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import * as Yup from 'yup'
 
 import axiosInstance from '../../../axios/axios'
 import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
+import { useFetchData } from '../../../hooks/useFetchData'
 
 import {
   CardBase,
@@ -31,12 +32,26 @@ type FormValues = {
   conversionRate: string
   status: string
   // statusDate: string
-  hes: string
+  hes: string,
+  state2: '',
+  depositDate: '',
+  depositAmountDollars: '',
+  depositAmountSoles: '',
+  depositDate2: '',
+  depositAmountDollars2: '',
+  depositAmountSoles2: '',
 }
 
-export const CreateBillingPage = () => {
+export const EditBillingPage = () => {
 
   const navigate = useNavigate();
+  const { id } = useParams()
+
+  const { data, isLoading, fetchData } = useFetchData({
+    url: `/billing/${id}`,
+  }); 
+  const [selectedClient, setSelectedClient] = useState<any>(null)
+  const [selectedServiceName, setSelectedServiceName] = useState<any>(null)
   const [hasHes, setHasHes] = useState(false) // get ?
   const tax = 1.18
 
@@ -64,7 +79,54 @@ export const CreateBillingPage = () => {
     status: '',
     // statusDate: '',
     hes: '',
+    state2: '',
+    depositDate: '',
+    depositAmountDollars: '',
+    depositAmountSoles: '',
+    depositDate2: '',
+    depositAmountDollars2: '',
+    depositAmountSoles2: '',
   })
+
+  
+  useEffect(() => { 
+    if (!!data) {
+      console.log("🚀 ~ fetchBilling ~ data", data)
+      setInitialValues({
+        client: data.client.id,
+        document_type: data.documentType,
+        document_number: data.documentNumber,
+        start_date: data.startDate,
+        payment_deadline: data.paymentDeadline.toString(),
+        serviceType: data.serviceId,
+        description: data.description,
+        purchase_order_number: data.purchaseOrderNumber,
+        currency: data.currency,
+        total: data.total.toString(),
+        conversionRate: data?.conversionRate,
+        status: data.billingState,
+        hes: data.hes,
+        state2: data.state2,
+        depositDate: data.depositDate,
+        depositAmountDollars: data?.depositAmountDollars,
+        depositAmountSoles: data?.depositAmountSoles,
+        depositDate2: data.depositDate2,
+        depositAmountDollars2: data?.depositAmountDollars2,
+        depositAmountSoles2: data.depositAmountSoles2
+
+      })
+
+      setSelectedClient({
+        value: data.client.id,
+        label: data.client.businessName
+      })
+
+      setSelectedServiceName({
+        value: data.service.id,
+        label: data.service.name
+      })
+    }
+  }, [data])
 
   const validationSchema = Yup.object({
     client: Yup.string().required(),
@@ -79,6 +141,14 @@ export const CreateBillingPage = () => {
     total: Yup.string().required(),
     conversionRate: Yup.number().required().min(0).max(5),
     status: Yup.string().required(),
+    state2: Yup.string().required(),
+    depositDate: Yup.string().required(),
+    depositAmountDollars: Yup.string().required(),
+    depositAmountSoles: Yup.string().required(),
+    depositDate2: Yup.string().required(),
+    depositAmountDollars2: Yup.string().required(),
+    depositAmountSoles2: Yup.string().required(),
+
     // statusDate: Yup.date().when('status', (status: string[], schema) => {
     //   // solo para cancelado y factoring
     //   return !status.includes('PENDIENTE') ? schema.required() : schema.notRequired()
@@ -196,7 +266,7 @@ export const CreateBillingPage = () => {
     }
 
     try {
-      await axiosInstance.post('billing', body);
+      await axiosInstance.patch('billing', body);
       ToastNotification.showSuccess('Venta creada correctamente');
       navigate('/billing');
     } catch (error) {
@@ -250,7 +320,7 @@ export const CreateBillingPage = () => {
 
   return (
     <CardBase className="container">
-      <h2 className="mb-4 text-2xl font-semibold">Crear Venta</h2>
+      <h2 className="mb-4 text-2xl font-semibold">Editar Venta</h2>
 
       <Formik
         initialValues={initialValues}
@@ -287,6 +357,7 @@ export const CreateBillingPage = () => {
                     placeholder="Buscar Cliente..."
                     label="Cliente"
                     fetchOptions={fetchClients}
+                    selectedItem={selectedClient}
                     component={Select2}
                   />
                 </div>
@@ -343,6 +414,7 @@ export const CreateBillingPage = () => {
                     placeholder="Buscar servicio..."
                     label="Servicio"
                     fetchOptions={fetchBillingServices}
+                    selectedItem={selectedServiceName}
                     component={Select2}
                   />
                 </div>
@@ -379,6 +451,65 @@ export const CreateBillingPage = () => {
                 </div>
               </section>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-0 border-green-500 md:border-t-2 pt-3 mt-3">
+                  <div className="grid grid-cols-1 gap-4">
+                    <h4>Depósito 1</h4>
+                    <Field
+                      name="depositDate"
+                      label="Fecha de depósito"
+                      component={DatePickerBase}
+                    />
+                      
+                    <Field
+                      name="depositAmountDollars"
+                      type="number"
+                      label="Monto dólares"
+                      component={InputBase}
+                    />
+
+                    <Field
+                      name="depositAmountSoles"
+                      type="number"
+                      label="Monto soles"
+                      component={InputBase}
+                    />
+
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    <h4>Depósito 2</h4>
+                    <Field
+                      name="state2"
+                      label="Estado"
+                      component={SelectBase}
+                      options={[
+                        { label: 'Pendiente', value: 'PENDIENTE' },
+                        { label: 'Cancelado', value: 'CANCELADO' },
+                        { label: 'Anulado', value: 'ANULADO' },
+                        { label: 'Factoring', value: 'FACTORING' },
+                      ]}
+                    />
+                    <Field
+                      name="depositDate2"
+                      label="Fecha de emisión"
+                      component={DatePickerBase}
+                    />
+                      
+                    <Field
+                      name="depositAmountDollars2"
+                      type="number"
+                      label="Monto dólares"
+                      component={InputBase}
+                    /> 
+                    <Field
+                      name="depositAmountSoles2"
+                      type="number"
+                      label="Monto soles"
+                      component={InputBase}
+                    />
+                  </div>
+                </div>
+
             <div className="mt-4 flex justify-end">
               <Button
                 color="primary"

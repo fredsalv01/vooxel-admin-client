@@ -99,7 +99,7 @@ export const CreateClientModal = ({ isOpen, onOpenChange, fetchData }) => {
                         component={InputBase}
                       />
                     </div>
-                    <div className="col-span-1">
+                    <div className="col-span-2">
                       <Field
                         name="address"
                         label="Dirección"

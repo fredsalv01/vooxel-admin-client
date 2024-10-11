@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Button, useDisclosure } from '@nextui-org/react'
+import { Button, Chip, useDisclosure } from '@nextui-org/react'
 import { Link } from 'react-router-dom'
 
 import Slot from '../../../components/Slot'
@@ -7,63 +7,68 @@ import { TableList } from '../../../components/base'
 import { useQueryPromise } from '../../../hooks/useQueryPromise'
 import { EditIcon, PlusIcon } from '../../../components/icons'
 
+// orden de las columnas
+// AÑO - MES - T/D - NRO DOC - FECHA DE EMISION - PLAZO DE PAGO -
+// CLIENTE - RUC - TIPO DE SERVICIO - DESCRIPCION - OC - MONEDA
+// T/C - MONTO NETO S/ - IGV S/ - MONTO TOTAL S/ - MONTO NETO US$ - IGV US$ - MONTO TOTAL US$
+// ESTADO - MES DEPOSITO - FECHA DEL DEPOSITO
+// FECHA DE VENCIMIENTO
+// DIAS ACUMULADOS
+
+// agregar un tooltip para mostrar
 const headersTable = [
-  { name: 'Cliente', uid: 'clientName' },
-  { name: 'Tipo de documento', uid: 'documentType' },
+  { name: 'Año', uid: 'year' },
+  { name: 'Mes', uid: 'month' },
+  { name: 'T/D', uid: 'documentType' },
   { name: 'Nro. de documento', uid: 'documentNumber' },
-  { name: 'Fecha de inicio', uid: 'startDate' },
-  { name: 'Fecha de vencimiento', uid: 'paymentDeadline' },
+  { name: 'Fecha de emisión', uid: 'startDate' },
+  { name: 'Plazo de pago', uid: 'paymentDeadline' },
+  { name: 'Cliente', uid: 'client' },
+  { name: 'RUC', uid: 'clientRuc' },
+  { name: 'Tipo de servicio', uid: 'serviceName' },
   { name: 'Descripción', uid: 'description' },
-  { name: 'Nro. de orden de compra', uid: 'purchaseOrderNumber' },
+  { name: 'Nro. OC', uid: 'purchaseOrderNumber' },
   { name: 'Moneda', uid: 'currency' },
-  { name: 'Valor de la moneda', uid: 'currencyValue' },
-  { name: 'Monto', uid: 'amount' },
-  { name: '¿Tiene IGV?', uid: 'hasIGV' },
+  { name: 'T/C', uid: 'conversionRate' },
+  { name: 'Monto Neto', uid: 'amount' },
   { name: 'IGV', uid: 'igv' },
-  { name: 'Total', uid: 'total' },
-  { name: 'Estado de facturación', uid: 'billingState' },
-  { name: 'Fecha de estado de facturación', uid: 'billingStateDate' },
+  { name: 'Monto Total', uid: 'total' },
+  { name: 'Monto Neto US$', uid: 'currencyConversionAmount' },
+  { name: 'IGV US$', uid: 'igvConversionAmount' },
+  { name: 'Monto Total US$', uid: 'totalConversionAmount' },
+  { name: 'Estado', uid: 'billingState' },
+  { name: 'Mes depósito', uid: 'depositMonth' },
+  { name: 'Fecha depósito', uid: 'depositDate' },
   { name: 'Fecha de vencimiento', uid: 'expirationDate' },
   { name: 'Días acumulados', uid: 'accumulatedDays' },
-  { name: 'Hashes', uid: 'hashes' },
-  { name: 'HES', uid: 'hes' },
-  { name: 'Monto de conversión de moneda', uid: 'currencyConversionAmount' },
-  { name: 'IGV en dólares', uid: 'igvConversionDollars' },
-  { name: 'Monto total en dólares', uid: 'totalAmountDollars' },
-  { name: 'Mes de pago', uid: 'paymentMonth' },
-  { name: 'Creado en', uid: 'createdAt' },
-  { name: 'Actualizado en', uid: 'updatedAt' },
-  { name: 'Servicio', uid: 'serviceName' },
   { name: 'Acciones', uid: 'actions' },
 ]
 
 const INITIAL_VISIBLE_COLUMNS = [
-  'clientName',
+  'year',
+  'month',
   'documentType',
   'documentNumber',
   'startDate',
   'paymentDeadline',
+  'client',
+  'clientRuc',
+  'serviceName',
   'description',
   'purchaseOrderNumber',
   'currency',
-  'currencyValue',
+  'conversionRate',
   'amount',
-  'hasIGV',
   'igv',
   'total',
-  'billingState',
-  'billingStateDate',
-  'expirationDate',
-  'accumulatedDays',
-  'hashes',
-  'hes',
   'currencyConversionAmount',
   'igvConversionDollars',
-  'totalAmountDollars',
-  'paymentMonth',
-  'createdAt',
-  'updatedAt',
-  'serviceName',
+  'totalConversionAmount',
+  'billingState',
+  'depositMonth',
+  'depositDate',
+  'expirationDate',
+  'accumulatedDays',
   'actions',
 ]
 
@@ -78,13 +83,75 @@ export const BillingList = () => {
     setQuerSearch,
   } = useQueryPromise({ url: 'billing', key: 'billing' })
 
+  const addCurrency = (currency, cellValue) => {
+    const language = {
+      SOLES: ['PEN', 'es-PE'],
+      DOLARES: ['USD', 'en-US'],
+    }
+
+    const [symbolMoney, lang] = language[currency]
+
+    return new Intl.NumberFormat(lang, {
+      style: 'currency',
+      currency: symbolMoney,
+    }).format(cellValue)
+  }
+
+  const getDayMora = (expirationDate) => {
+    const date = new Date(expirationDate)
+    const today = new Date()
+    const diffTime = date - today
+    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    // show years, months, days
+    const diffYears = Math.abs(Math.floor(diffDays / 365))
+    const diffMonths = Math.abs(Math.floor((diffDays % 365) / 30))
+    diffDays = Math.abs(Math.floor((diffDays % 365) % 30))
+
+    // concat if not 0
+    if (diffYears === 0 && diffMonths === 0) return `${diffDays} días`
+    if (diffYears === 0) return `${diffMonths} meses, ${diffDays} días`
+    return `${diffYears} años, ${diffMonths} meses, ${diffDays} días`
+  }
+
   const switchRenderCell = (item, columnKey) => {
     const cellValue = item[columnKey]
     switch (columnKey) {
+      case 'paymentDeadline':
+        return `${cellValue} días`
+      case 'amount':
+      case 'igv':
+      case 'total':
+        return addCurrency(item.currency, cellValue)
+      case 'currencyConversionAmount':
+      case 'igvConversionDollars':
+      case 'totalConversionAmount':
+        return addCurrency(
+          item.currency === 'DOLARES' ? 'SOLES' : 'DOLARES',
+          cellValue,
+        )
+      case 'billingState':
+        const colors = {
+          CANCELADO: 'success',
+          PENDIENTE: 'warning',
+          ANULADO: 'danger',
+          FACTORING: 'info',
+        }
+        return (
+          <Chip
+            className="gap-1 border-none capitalize text-default-600"
+            color={colors[cellValue]}
+            size="md"
+            variant="dot"
+          >
+            {cellValue}
+          </Chip>
+        )
+      case 'accumulatedDays':
+        return getDayMora(item.expirationDate)
       case 'actions':
         return (
           <Link
-            to={`/billing/${item.id}/detail`}
+            to={`/billing/${item.id}/edit`}
             className="cursor-pointer text-lg text-default-400 active:opacity-50"
           >
             <EditIcon />
