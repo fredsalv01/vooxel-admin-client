@@ -4,48 +4,55 @@ export function capitalize(str) {
 
 export function getValueFromFieldFormik(arr, str) {
   if (str.length === 0) {
-    return;
+    return
   }
-  const path = str.split('.');
+  const path = str.split('.')
   let result = arr
   for (let i = 0; i < path.length; i++) {
     if (result && typeof result[path[i]] !== 'undefined') {
-      result = result[path[i]];
+      result = result[path[i]] ?? ''
     } else {
-      result = '';
-      break;
+      result = ''
+      break
     }
   }
-  return result;
+  return result ?? ''
 }
 
 export function setPropsItem(editItem, arr = {}) {
   for (const key in editItem) {
     if (Object.hasOwnProperty.call(editItem, key)) {
-      const element = editItem[key];
+      const element = editItem[key]
       if (!!element) {
         if (key === 'bankAccount') {
-          console.log(typeof element);
+          console.log(typeof element)
         }
         if (typeof element === 'object') {
-          setPropsItem(element);
+          setPropsItem(element)
         } else {
-          arr[key] = element;
+          arr[key] = element
         }
       }
     }
   }
-  return arr;
+  return arr
 }
-
 
 // Debounce function
 export function debounce(func, delay) {
-  let timer;
+  let timer
   return (...args) => {
-    if (timer) clearTimeout(timer);
+    if (timer) clearTimeout(timer)
     timer = setTimeout(() => {
-      func(...args);
-    }, delay);
-  };
-};
+      func(...args)
+    }, delay)
+  }
+}
+
+// convert string to number with to decimals
+
+export function stringToNumber(str, decimals = 2) {
+  if (str === '') return 0
+  const number = parseFloat(str)
+  return parseFloat(number.toFixed(decimals))
+}

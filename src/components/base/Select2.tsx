@@ -46,27 +46,21 @@ export const Select2: React.FC<Select2Props> = ({
   };
 
   const handleMenuScrollToBottom = () => {
-    console.log('🚀 ~ handleMenuScrollToBottom ~ hasMore:', hasMore)
     if (hasMore) {
       setPage((prevPage) => prevPage + 1)
     }
   }
 
   const handleChange = (option: any) => {
-    console.log('🚀 ~ handleChange ~ option:', option)
     form.setFieldValue(field.name, option.value)
+    setSelectedOption(option)
   }
 
-  // useEffect(() => {
-  //   // Set initial value if form value is already set
-  //   if (!!selectedItem && Object.keys(selectedItem).length) {
-  //     // const initialOption = {
-  //     //   value: form.values[field.name],
-  //     //   label: form.values[field.name], // Adjust this if you have a different label
-  //     // };
-  //     setSelectedOption(selectedItem);
-  //   }
-  // }, [field.name, form.values, fetchOptions]);
+  useEffect(() => {
+    if (!!selectedItem && Object.keys(selectedItem).length) {
+      setSelectedOption(selectedItem);
+    }
+  }, [field.name, form.values, fetchOptions]);
 
   return (
     <>
@@ -77,7 +71,7 @@ export const Select2: React.FC<Select2Props> = ({
         cacheOptions
         loadOptions={loadOptions}
         defaultOptions
-        // value={selectedOption}
+        value={selectedOption}
         onMenuScrollToBottom={handleMenuScrollToBottom}
         styles={{
           menu: (provided: any) => ({

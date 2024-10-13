@@ -16,8 +16,15 @@ export type BillingRequestPost = {
   billingState: string;
   billingStateDate?: string;
   expirationDate: string;
-  hashes: boolean;
+  hasHes: boolean;
   hes: string;
+  state2?: string;
+  depositDate?: string;
+  depositAmountDollars?: number
+  depositAmountSoles?: number
+  depositDate2?: string;
+  depositAmountDollars2?: number;
+  depositAmountSoles2?: number;
   accumulatedDays?: number; // only client
 }
 

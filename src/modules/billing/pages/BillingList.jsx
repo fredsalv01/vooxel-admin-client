@@ -147,7 +147,12 @@ export const BillingList = () => {
           </Chip>
         )
       case 'accumulatedDays':
-        return getDayMora(item.expirationDate)
+        return item.billingState === 'CANCELADO'
+          ? '---'
+          : getDayMora(item.expirationDate)
+      case 'depositMonth':
+      case 'depositDate':
+        return item.billingState !== 'CANCELADO' ? '---' : cellValue
       case 'actions':
         return (
           <Link

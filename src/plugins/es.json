@@ -34,5 +34,9 @@
   "document_type": "tipo de documento",
   "description": "descripción",
   "conversionRate": "tipo de cambio",
-  "state2": "estado"
+  "state2": "estado",
+  "depositAmountSoles": "monto depositado en soles",
+  "depositAmountDollars": "monto depositado en dólares",
+  "status": "estado",
+  "requiredField": "el campo es requerido"
 }

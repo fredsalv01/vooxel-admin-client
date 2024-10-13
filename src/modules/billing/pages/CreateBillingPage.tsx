@@ -32,12 +32,12 @@ type FormValues = {
   status: string
   // statusDate: string
   hes: string
+  hasHes: boolean
 }
 
 export const CreateBillingPage = () => {
 
   const navigate = useNavigate();
-  const [hasHes, setHasHes] = useState(false) // get ?
   const tax = 1.18
 
   const [hasIGV, setHasIGV] = useState(true)
@@ -64,6 +64,7 @@ export const CreateBillingPage = () => {
     status: '',
     // statusDate: '',
     hes: '',
+    hasHes: false,
   })
 
   const validationSchema = Yup.object({
@@ -79,6 +80,11 @@ export const CreateBillingPage = () => {
     total: Yup.string().required(),
     conversionRate: Yup.number().required().min(0).max(5),
     status: Yup.string().required(),
+    hes: Yup.string().when('hasHes', (hasHes, schema) => {
+      console.log("🚀 ~ EditBillingPage ~ hasHes:", hasHes)
+      return hasHes.includes(true) ? schema.required() : schema.notRequired()
+    }),
+    hasHes: Yup.boolean(),
     // statusDate: Yup.date().when('status', (status: string[], schema) => {
     //   // solo para cancelado y factoring
     //   return !status.includes('PENDIENTE') ? schema.required() : schema.notRequired()
@@ -191,7 +197,7 @@ export const CreateBillingPage = () => {
       total: parseFloat(values.total),
       billingState: values.status,
       expirationDate: finalExpirationDate,
-      hashes: hasHes,
+      hasHes: values.hasHes,
       hes: values.hes,
     }
 
@@ -260,7 +266,7 @@ export const CreateBillingPage = () => {
         }
         enableReinitialize
       >
-        {({ isSubmitting, values }) => (
+        {({ isSubmitting, values, setFieldValue }) => (
           <Form>
             <div className="grid grid-cols-1 md:grid-cols-2">
               <section className="grid grid-cols-1 gap-4 border-0 border-green-500 pr-4 md:grid-cols-2 md:border-r-2">
@@ -300,15 +306,19 @@ export const CreateBillingPage = () => {
                 </div>
 
                 <div className="col-span-1 flex items-center">
-                  <Checkbox
-                    isSelected={hasHes}
-                    onValueChange={setHasHes}
-                    size="md"
-                  >
-                    Habilitar HES
-                  </Checkbox>
+                  <Field name="hasHes">
+                    {({ field }: { field: any}) => (
+                      <Checkbox
+                        isSelected={field.value}
+                        onValueChange={(value) => setFieldValue(field.name, value)}
+                        size="md"
+                      >
+                        Habilitar HES
+                      </Checkbox>
+                    )}
+                  </Field>
                 </div>
-                {hasHes && (
+                {values.hasHes && (
                   <div className="col-span-1">
                     <Field name="hes" label="HES" component={InputBase} />
                   </div>
