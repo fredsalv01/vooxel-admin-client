@@ -67,19 +67,19 @@ export const VacationDetail = ({
 
   const deleteRow = async () => {
     // if (form.length > 1) {
-    if (row.id > 0 && row.vacationType !== "pendientes") {
-      ToastNotification.showWarning("No puede eliminar estas vacaciones");
-      return;
-    }
+    // if (row.id > 0 && row.vacationType !== "pendientes") {
+    //   ToastNotification.showWarning("No puede eliminar estas vacaciones");
+    //   return;
+    // }
 
     if (row.id > 0) {
       try {
         await axiosInstance.delete(`/vacation-details/${row.id}`);
-        ToastNotification.showSuccess("Vacaciones pendientes eliminadas");
+        ToastNotification.showSuccess("Vacaciones eliminadas");
         onDeleteRow(indexRow);
         return;
       } catch (error) {
-        ToastNotification.showError("Error al eliminar vacaciones pendientes");
+        ToastNotification.showError("Error al eliminar vacaciones");
       }
     }
 
