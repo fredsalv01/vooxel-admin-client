@@ -63,7 +63,7 @@ const INITIAL_VISIBLE_COLUMNS = [
   'igv',
   'total',
   'currencyConversionAmount',
-  'igvConversionDollars',
+  'igvConversionAmount',
   'totalConversionAmount',
   'billingState',
   'depositMonth',
@@ -124,7 +124,7 @@ export const BillingList = () => {
       case 'total':
         return addCurrency(item.currency, cellValue)
       case 'currencyConversionAmount':
-      case 'igvConversionDollars':
+      case 'igvConversionAmount':
       case 'totalConversionAmount':
         return addCurrency(
           item.currency === 'DOLARES' ? 'SOLES' : 'DOLARES',
