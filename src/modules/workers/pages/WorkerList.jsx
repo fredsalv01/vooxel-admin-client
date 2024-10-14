@@ -42,7 +42,7 @@ export const WorkerList = () => {
     refetch,
     paginationProps,
     updatingList,
-    setQuerSearch,
+    setQuerySearch,
   } = useQueryPromise({ url: 'workers', key: 'workers' })
 
   const switchRenderCell = (worker, columnKey) => {
@@ -125,7 +125,7 @@ export const WorkerList = () => {
         isLoading={isFetching}
         paginationProps={paginationProps}
         updatingList={updatingList}
-        setQuerSearch={setQuerSearch}
+        setQuerySearch={setQuerySearch}
       >
         <Slot slot="topContent">
           <Button

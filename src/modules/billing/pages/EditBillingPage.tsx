@@ -8,7 +8,6 @@ import * as Yup from 'yup'
 import axiosInstance from '../../../axios/axios'
 import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
 import { useFetchData } from '../../../hooks/useFetchData'
-import * as translateES from '../../../plugins/es.json'
 
 import {
   CardBase,
@@ -20,6 +19,7 @@ import {
 } from '../../../components/base'
 import { BillingRequestPost } from '@/interfaces/billing.interface'
 import { stringToNumber } from '../../../lib/helpers/utils';
+import { Alerts } from '../../../lib/helpers/alerts'
 
 type FormValues = {
   client: number,
@@ -50,18 +50,12 @@ export const EditBillingPage = () => {
   const navigate = useNavigate();
   const { id } = useParams()
 
-  const { data, isLoading, fetchData } = useFetchData({
+  const { data, isLoading } = useFetchData({
     url: `/billing/${id}`,
   }); 
-  const [selectedClient, setSelectedClient] = useState<any>(null)
-  const [selectedServiceName, setSelectedServiceName] = useState<any>(null)
   const tax = 1.18
-
   const [hasIGV, setHasIGV] = useState(true)
-
   const [initialValues, setInitialValues] = useState<FormValues>({
-    // year: '', // con el año y mes se calcula el periodo, no se si es importante mostrarlo
-    // month: '',
     client: -1, // jala el ruc
     document_type: '', // tabla tipos
     document_number: '',
@@ -71,12 +65,7 @@ export const EditBillingPage = () => {
     description: '',
     purchase_order_number: '',
     currency: '', // enum dolares o soles,
-    // amount: '',  // se calcula con el total y el igv
-    // IGV: '', // se calcula con el total y el igv
     total: '', // por debajo se calcular la conversion en soles y dolares.
-    // status: '', // enum pendiente, pagado, anulado al momento de crear es pendiente. luego en editar se podra cambiar segun el plazo de pago o simplemente anulado
-    // fecha de vencimiento se calcula con el payment_deadline
-    // dias acumulados es para la tabla de facturacion para saber la mora en caso que aun no se ha pagado, igual debe mostrarse ?
     conversionRate: '',
     status: '',
     hasHes: false,
@@ -115,20 +104,15 @@ export const EditBillingPage = () => {
         depositDate2: data.depositDate2 ?? '',
         depositAmountDollars2: data?.depositAmountDollars2 ?? '',
         depositAmountSoles2: data.depositAmountSoles ?? ''
-
-      })
-
-      setSelectedClient({
-        value: data.client.id,
-        label: data.client.businessName
-      })
-
-      setSelectedServiceName({
-        value: data.service.id,
-        label: data.service.name
       })
     }
-  }, [data])
+
+    Alerts.showLoading();
+    if (!isLoading) {
+      Alerts.close();
+    }
+
+  }, [data, isLoading])
 
   const validationSchema = Yup.object({
     client: Yup.string().required(),
@@ -148,87 +132,14 @@ export const EditBillingPage = () => {
       return hasHes.includes(true) ? schema.required() : schema.notRequired()
     }),
     hasHes: Yup.boolean(),
-    depositDate: Yup.string()
-    .test('is-not-empty', translateES.requiredField, function(value) {
-      // if (!!value) return true
-      const { depositAmountSoles, depositAmountDollars, currency } = this.parent;
-      if (currency === 'SOLES' && !!depositAmountSoles) return true
-      if (currency === 'DOLARES' && !!depositAmountDollars) return true
-      return false
-    }),
-    depositAmountSoles: Yup.number()
-    .test('is-not-empty', translateES.requiredField, function(value) {
-      // if (!!value) return true
-      const { depositAmountSoles, depositDate } = this.parent;
-      // console.log("🚀 ~ .test ~ depositAmountSoles:", depositAmountSoles)
-    
-      if (!!depositDate || !!depositAmountSoles) {
-        console.log("🚀 ~ .test ~ depositDate:", depositDate)
-        return true
-      } 
-      
-      if (!!depositDate && !!depositAmountSoles) {
-        console.log("🚀 ~ .test ~ !!depositAmountSoles", !!depositAmountSoles)
-        return false
-      }
-      return true;
-    }),
-    depositAmountDollars: Yup.number()
-    .test('is-not-empty', translateES.requiredField, function(value) {
-      // if (!!value) return true
-      const { depositAmountDollars, depositDate } = this.parent;
-      if (!!depositDate) return false
-      return !depositAmountDollars;
-    }),
-    depositDate2: Yup.string()
-    .test('is-not-empty', translateES.requiredField, function(value) {
-      // if (!!value) return true
-      const { depositAmountSoles2, depositAmountDollars2, currency } = this.parent;
-      if (currency === 'SOLES') {
-        return !depositAmountSoles2;
-      }
-      return !depositAmountDollars2;
-    }),
-    depositAmountSoles2: Yup.number()
-    .test('is-not-empty', translateES.requiredField, function(value) {
-      // if (!!value) return true
-      const { depositAmountSoles2, depositDate2, state2 } = this.parent;
-      if (!!depositDate2 || !!state2) return false
-      return !depositAmountSoles2;
-    }),
-    depositAmountDollars2: Yup.number()
-    .test('is-not-empty', translateES.requiredField, function(value) {
-      // if (!!value) return true
-      const { depositAmountDollars2, depositDate2, state2 } = this.parent;
-      if (!!depositDate2 || !!state2) return false
-      return !depositAmountDollars2;
-    }),
-    state2: Yup.string()
-    .test('is-not-empty', translateES.requiredField, function(value) {
-      // if (!!value) return true
-      const { depositAmountSoles2, depositAmountDollars2, currency, depositDate2 } = this.parent;
-      if (!!depositDate2) return false
-      if (currency === 'SOLES') {
-        return !depositAmountSoles2;
-      }
-      return !depositAmountDollars2;
-    }),
+    depositDate: Yup.string().nullable(),
+    depositAmountSoles: Yup.number().nullable(),
+    depositAmountDollars: Yup.number().nullable(),
+    depositDate2: Yup.string().nullable(),
+    depositAmountSoles2: Yup.number().nullable(),
+    depositAmountDollars2: Yup.number().nullable(),
+    state2: Yup.string().nullable(),
   })
-
-  const calculateAmount = (total: string, hasIGV: boolean) => {
-    if (!!total && parseFloat(total) > 0) {
-      const tax = 1.18;
-      return (parseFloat(total) / (hasIGV ? tax : 1)).toFixed(2);
-    }
-    return '0';
-  };
-
-  const calculateIGV = (total: string, amount: string) => {
-    if (!!total && parseFloat(total) > 0 && hasIGV) {
-      return (parseFloat(total) - parseFloat(amount)).toFixed(2);
-    }
-    return '0';
-  };
 
   const AmountCalculated: React.FC = () => {
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
@@ -267,19 +178,6 @@ export const EditBillingPage = () => {
     )
   }
 
-  const calculateExpirationDate = (paymentDeadlineValue: string, startDateValue: string) => {
-
-    if (!!paymentDeadlineValue && !!startDateValue) {
-          const startDate = new Date(startDateValue)
-        const paymentDeadline = parseInt(paymentDeadlineValue)
-        const expirationDate = new Date(
-          startDate.setDate(startDate.getDate() + paymentDeadline),
-        )
-      return expirationDate.toISOString().split('T')[0];
-    }
-    return '--';
-  }
-
   const ExpirationDateCalculated: React.FC = () => {
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
 
@@ -296,7 +194,7 @@ export const EditBillingPage = () => {
   const ShowFieldDepositCurrency: React.FC = () => { 
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
       
-        return values.currency === 'SOLES'  ? 
+      return values.currency === 'SOLES'  ? 
         <Field
           name="depositAmountSoles"
           type="number"
@@ -311,6 +209,7 @@ export const EditBillingPage = () => {
           component={InputBase}
         />
   }
+  
   const ShowFieldDepositCurrencyTwo: React.FC = () => { 
     const { values }: { values: FormValues } = useFormikContext() // Access Formik values
       
@@ -330,19 +229,35 @@ export const EditBillingPage = () => {
       />
   }
 
-  const mutation = useMutation({
-    mutationFn: async (body: BillingRequestPost) => {
-      return await axiosInstance.patch(`billing/${id}`, body);
-    },
-    onSuccess: () => {
-      queryClient.removeQueries({queryKey: ['billing'], exact: false}); // Invalidate the billing list cache
-      ToastNotification.showSuccess('Venta creada correctamente');
-      navigate('/billing');
-    },
-    onError: () => {
-      ToastNotification.showError('Error al crear la venta');
-    },
-  });
+  const calculateAmount = (total: string, hasIGV: boolean) => {
+    if (!!total && parseFloat(total) > 0) {
+      const tax = 1.18;
+      return (parseFloat(total) / (hasIGV ? tax : 1)).toFixed(2);
+    }
+    return '0';
+  };
+
+  const calculateIGV = (total: string, amount: string) => {
+    if (!!total && parseFloat(total) > 0 && hasIGV) {
+      return (parseFloat(total) - parseFloat(amount)).toFixed(2);
+    }
+    return '0';
+  };
+
+  const calculateExpirationDate = (paymentDeadlineValue: string, startDateValue: string) => {
+    if (!!startDateValue && !Date.parse(startDateValue)) {
+      return '--';
+    }
+    if (!!paymentDeadlineValue && !!startDateValue) {
+          const startDate = new Date(startDateValue)
+        const paymentDeadline = parseInt(paymentDeadlineValue)
+        const expirationDate = new Date(
+          startDate.setDate(startDate.getDate() + paymentDeadline),
+        )
+      return expirationDate.toISOString().split('T')[0];
+    }
+    return '--';
+  }
 
   const handleSubmit = async (
     values: FormValues,
@@ -396,27 +311,17 @@ export const EditBillingPage = () => {
       }
     }
 
-
-    mutation.mutate(body); // Trigger the mutation
-
-    // try {
-    //   const resp = await axiosInstance.patch(`billing/${id}`, body);
-      
-    //   console.log("🚀 ~ EditBillingPage ~ resp:", resp)
-    //   ToastNotification.showSuccess('Venta creada correctamente');
-
-    //   // how use useMutaion?
-    //   useMutation(resp, fetchData);
-    //   // queryClient.resetQueries({ queryKey: ['billing'], exact: true });
-    //   navigate('/billing');
-
-    // } catch (error) {
-    //   ToastNotification.showError('Error al crear la venta');
-    // } finally {
-    //   setSubmitting(false);
-    // }
+    try {
+      await axiosInstance.patch(`billing/${id}`, body);
+      ToastNotification.showSuccess('Venta creada correctamente');
+      queryClient.removeQueries({queryKey: ['billing'], exact: false}); // Invalidate the billing list cache
+      navigate('/billing');
+    } catch (error) {
+      ToastNotification.showError('Error al crear la venta');
+    } finally {
+      setSubmitting(false);
+    }
   }
-
 
   const fetchClients = async (inputValue: string, page: number) => {
     try {
@@ -498,7 +403,6 @@ export const EditBillingPage = () => {
                     placeholder="Buscar Cliente..."
                     label="Cliente"
                     fetchOptions={fetchClients}
-                    selectedItem={selectedClient}
                     component={Select2}
                   />
                 </div>
@@ -559,7 +463,6 @@ export const EditBillingPage = () => {
                     placeholder="Buscar servicio..."
                     label="Servicio"
                     fetchOptions={fetchBillingServices}
-                    selectedItem={selectedServiceName}
                     component={Select2}
                   />
                 </div>

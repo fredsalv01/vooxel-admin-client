@@ -1,9 +1,20 @@
-import axios from "axios";
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { store } from "../store";
 import { addToken } from "../features/tokenReducer";
 import { redirect } from "react-router-dom";
 
-const axiosInstance = axios.create({
+interface ImportMetaEnv {
+  VITE_API_BACK_LOCAL: string;
+  VITE_API_BACK_DEV: string;
+}
+
+declare global {
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
+}
+
+const axiosInstance: AxiosInstance = axios.create({
   baseURL:
     import.meta.env.VITE_API_BACK_LOCAL || import.meta.env.VITE_API_BACK_DEV,
   timeout: 10000, // 10s.
@@ -14,24 +25,25 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
     const token = store.getState().tokens; // Obtener el token del store
     if (token) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  (error: AxiosError) => {
     return Promise.reject(error);
   },
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => {
+  (response: AxiosResponse) => {
     return response;
   },
-  async (error) => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
     if (error.response) {
       switch (error.response.status) {
         case 403:

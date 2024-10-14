@@ -16,14 +16,15 @@ import {
   TextareaBase,
 } from '../../../components/base'
 import { BillingRequestPost } from '@/interfaces/billing.interface'
+import { useQueryClient } from '@tanstack/react-query'
 
 type FormValues = {
-  client: number,
+  client: number | null
   document_type: string
   document_number: string
   start_date: string
   payment_deadline: string
-  serviceType: number
+  serviceType: number | null
   description: string
   purchase_order_number: string
   currency: string
@@ -36,7 +37,7 @@ type FormValues = {
 }
 
 export const CreateBillingPage = () => {
-
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const tax = 1.18
 
@@ -45,12 +46,12 @@ export const CreateBillingPage = () => {
   const [initialValues, setInitialValues] = useState<FormValues>({
     // year: '', // con el año y mes se calcula el periodo, no se si es importante mostrarlo
     // month: '',
-    client: -1, // jala el ruc
+    client: null, // jala el ruc
     document_type: '', // tabla tipos
     document_number: '',
     start_date: '',
     payment_deadline: '',
-    serviceType: -1, // tabla de servicios
+    serviceType: null, // tabla de servicios
     description: '',
     purchase_order_number: '',
     currency: '', // enum dolares o soles,
@@ -144,9 +145,12 @@ export const CreateBillingPage = () => {
   }
 
   const calculateExpirationDate = (paymentDeadlineValue: string, startDateValue: string) => {
+    if (!!startDateValue && !Date.parse(startDateValue)) {
+      return '--';
+    }
 
     if (!!paymentDeadlineValue && !!startDateValue) {
-          const startDate = new Date(startDateValue)
+        const startDate = new Date(startDateValue)
         const paymentDeadline = parseInt(paymentDeadlineValue)
         const expirationDate = new Date(
           startDate.setDate(startDate.getDate() + paymentDeadline),
@@ -181,12 +185,12 @@ export const CreateBillingPage = () => {
     const finalExpirationDate = calculateExpirationDate(values.payment_deadline, values.start_date);
     
     const body: BillingRequestPost = {
-      clientId: values.client,
+      clientId: values.client!,
       documentType: values.document_type,
       documentNumber: values.document_number,
       startDate: values.start_date,
       paymentDeadline: parseInt(values.payment_deadline),
-      serviceId: values.serviceType,
+      serviceId: values.serviceType!,
       description: values.description,
       purchaseOrderNumber: values.purchase_order_number,
       currency: values.currency,
@@ -197,13 +201,13 @@ export const CreateBillingPage = () => {
       total: parseFloat(values.total),
       billingState: values.status,
       expirationDate: finalExpirationDate,
-      hasHes: values.hasHes,
       hes: values.hes,
     }
 
     try {
       await axiosInstance.post('billing', body);
       ToastNotification.showSuccess('Venta creada correctamente');
+      queryClient.removeQueries({queryKey: ['billing'], exact: false}); // Invalidate the billing list cache
       navigate('/billing');
     } catch (error) {
       console.log(error);

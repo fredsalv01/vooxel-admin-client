@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { Button, Chip, useDisclosure } from '@nextui-org/react'
+import React from 'react'
+import { Button, Chip } from '@nextui-org/react'
 import { Link } from 'react-router-dom'
 
 import Slot from '../../../components/Slot'
 import { TableList } from '../../../components/base'
 import { useQueryPromise } from '../../../hooks/useQueryPromise'
 import { EditIcon, PlusIcon } from '../../../components/icons'
+import { Alerts } from '../../../lib/helpers/alerts'
 
 // orden de las columnas
 // AÑO - MES - T/D - NRO DOC - FECHA DE EMISION - PLAZO DE PAGO -
@@ -80,7 +81,7 @@ export const BillingList = () => {
     isSuccess,
     paginationProps,
     updatingList,
-    setQuerSearch,
+    setQuerySearch,
   } = useQueryPromise({ url: 'billing', key: 'billing' })
 
   const addCurrency = (currency, cellValue) => {
@@ -150,6 +151,22 @@ export const BillingList = () => {
         return item.billingState === 'CANCELADO'
           ? '---'
           : getDayMora(item.expirationDate)
+      case 'description':
+        return (
+          <Button
+            color="primary"
+            type="buttom"
+            onClick={() =>
+              Alerts.basicAlert({
+                title: 'Descripción',
+                text: cellValue,
+              })
+            }
+            size="sm"
+          >
+            Ver
+          </Button>
+        )
       case 'depositMonth':
       case 'depositDate':
         return item.billingState !== 'CANCELADO' ? '---' : cellValue
@@ -178,7 +195,7 @@ export const BillingList = () => {
         isLoading={isFetching}
         paginationProps={paginationProps}
         updatingList={updatingList}
-        setQuerSearch={setQuerSearch}
+        setQuerySearch={setQuerySearch}
       >
         <Slot slot="topContent">
           {/* onPress={onOpen} */}

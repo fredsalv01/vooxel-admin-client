@@ -31,7 +31,7 @@ export const UserList = () => {
     refetch,
     paginationProps,
     updatingList,
-    setQuerSearch,
+    setQuerySearch,
   } = useQueryPromise({ url: 'users', key: 'users' })
 
   const handleEditUser = (id) => {
@@ -100,7 +100,7 @@ export const UserList = () => {
         isLoading={isFetching}
         paginationProps={paginationProps}
         updatingList={updatingList}
-        setQuerSearch={setQuerSearch}
+        setQuerySearch={setQuerySearch}
       >
         <Slot slot="topContent">
           <Button

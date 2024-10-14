@@ -21,7 +21,7 @@ export const TableList = ({
   isLoading,
   paginationProps,
   updatingList,
-  setQuerSearch,
+  setQuerySearch,
   children,
 }) => {
   const topContentSlot = React.Children.toArray(children).find((child) =>
@@ -51,12 +51,12 @@ export const TableList = ({
         visibleColumns={visibleColumns}
         headersTable={headersTable}
         setVisibleColumns={setVisibleColumns}
-        setQuerSearch={setQuerSearch}
+        setQuerySearch={setQuerySearch}
       >
         {topContentSlot && topContentSlot.props.children}
       </TableTopContent>
     ),
-    [visibleColumns, headersTable, setQuerSearch, topContentSlot],
+    [visibleColumns, headersTable, setQuerySearch, topContentSlot],
   )
 
   const computedBottomContent = useMemo(

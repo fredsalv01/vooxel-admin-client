@@ -22,7 +22,6 @@ export const Select2: React.FC<Select2Props> = ({
   field,
   form,
   fetchOptions,
-  selectedItem = {},
   ...props
 }) => {
   const [selectedOption, setSelectedOption] = useState<Option | null>(null);
@@ -51,14 +50,19 @@ export const Select2: React.FC<Select2Props> = ({
     }
   }
 
-  const handleChange = (option: any) => {
-    form.setFieldValue(field.name, option.value)
-    setSelectedOption(option)
-  }
+  const handleChange = (option: Option | null) => {
+    setSelectedOption(option);
+    form.setFieldValue(field.name, option ? option.value : '');
+  };
 
   useEffect(() => {
-    if (!!selectedItem && Object.keys(selectedItem).length) {
-      setSelectedOption(selectedItem);
+    if (field.value && !selectedOption) {
+      fetchOptions().then((options: Option[]) => {
+        const matchingOption = options.find(option => option.value === field.value);
+        if (matchingOption) {
+          setSelectedOption(matchingOption);
+        }
+      });
     }
   }, [field.name, form.values, fetchOptions]);
 

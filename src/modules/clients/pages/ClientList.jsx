@@ -42,7 +42,7 @@ export const ClientList = () => {
     refetch,
     paginationProps,
     updatingList,
-    setQuerSearch,
+    setQuerySearch,
   } = useQueryPromise({ url: 'clients', key: 'clients' })
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure()
@@ -83,7 +83,7 @@ export const ClientList = () => {
         isLoading={isFetching}
         paginationProps={paginationProps}
         updatingList={updatingList}
-        setQuerSearch={setQuerSearch}
+        setQuerySearch={setQuerySearch}
       >
         <Slot slot="topContent">
           <Button

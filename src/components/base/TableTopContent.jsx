@@ -16,14 +16,14 @@ export const TableTopContent = ({
   visibleColumns,
   headersTable,
   setVisibleColumns,
-  setQuerSearch,
+  setQuerySearch,
   children,
 }) => {
   const [inputSearch, setInputSearch] = useState()
 
   const onSearchChange = (value) => {
     setInputSearch(value)
-    setQuerSearch(value)
+    setQuerySearch(value)
   }
 
   return (
