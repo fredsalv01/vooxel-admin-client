@@ -10,6 +10,7 @@ export const VacationDetail = ({
   indexRow,
   onChangeForm,
   onDeleteRow,
+  fetchData
 }) => {
   const [item, setItem] = useState(row);
   const [settingDays, setSettingDays] = useState(item.id > 0 ? true : false);

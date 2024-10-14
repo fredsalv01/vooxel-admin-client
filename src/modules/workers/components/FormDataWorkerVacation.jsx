@@ -1,70 +1,70 @@
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { Button } from "@nextui-org/react";
-import { VacationDetail } from "./VacationDetail";
-import { PlusIcon } from "../../../components/icons";
-import { VACATION_DETAIL_TYPE_BACKEND } from "../../../lib/consts/general";
-import axiosInstance from "../../../axios/axios";
-import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
+import React, { useEffect, useState } from 'react'
+import PropTypes from 'prop-types'
+import { Button } from '@nextui-org/react'
+import { VacationDetail } from './VacationDetail'
+import { PlusIcon } from '../../../components/icons'
+import { VACATION_DETAIL_TYPE_BACKEND } from '../../../lib/consts/general'
+import axiosInstance from '../../../axios/axios'
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
 
 export const FormDataWorkerVacation = ({
   vacationsDetailActive,
   vacationId,
   fetchData,
 }) => {
-  const [form, setForm] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [form, setForm] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (!!vacationsDetailActive && vacationsDetailActive.length > 0) {
-      setForm(vacationsDetailActive);
+      setForm(vacationsDetailActive)
     }
-  }, [vacationsDetailActive]);
+  }, [vacationsDetailActive])
 
   const addRow = () => {
-    let newForm = [];
+    let newForm = []
 
     newForm = [
       ...form,
       {
         id: -1,
-        startDate: "",
-        endDate: "",
+        startDate: '',
+        endDate: '',
         days: 0,
         vacationType: VACATION_DETAIL_TYPE_BACKEND[2].value,
-        reason: "",
+        reason: '',
       },
-    ];
-    setForm(newForm);
-  };
+    ]
+    setForm(newForm)
+  }
 
   const handleChange = (newItem, index) => {
-    const newForm = [...form];
-    newForm[index] = newItem;
-    setForm(newForm);
-  };
+    const newForm = [...form]
+    newForm[index] = newItem
+    setForm(newForm)
+  }
 
   const onDelete = async (index) => {
-    const newForm = form.filter((_, i) => i !== index);
-    setForm(newForm);
-  };
+    const newForm = form.filter((_, i) => i !== index)
+    setForm(newForm)
+  }
 
   const onSubmit = async () => {
     try {
-      setIsLoading(true);
+      setIsLoading(true)
       // validate if the days sum are greater than the remaining days
       const sumDays = [...form].reduce(
-        (acc, item) => item.vacationType === "pendientes" && acc + item.days,
+        (acc, item) => item.vacationType === 'pendientes' && acc + item.days,
         0,
-      );
+      )
       if (sumDays > vacationsDetailActive.remainingVacations) {
         ToastNotification.showWarning(
-          "La suma de los días no puede ser mayor a los días restantes",
-        );
-        return;
+          'La suma de los días no puede ser mayor a los días restantes',
+        )
+        return
       }
 
-      const newForm = [...form];
+      const newForm = [...form]
 
       const { newDates, oldDates } = newForm.reduce(
         (acc, item) => {
@@ -72,34 +72,34 @@ export const FormDataWorkerVacation = ({
             ...item,
             quantity: item.days,
             vacationId,
-          };
-          delete item.days;
-          if (item.id < 0) {
-            delete item.id;
-            acc.newDates.push(item);
-          } else {
-            acc.oldDates.push(item);
           }
-          return acc;
+          delete item.days
+          if (item.id < 0) {
+            delete item.id
+            acc.newDates.push(item)
+          } else {
+            acc.oldDates.push(item)
+          }
+          return acc
         },
         { newDates: [], oldDates: [] },
-      );
+      )
 
       await axiosInstance.put(`/vacation-details/vacation/${vacationId}`, {
         items: [...newDates, ...oldDates],
-      });
+      })
 
-      // setTimeout(() => {
-      //   fetchData();
-      // }, 2000);
+      setTimeout(() => {
+        fetchData()
+      }, 2000)
 
-      ToastNotification.showSuccess("Vacaciones actualizadas");
+      ToastNotification.showSuccess('Vacaciones actualizadas')
     } catch (error) {
-      console.error(error);
+      console.error(error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div>
@@ -116,7 +116,7 @@ export const FormDataWorkerVacation = ({
 
       <div
         className="grid overflow-auto "
-        style={{ maxHeight: "calc(100vh - 450px)" }}
+        style={{ maxHeight: 'calc(100vh - 450px)' }}
       >
         {form.map((item, index) => (
           <React.Fragment key={index}>
@@ -125,6 +125,7 @@ export const FormDataWorkerVacation = ({
               indexRow={index}
               onChangeForm={(newItem) => handleChange(newItem, index)}
               onDeleteRow={onDelete}
+              fetchData={fetchData}
             />
           </React.Fragment>
         ))}
@@ -136,11 +137,11 @@ export const FormDataWorkerVacation = ({
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 // validate props
 FormDataWorkerVacation.propTypes = {
   vacationsDetailActive: PropTypes.array,
   vacationId: PropTypes.number,
   fetchData: PropTypes.func,
-};
+}
