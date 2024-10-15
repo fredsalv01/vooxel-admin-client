@@ -18,14 +18,14 @@ export type BillingRequestPost = {
   expirationDate: string;
   hasHes?: boolean;
   hes: string;
-  state2?: string;
-  depositDate?: string;
-  depositAmountDollars?: number
-  depositAmountSoles?: number
-  depositDate2?: string;
-  depositAmountDollars2?: number;
-  depositAmountSoles2?: number;
-  accumulatedDays?: number; // only client
+  state2?: string | null;
+  depositDate?: string | null;
+  depositAmountDollars?: number | null;
+  depositAmountSoles?: number | null;
+  depositDate2?: string | null;
+  depositAmountDollars2?: number | null;
+  depositAmountSoles2?: number | null;
+  accumulatedDays?: number | null; // only client
 }
 
 export interface BillingItem {

@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Formik, Form, Field, useFormikContext } from 'formik'
-import { Button, Checkbox } from '@nextui-org/react'
+import { Button, Checkbox, useDisclosure } from '@nextui-org/react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import * as Yup from 'yup'
@@ -20,6 +20,7 @@ import {
 import { BillingRequestPost } from '@/interfaces/billing.interface'
 import { stringToNumber } from '../../../lib/helpers/utils';
 import { Alerts } from '../../../lib/helpers/alerts'
+import { EditCreateServiceModal } from '../components/EditCreateServiceModal'
 
 type FormValues = {
   client: number,
@@ -50,10 +51,13 @@ export const EditBillingPage = () => {
   const navigate = useNavigate();
   const { id } = useParams()
 
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
+
   const { data, isLoading } = useFetchData({
     url: `/billing/${id}`,
   }); 
-  const tax = 1.18
+  const tax = 1.18;
+  const detraction = 0.12;
   const [hasIGV, setHasIGV] = useState(true)
   const [initialValues, setInitialValues] = useState<FormValues>({
     client: -1, // jala el ruc
@@ -79,9 +83,22 @@ export const EditBillingPage = () => {
     depositAmountSoles2: '',
   })
 
+  const calcDetraction = (total: string) => { 
+    let value1 = '0', value2 = '0';
+    if (!!total && parseFloat(total) > 0) {
+      value1 = (parseFloat(total) * (1 - detraction)).toFixed(2);
+      value2 = (parseFloat(total) * detraction).toFixed(2);
+    }
+    return [value1, value2];
+  }
   
-  useEffect(() => { 
+  useEffect(() => {
     if (!!data) {
+      if (data.total && data.currency) {
+        data.currency === 'DOLARES' ? [data.depositAmountDollars, data.depositAmountDollars2] 
+          : [data.depositAmountSoles, data.depositAmountSoles2] = calcDetraction(data.total);
+      } 
+      
       setInitialValues({
         client: data.client.id ?? '',
         document_type: data.documentType ?? '',
@@ -103,7 +120,7 @@ export const EditBillingPage = () => {
         depositAmountSoles: data?.depositAmountSoles ?? '',
         depositDate2: data.depositDate2 ?? '',
         depositAmountDollars2: data?.depositAmountDollars2 ?? '',
-        depositAmountSoles2: data.depositAmountSoles ?? ''
+        depositAmountSoles2: data.depositAmountSoles2 ?? ''
       })
     }
 
@@ -111,7 +128,6 @@ export const EditBillingPage = () => {
     if (!isLoading) {
       Alerts.close();
     }
-
   }, [data, isLoading])
 
   const validationSchema = Yup.object({
@@ -290,22 +306,24 @@ export const EditBillingPage = () => {
       hes: values.hes,
     }
 
-    let { depositDate, depositAmountDollars, depositAmountSoles, state2, depositDate2, depositAmountDollars2, depositAmountSoles2 } = {...values}
+    let { depositDate, currency, depositAmountDollars, depositAmountSoles, state2, depositDate2, depositAmountDollars2, depositAmountSoles2 } = {...values}
 
-    if (!!depositDate || !!depositAmountDollars || !!depositAmountSoles) {
-      body = { 
+    const depositFilled = parseFloat(currency=== 'SOLES' ? depositAmountSoles : depositAmountDollars) > 0;
+    if (depositDate && depositFilled) {
+      body = {
         ...body, 
-        depositDate: depositDate ?? null, 
+        depositDate, 
         depositAmountDollars: depositAmountDollars ? stringToNumber(depositAmountDollars) : null, 
         depositAmountSoles: depositAmountSoles ? stringToNumber(depositAmountSoles) : null 
       }
     }
 
-    if (!!state2 || !!depositDate2 || !!depositAmountDollars2 || !!depositAmountSoles2) {
+    const depositFilled2 = parseFloat(currency=== 'SOLES' ? depositAmountSoles2 : depositAmountDollars2) > 0;
+    if (state2 && depositDate2 && depositFilled2) {
       body = { 
         ...body, 
-        state2: state2 ?? null, 
-        depositDate2: depositDate2 ?? null, 
+        state2, 
+        depositDate2, 
         depositAmountDollars2: depositAmountDollars2 ? stringToNumber(depositAmountDollars2) : null, 
         depositAmountSoles2: depositAmountSoles2 ? stringToNumber(depositAmountSoles2) : null
       }
@@ -344,208 +362,226 @@ export const EditBillingPage = () => {
     }
   }
 
-  const fetchBillingServices = async (inputValue: string, page: number) => { 
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchBillingServices = useCallback(async (inputValue: string, page: number) => {
     try {
       const { data } = await axiosInstance.get('billing-service', {
         params: {
           input: inputValue,
         },
-      })
-      console.log("🚀 ~ fetchBillingServices ~ data:", data)
+      });
+      console.log("🚀 ~ fetchBillingServices ~ data:", data);
 
       return data.map((item: any) => ({
         value: item.id,
         label: item.name,
-      }))
-
+      }));
+      
     } catch (error) {
-      console.error(error)
-      return []
+      console.error(error);
+      return [];
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setRefreshKey(prevKey => prevKey + 1);
+    }
+  }, [isOpen]); // Fetch services when the modal closes
 
   return (
-    <CardBase className="container">
-      <h2 className="mb-4 text-2xl font-semibold">Editar Venta</h2>
-
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={(values, { setSubmitting }) =>
-          handleSubmit(values, setSubmitting)
-        }
-        enableReinitialize 
-      >
-        {({ isSubmitting, values , setFieldValue}) => (
-          <Form>
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <section className="grid grid-cols-1 gap-4 border-0 border-green-500 pr-4 md:grid-cols-2 md:border-r-2">
-                <Field
-                  name="document_type"
-                  label="Tipo de doc."
-                  component={SelectBase}
-                  options={[
-                    { label: 'Factura', value: 'FACTURA' },
-                    { label: 'Boleta', value: 'BOLETA' },
-                    { label: 'Letra', value: 'LT' },
-                    { label: 'Nota de débito', value: 'ND' },
-                    { label: 'Nota de crédito', value: 'NC' },
-                  ]}
-                />
-                <Field
-                  name="document_number"
-                  label="Nro de doc."
-                  component={InputBase}
-                />
-                <div className="col-span-2">
+    <>
+      {isOpen && (
+        <EditCreateServiceModal
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          fetchData={fetchBillingServices}
+        />
+      )} 
+      <CardBase className="container">
+        <h2 className="mb-4 text-2xl font-semibold">Editar Venta</h2>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={(values, { setSubmitting }) =>
+            handleSubmit(values, setSubmitting)
+          }
+          enableReinitialize
+        >
+          {({ isSubmitting, values , setFieldValue}) => (
+            <Form>
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <section className="grid grid-cols-1 gap-4 border-0 border-green-500 pr-4 md:grid-cols-2 md:border-r-2">
                   <Field
-                    name="client"
-                    placeholder="Buscar Cliente..."
-                    label="Cliente"
-                    fetchOptions={fetchClients}
-                    component={Select2}
+                    name="document_type"
+                    label="Tipo de doc."
+                    component={SelectBase}
+                    options={[
+                      { label: 'Factura', value: 'FACTURA' },
+                      { label: 'Boleta', value: 'BOLETA' },
+                      { label: 'Letra', value: 'LT' },
+                      { label: 'Nota de débito', value: 'ND' },
+                      { label: 'Nota de crédito', value: 'NC' },
+                    ]}
                   />
-                </div>
-
-                <div className="col-span-2">
                   <Field
-                    name="purchase_order_number"
-                    label="Nro orden de compra"
+                    name="document_number"
+                    label="Nro de doc."
                     component={InputBase}
                   />
-                </div>
-
-                <div className="col-span-1 flex items-center">
-                  <Field name="hasHes">
-                    {({ field }: { field: any}) => (
-                      <Checkbox
-                        isSelected={field.value}
-                        onValueChange={(value) => setFieldValue(field.name, value)}
-                        size="md"
-                      >
-                        Habilitar HES
-                      </Checkbox>
-                    )}
-                  </Field>
-                </div>
-                {values.hasHes && (
-                  <div className="col-span-1">
-                    <Field name="hes" label="HES" component={InputBase} />
+                  <div className="col-span-2">
+                    <Field
+                      name="client"
+                      placeholder="Buscar Cliente..."
+                      label="Cliente"
+                      fetchOptions={fetchClients}
+                      component={Select2}
+                    />
                   </div>
-                )}
-                <div className="col-span-2">
+                  <div className="col-span-2">
+                    <Field
+                      name="purchase_order_number"
+                      label="Nro orden de compra"
+                      component={InputBase}
+                    />
+                  </div>
+                  <div className="col-span-1 flex items-center">
+                    <Field name="hasHes">
+                      {({ field }: { field: any}) => (
+                        <Checkbox
+                          isSelected={field.value}
+                          onValueChange={(value) => setFieldValue(field.name, value)}
+                          size="md"
+                        >
+                          Habilitar HES
+                        </Checkbox>
+                      )}
+                    </Field>
+                  </div>
+                  {values.hasHes && (
+                    <div className="col-span-1">
+                      <Field name="hes" label="HES" component={InputBase} />
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <Field
+                      name="description"
+                      label="Descripción"
+                      component={
+                        TextareaBase
+                      }
+                    />
+                  </div>
+                </section>
+                <section className="grid grid-cols-1 gap-4 pl-4 md:grid-cols-2">
                   <Field
-                    name="description"
-                    label="Descripción"
-                    component={
-                      TextareaBase
+                    name="start_date"
+                    label="Fecha de emisión"
+                    component={DatePickerBase}
+                  />
+                  <Field
+                    name="payment_deadline"
+                    label="Plazo de pago"
+                    placeholder="30 días"
+                    component={InputBase}
+                  />
+                  <ExpirationDateCalculated />
+                  <div className="col-span-1">
+                    <Field
+                      key={refreshKey}
+                      name="serviceType"
+                      placeholder="Buscar servicio..."
+                      label="Servicio"
+                      fetchOptions={fetchBillingServices}
+                      component={Select2}
+                    />
+                  </div>
+                  <Field
+                    name="currency"
+                    label="Moneda"
+                    component={SelectBase}
+                    options={[
+                      { label: 'Soles', value: 'SOLES' },
+                      { label: 'Dólares', value: 'DOLARES' },
+                    ]}
+                  />
+                  <Button
+                    onPress={onOpen}
+                    className="mb-0"
+                    color="primary"
+                    isDisabled={
+                      isLoading
                     }
-                  />
-                </div>
-              </section>
-              <section className="grid grid-cols-1 gap-4 pl-4 md:grid-cols-2">
-                <Field
-                  name="start_date"
-                  label="Fecha de emisión"
-                  component={DatePickerBase}
-                />
-                <Field
-                  name="payment_deadline"
-                  label="Plazo de pago"
-                  placeholder="30 días"
-                  component={InputBase}
-                />
-                <ExpirationDateCalculated />
-
-                <div className="col-span-1">
+                  >
+                    Crear Servicio
+                  </Button>
                   <Field
-                    name="serviceType"
-                    placeholder="Buscar servicio..."
-                    label="Servicio"
-                    fetchOptions={fetchBillingServices}
-                    component={Select2}
+                    name="conversionRate"
+                    label="Tipo de cambio"
+                    component={InputBase}
                   />
-                </div>
-                <Field
-                  name="currency"
-                  label="Moneda"
-                  component={SelectBase}
-                  options={[
-                    { label: 'Soles', value: 'SOLES' },
-                    { label: 'Dólares', value: 'DOLARES' },
-                  ]}
-                />
-
-                <Field
-                  name="conversionRate"
-                  label="Tipo de cambio"
-                  component={InputBase}
-                />
-
-                <Field
-                  name="status"
-                  label="Estado"
-                  component={SelectBase}
-                  options={[
-                    { label: 'Pendiente', value: 'PENDIENTE' },
-                    { label: 'Cancelado', value: 'CANCELADO' },
-                    { label: 'Anulado', value: 'ANULADO' },
-                    { label: 'Factoring', value: 'FACTORING' },
-                  ]}
-                />
-
-                <div className="col-span-2">
-                  <AmountCalculated />
-                </div>
-              </section>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-0 border-green-500 md:border-t-2 pt-3 mt-3">
-              <div className="grid grid-cols-1 gap-4">
-                <h4>Depósito 1 ( Detracción ) </h4>
-                <Field
-                  name="depositDate"
-                  label="Fecha de depósito"
-                  component={DatePickerBase}
-                />
-                <ShowFieldDepositCurrency />
+                  <Field
+                    name="status"
+                    label="Estado"
+                    component={SelectBase}
+                    options={[
+                      { label: 'Pendiente', value: 'PENDIENTE' },
+                      { label: 'Cancelado', value: 'CANCELADO' },
+                      { label: 'Anulado', value: 'ANULADO' },
+                      { label: 'Factoring', value: 'FACTORING' },
+                    ]}
+                  />
+                  <div className="col-span-2">
+                    <AmountCalculated />
+                  </div>
+                </section>
               </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <h4>Depósito 2</h4>
-                <Field
-                  name="state2"
-                  label="Estado"
-                  component={SelectBase}
-                  options={[
-                    { label: 'Pendiente', value: 'PENDIENTE' },
-                    { label: 'Cancelado', value: 'CANCELADO' },
-                    { label: 'Anulado', value: 'ANULADO' },
-                    { label: 'Factoring', value: 'FACTORING' },
-                  ]}
-                />
-                <Field
-                  name="depositDate2"
-                  label="Fecha de emisión"
-                  component={DatePickerBase}
-                />
-                <ShowFieldDepositCurrencyTwo />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-0 border-green-500 md:border-t-2 pt-3 mt-3">
+                <div className="grid grid-cols-1 gap-4">
+                  <h4>Depósito 1 ( Detracción ) </h4>
+                  <Field
+                    name="depositDate"
+                    label="Fecha de depósito"
+                    component={DatePickerBase}
+                  />
+                  <ShowFieldDepositCurrency />
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                  <h4>Depósito 2</h4>
+                  <Field
+                    name="state2"
+                    label="Estado"
+                    component={SelectBase}
+                    options={[
+                      { label: 'Pendiente', value: 'PENDIENTE' },
+                      { label: 'Cancelado', value: 'CANCELADO' },
+                      { label: 'Anulado', value: 'ANULADO' },
+                      { label: 'Factoring', value: 'FACTORING' },
+                    ]}
+                  />
+                  <Field
+                    name="depositDate2"
+                    label="Fecha de emisión"
+                    component={DatePickerBase}
+                  />
+                  <ShowFieldDepositCurrencyTwo />
+                </div>
               </div>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <Button
-                color="primary"
-                type="submit"
-                isLoading={isSubmitting}
-                size="lg"
-              >
-                Guardar
-              </Button>
-            </div>
-          </Form>
-        )}
-      </Formik>
-    </CardBase>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  color="primary"
+                  type="submit"
+                  isLoading={isSubmitting}
+                  size="lg"
+                >
+                  Guardar
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </CardBase>
+    </>
   )
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Modal,
   ModalContent,
@@ -6,31 +6,26 @@ import {
   ModalBody,
   Button,
   ModalFooter,
-  DatePicker,
-  Autocomplete,
-  AutocompleteSection,
-  AutocompleteItem,
   Divider,
-} from "@nextui-org/react";
-import { Formik, Form, Field } from "formik";
+} from '@nextui-org/react'
+import { Formik, Form, Field } from 'formik'
 import {
   DatePickerBase,
   InputBase,
   SelectBase,
   InputTagBase,
   AutocompleteBase,
-} from "../../../components/base";
-import { useAsyncList } from "@react-stately/data";
-import axios from "../../../axios/axios";
-import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
-import * as Yup from "yup";
+} from '../../../components/base'
+import axios from '../../../axios/axios'
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
+import * as Yup from 'yup'
 import {
   BANKS_BACKEND,
   DOCUMENT_TYPES_BACKEND,
   ENGLISH_LEVEL_BACKEND,
   SENIORITY_BACKEND,
-} from "../../../lib/consts/general";
-import { useQueryPromise } from "../../../hooks/useQueryPromise";
+} from '../../../lib/consts/general'
+import { useQueryPromise } from '../../../hooks/useQueryPromise'
 
 export const EditWorkerModal = ({
   isOpen,
@@ -39,28 +34,28 @@ export const EditWorkerModal = ({
   fetchData,
 }) => {
   const [initialValues, setInitialValues] = useState({
-    name: "",
-    apPat: "",
-    apMat: "",
-    documentType: "",
-    documentNumber: "",
-    englishLevel: "",
-    charge: "",
-    birthdate: "",
-    phoneNumber: "",
-    address: "",
-    district: "",
-    province: "",
-    department: "",
-    familiarAssignment: "",
+    name: '',
+    apPat: '',
+    apMat: '',
+    documentType: '',
+    documentNumber: '',
+    englishLevel: '',
+    charge: '',
+    birthdate: '',
+    phoneNumber: '',
+    address: '',
+    district: '',
+    province: '',
+    department: '',
+    familiarAssignment: '',
     techSkills: [],
-    clientId: "",
-    chiefOfficerId: "",
-  });
+    clientId: '',
+    chiefOfficerId: '',
+  })
 
   useEffect(() => {
     if (editItem) {
-      console.log("🚀 ~ useEffect ~ editItem:", editItem);
+      console.log('🚀 ~ useEffect ~ editItem:', editItem)
       setInitialValues({
         ...initialValues,
         name: editItem?.name,
@@ -73,7 +68,7 @@ export const EditWorkerModal = ({
         startDate: editItem?.startDate,
         englishLevel: editItem?.englishLevel,
         charge: editItem?.charge,
-        birthdate: editItem?.birthdate || "",
+        birthdate: editItem?.birthdate || '',
         phoneNumber: editItem?.phoneNumber,
         address: editItem?.address,
         district: editItem?.district,
@@ -81,11 +76,11 @@ export const EditWorkerModal = ({
         department: editItem?.department,
         familiarAssignment: editItem?.familiarAssignment,
         techSkills: editItem?.techSkills,
-        clientId: editItem?.clientInfo?.id.toString() || "",
-        chiefOfficerId: editItem?.chiefOfficer?.id.toString() || "",
-      });
+        clientId: editItem?.clientInfo?.id.toString() || '',
+        chiefOfficerId: editItem?.chiefOfficer?.id.toString() || '',
+      })
     }
-  }, []);
+  }, [])
 
   const validationSchema = Yup.object({
     name: Yup.string().required(),
@@ -93,16 +88,16 @@ export const EditWorkerModal = ({
     apMat: Yup.string().required(),
     documentType: Yup.string().required(),
     documentNumber: Yup.string()
-      .when("documentType", {
-        is: "Dni",
+      .when('documentType', {
+        is: 'Dni',
         then: (schema) => schema.length(8),
       })
-      .when("documentType", {
-        is: "Pasaporte",
+      .when('documentType', {
+        is: 'Pasaporte',
         then: (schema) => schema.length(9),
       })
-      .when("documentType", {
-        is: "Carnet Extranjeria",
+      .when('documentType', {
+        is: 'Carnet Extranjeria',
         then: (schema) => schema.max(20),
       })
       .required(),
@@ -115,7 +110,7 @@ export const EditWorkerModal = ({
           new Date().getMonth(),
           new Date().getDate(),
         ),
-        "debe tener al menos 18 años",
+        'debe tener al menos 18 años',
       )
       .required(), // Assuming birthdate is a string, adjust if it's a date
     phoneNumber: Yup.string()
@@ -133,10 +128,10 @@ export const EditWorkerModal = ({
     email: Yup.string().email().required(),
     seniority: Yup.string().required(),
     startDate: Yup.string().required(),
-  });
+  })
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values);
+    console.log('🚀 ~ handleSubmit ~ values:', values)
 
     // if (!editItem?.chiefOfficer && !values.chiefOfficerId) {
     //     ToastNotification.showError('Agregar jefe de colaborador');
@@ -148,28 +143,28 @@ export const EditWorkerModal = ({
     //     return;
     // }
 
-    delete values.id;
-    delete values.isActive;
+    delete values.id
+    delete values.isActive
     try {
-      setSubmitting(true);
-      await axios.patch(`workers/${editItem.id}`, { ...values });
-      ToastNotification.showSuccess("Colaborador actualizado correctamente");
-      fetchData();
-      onClose();
+      setSubmitting(true)
+      await axios.patch(`workers/${editItem.id}`, { ...values })
+      ToastNotification.showSuccess('Colaborador actualizado correctamente')
+      fetchData()
+      onClose()
     } catch (error) {
       if (error.response.status === 400)
-        ToastNotification.showError(error.response.data.message);
-      else ToastNotification.showError("Error al crear el colaborador");
-      console.log("Error", error);
+        ToastNotification.showError(error.response.data.message)
+      else ToastNotification.showError('Error al crear el colaborador')
+      console.log('Error', error)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   const { data: clientsData } = useQueryPromise({
-    url: "clients",
-    key: "clients",
-  });
+    url: 'clients',
+    key: 'clients',
+  })
 
   const computedClients = useMemo(() => {
     return (
@@ -177,13 +172,13 @@ export const EditWorkerModal = ({
         label: item.businessName,
         value: item.id,
       })) || []
-    );
-  }, [clientsData]);
+    )
+  }, [clientsData])
 
   const { data: chiefOfficerData } = useQueryPromise({
-    url: "workers",
-    key: "workers",
-  });
+    url: 'workers',
+    key: 'workers',
+  })
 
   const computedChiefOfficerData = useMemo(() => {
     return (
@@ -191,8 +186,8 @@ export const EditWorkerModal = ({
         label: `${item.name} ${item.apPat}`,
         value: item.id,
       })) || []
-    );
-  }, [chiefOfficerData]);
+    )
+  }, [chiefOfficerData])
 
   // let listClients = useAsyncList({
   //     async load({ signal, filterText }) {
@@ -337,8 +332,8 @@ export const EditWorkerModal = ({
                         label="Asignación familiar"
                         component={SelectBase}
                         options={[
-                          { label: "Sí", value: "SI" },
-                          { label: "No", value: "NO" },
+                          { label: 'Sí', value: 'SI' },
+                          { label: 'No', value: 'NO' },
                         ]}
                       />
                     </div>
@@ -441,5 +436,5 @@ export const EditWorkerModal = ({
         )}
       </ModalContent>
     </Modal>
-  );
-};
+  )
+}
