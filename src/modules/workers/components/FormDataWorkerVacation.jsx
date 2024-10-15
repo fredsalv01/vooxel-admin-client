@@ -11,15 +11,16 @@ export const FormDataWorkerVacation = ({
   vacationsDetailActive,
   vacationId,
   fetchData,
+  onDeleteRow,
 }) => {
-  const [form, setForm] = useState([])
+  const [form, setForm] = useState(vacationsDetailActive || [])
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (!!vacationsDetailActive && vacationsDetailActive.length > 0) {
       setForm(vacationsDetailActive)
     }
-  }, [vacationsDetailActive])
+  }, [vacationsDetailActive, form])
 
   const addRow = () => {
     let newForm = []
@@ -39,14 +40,17 @@ export const FormDataWorkerVacation = ({
   }
 
   const handleChange = (newItem, index) => {
+    console.log('🚀 ~ handleChange ~ newItem:', newItem)
     const newForm = [...form]
     newForm[index] = newItem
     setForm(newForm)
   }
 
-  const onDelete = async (index) => {
+  const onDelete = (index) => {
     const newForm = form.filter((_, i) => i !== index)
+    console.log('🚀 ~ onDelete ~ newForm:', newForm)
     setForm(newForm)
+    onDeleteRow(index)
   }
 
   const onSubmit = async () => {
@@ -91,7 +95,7 @@ export const FormDataWorkerVacation = ({
 
       setTimeout(() => {
         fetchData()
-      }, 2000)
+      }, 1500)
 
       ToastNotification.showSuccess('Vacaciones actualizadas')
     } catch (error) {

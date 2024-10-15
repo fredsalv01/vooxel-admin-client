@@ -1,70 +1,72 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Input, Select, SelectItem } from "@nextui-org/react";
-import { VACATION_DETAIL_TYPE_BACKEND } from "../../../lib/consts/general";
-import { ToastNotification } from "../../../lib/helpers/toast-notification-temp";
-import axiosInstance from "../../../axios/axios";
+import React, { useMemo, useState, useEffect } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Button, Input, Select, SelectItem } from '@nextui-org/react'
+import { VACATION_DETAIL_TYPE_BACKEND } from '../../../lib/consts/general'
+import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
+import axiosInstance from '../../../axios/axios'
+import { Alerts } from '../../../lib/helpers/alerts'
 
 export const VacationDetail = ({
   row,
   indexRow,
   onChangeForm,
   onDeleteRow,
-  fetchData
+  fetchData,
 }) => {
-  const [item, setItem] = useState(row);
-  const [settingDays, setSettingDays] = useState(item.id > 0 ? true : false);
-  const [manualDays, setManualDays] = useState(item.quantity || 0);
+  const [item, setItem] = useState(row)
+  const [settingDays, setSettingDays] = useState(item.id > 0 ? true : false)
+  const [manualDays, setManualDays] = useState(item.quantity || 0)
 
   useEffect(() => {
-    setItem(row);
-  }, [row]);
+    setItem(row)
+  }, [row])
 
   useEffect(() => {
     if (!settingDays) {
-      setManualDays(calculateDays());
+      setManualDays(calculateDays())
     }
-  }, [item.startDate, item.endDate]);
+  }, [item.startDate, item.endDate])
 
   const handleChange = ({ target }) => {
-    const { name, value } = target;
+    const { name, value } = target
 
-    if (name === "days") {
-      setSettingDays(true);
-      setManualDays(value);
+    if (name === 'days') {
+      setSettingDays(true)
+      setManualDays(value)
     } else {
-      setSettingDays(false);
+      setSettingDays(false)
     }
 
     const newItem = {
       ...item,
-      [name]: name === "days" ? parseInt(value || 0) : value,
-    };
+      [name]: name === 'days' ? parseInt(value || 0) : value,
+    }
 
-    setItem(newItem);
-    onChangeForm(newItem);
-  };
+    setItem(newItem)
+    onChangeForm(newItem)
+  }
 
   const checkDates = () => {
-    const { startDate, endDate } = item;
-    if (!startDate || !endDate) return false;
+    const { startDate, endDate } = item
+    if (!startDate || !endDate) return false
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return start <= end;
-  };
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    return start <= end
+  }
 
   const calculateDays = () => {
-    if (!checkDates()) return 0;
-    let days = 0;
+    if (!checkDates()) return 0
+    let days = 0
     if (item.startDate && item.endDate) {
-      const startDate = new Date(item.startDate);
-      const endDate = new Date(item.endDate);
-      days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      const startDate = new Date(item.startDate)
+      const endDate = new Date(item.endDate)
+      days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
     }
-    setItem({ ...item, quantity: days });
-    return days;
-  };
+    setItem({ ...item, days })
+    onChangeForm({ ...item, days })
+    return days
+  }
 
   const deleteRow = async () => {
     // if (form.length > 1) {
@@ -73,23 +75,31 @@ export const VacationDetail = ({
     //   return;
     // }
 
-    if (row.id > 0) {
-      try {
-        await axiosInstance.delete(`/vacation-details/${row.id}`);
-        ToastNotification.showSuccess("Vacaciones eliminadas");
-        onDeleteRow(indexRow);
-        return;
-      } catch (error) {
-        ToastNotification.showError("Error al eliminar vacaciones");
-      }
-    }
+    const { isConfirmed } = await Alerts.confirmAlert({})
+    if (!isConfirmed) return
 
-    onDeleteRow(indexRow);
-  };
+    if (row.id > 0) {
+      console.log('🚀 ~ deleteRow ~ row:', row)
+      console.log('🚀 ~ deleteRow ~ indexRow:', indexRow)
+      try {
+        await axiosInstance.delete(`/vacation-details/${row.id}`)
+        onDeleteRow(indexRow)
+        ToastNotification.showSuccess('Vacaciones eliminadas')
+      } catch (error) {
+        ToastNotification.showError('Error al eliminar vacaciones')
+      } finally {
+        setTimeout(() => {
+          fetchData()
+        }, 2000)
+      }
+    } else {
+      onDeleteRow(indexRow)
+    }
+  }
 
   const days = useMemo(() => {
     if (settingDays) {
-      return manualDays;
+      return manualDays
     }
 
     if (
@@ -97,11 +107,11 @@ export const VacationDetail = ({
       item.endDate !== row.endDate &&
       !settingDays
     ) {
-      return calculateDays();
+      return calculateDays()
     }
 
-    return manualDays;
-  }, [item.startDate, item.endDate, settingDays, manualDays]);
+    return manualDays
+  }, [item.startDate, item.endDate, settingDays, manualDays])
 
   return (
     <div className="custom-shadow mx-2 my-4 grid grid-cols-1 rounded-md py-4 md:grid-cols-10">
@@ -143,7 +153,7 @@ export const VacationDetail = ({
             value={item.vacationType}
             selectedKeys={item.vacationType ? [item.vacationType] : []}
             onChange={(e) => {
-              handleChange(e);
+              handleChange(e)
             }}
           >
             {VACATION_DETAIL_TYPE_BACKEND.map((item) => (
@@ -178,5 +188,5 @@ export const VacationDetail = ({
       </div>
       {/* </div> */}
     </div>
-  );
-};
+  )
+}

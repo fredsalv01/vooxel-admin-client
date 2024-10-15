@@ -1,22 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
-import { CardBase } from "../../../components/base";
-import { Chip } from "@nextui-org/react";
-import { FormDataWorkerVacation } from "../components";
-import Slot from "../../../components/Slot";
+import { CardBase } from '../../../components/base'
+import { Chip } from '@nextui-org/react'
+import { FormDataWorkerVacation } from '../components'
+import Slot from '../../../components/Slot'
 
-import { useFetchData } from "../../../hooks/useFetchData";
-import { useWorker } from "../hooks/useWorker";
+import { useFetchData } from '../../../hooks/useFetchData'
+import { useWorker } from '../hooks/useWorker'
 
-import ReactLoading from "react-loading";
+import ReactLoading from 'react-loading'
 
 export const WorkerVacationsPage = () => {
-  const { id: worderId } = useParams();
+  const { id: worderId } = useParams()
 
-  const [vacDetailActive, setVacDetailActive] = useState({});
-  const [totalExpiredDays, setTotalExpiredDays] = useState(0);
+  const [vacDetailActive, setVacDetailActive] = useState({})
+  const [totalExpiredDays, setTotalExpiredDays] = useState(0)
 
   const {
     data: vacationsWorker,
@@ -24,17 +24,29 @@ export const WorkerVacationsPage = () => {
     loading,
   } = useFetchData({
     url: `vacations/workerId/${worderId}`,
-  });
+  })
 
-  const { getWorkerDetails } = useWorker(worderId);
+  const { getWorkerDetails } = useWorker(worderId)
 
   useEffect(() => {
-    if (!!vacationsWorker) {
-      console.log("🚀 ~ useEffect ~ vacationsWorker:", vacationsWorker);
-      setVacDetailActive(vacationsWorker);
-      setTotalExpiredDays(vacationsWorker.expiredDays);
+    if (vacationsWorker) {
+      console.log('🚀 ~ useEffect ~ vacationsWorker:', vacationsWorker)
+      setVacDetailActive(vacationsWorker)
+      setTotalExpiredDays(vacationsWorker.expiredDays)
     }
-  }, [vacationsWorker]);
+  }, [vacationsWorker, vacDetailActive, totalExpiredDays])
+
+  const onDeleteRow = async (indexRow) => {
+    const activeDetails = vacDetailActive.vacationDetails.filter(
+      (item, index) => index !== indexRow,
+    )
+    const newVacDetailActive = {
+      ...vacDetailActive,
+      vacationDetails: activeDetails,
+    }
+    console.log('🚀 ~ onDeleteRow ~ newVacDetailActive:', newVacDetailActive)
+    setVacDetailActive(newVacDetailActive)
+  }
 
   return (
     <div className="container flex flex-col">
@@ -49,7 +61,7 @@ export const WorkerVacationsPage = () => {
             </p>
 
             <p className="text-xl">
-              <strong>Fecha de inicio de trabajo:</strong> <br />{" "}
+              <strong>Fecha de inicio de trabajo:</strong> <br />{' '}
               {getWorkerDetails.data?.startDate}
             </p>
 
@@ -61,8 +73,8 @@ export const WorkerVacationsPage = () => {
           {loading ? (
             <div className="flex justify-center">
               <ReactLoading
-                type={"balls"}
-                color={"#16a34a"}
+                type={'balls'}
+                color={'#16a34a'}
                 height={300}
                 width={300}
               />
@@ -72,11 +84,11 @@ export const WorkerVacationsPage = () => {
               <Slot slot="header">
                 <Chip
                   className="gap-1 border-none capitalize text-default-600"
-                  color={vacDetailActive.isActive ? "success" : "danger"}
+                  color={vacDetailActive.isActive ? 'success' : 'danger'}
                   size="sm"
                   variant="dot"
                 >
-                  {vacDetailActive.isActive ? "Activas" : "Inactivas"}
+                  {vacDetailActive.isActive ? 'Activas' : 'Inactivas'}
                 </Chip>
               </Slot>
               <Slot slot="body">
@@ -98,9 +110,10 @@ export const WorkerVacationsPage = () => {
                     vacationsDetailActive={vacDetailActive.vacationDetails}
                     vacationId={vacDetailActive.id}
                     fetchData={() => {
-                      fetchData();
-                      getWorkerDetails.refetch();
+                      fetchData()
+                      getWorkerDetails.refetch()
                     }}
+                    onDeleteRow={onDeleteRow}
                   ></FormDataWorkerVacation>
                 )}
               </Slot>
@@ -109,11 +122,11 @@ export const WorkerVacationsPage = () => {
         </div>
       )}
     </div>
-  );
+  )
 
   // return (
   //   <>
   //     <pre>{JSON.stringify(data)}</pre>
   //   </>
   // )
-};
+}

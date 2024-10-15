@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Formik, Form, Field, useFormikContext } from 'formik'
-import { Button, Checkbox } from '@nextui-org/react'
+import { Button, Checkbox, useDisclosure } from '@nextui-org/react'
 import { useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
 
@@ -17,6 +17,7 @@ import {
 } from '../../../components/base'
 import { BillingRequestPost } from '@/interfaces/billing.interface'
 import { useQueryClient } from '@tanstack/react-query'
+import { EditCreateServiceModal } from '../components/EditCreateServiceModal'
 
 type FormValues = {
   client: number | null
@@ -39,6 +40,8 @@ type FormValues = {
 export const CreateBillingPage = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure()
   const tax = 1.18
 
   const [hasIGV, setHasIGV] = useState(true)
@@ -239,6 +242,8 @@ export const CreateBillingPage = () => {
     }
   }
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const fetchBillingServices = async (inputValue: string, page: number) => { 
     try {
       const { data } = await axiosInstance.get('billing-service', {
@@ -258,154 +263,170 @@ export const CreateBillingPage = () => {
     }
   }
 
+  useEffect(() => {
+    if (!isOpen) {
+      setRefreshKey(prevKey => prevKey + 1);
+    }
+  }, [isOpen]); // Fetch services when the modal closes
+
   return (
-    <CardBase className="container">
-      <h2 className="mb-4 text-2xl font-semibold">Crear Venta</h2>
-
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={(values, { setSubmitting }) =>
-          handleSubmit(values, setSubmitting)
-        }
-        enableReinitialize
-      >
-        {({ isSubmitting, values, setFieldValue }) => (
-          <Form>
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              <section className="grid grid-cols-1 gap-4 border-0 border-green-500 pr-4 md:grid-cols-2 md:border-r-2">
-                <Field
-                  name="document_type"
-                  label="Tipo de doc."
-                  component={SelectBase}
-                  options={[
-                    { label: 'Factura', value: 'FACTURA' },
-                    { label: 'Boleta', value: 'BOLETA' },
-                    { label: 'Letra', value: 'LT' },
-                    { label: 'Nota de débito', value: 'ND' },
-                    { label: 'Nota de crédito', value: 'NC' },
-                  ]}
-                />
-                <Field
-                  name="document_number"
-                  label="Nro de doc."
-                  component={InputBase}
-                />
-                <div className="col-span-2">
+    <>
+      {isOpen && (
+        <EditCreateServiceModal
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          fetchData={fetchBillingServices}
+        />
+      )} 
+      <CardBase className="container">
+        <h2 className="mb-4 text-2xl font-semibold">Crear Venta</h2>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={(values, { setSubmitting }) =>
+            handleSubmit(values, setSubmitting)
+          }
+          enableReinitialize
+        >
+          {({ isSubmitting, values, setFieldValue }) => (
+            <Form>
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                <section className="grid grid-cols-1 gap-4 border-0 border-green-500 pr-4 md:grid-cols-2 md:border-r-2">
                   <Field
-                    name="client"
-                    placeholder="Buscar Cliente..."
-                    label="Cliente"
-                    fetchOptions={fetchClients}
-                    component={Select2}
+                    name="document_type"
+                    label="Tipo de doc."
+                    component={SelectBase}
+                    options={[
+                      { label: 'Factura', value: 'FACTURA' },
+                      { label: 'Boleta', value: 'BOLETA' },
+                      { label: 'Letra', value: 'LT' },
+                      { label: 'Nota de débito', value: 'ND' },
+                      { label: 'Nota de crédito', value: 'NC' },
+                    ]}
                   />
-                </div>
-
-                <div className="col-span-2">
                   <Field
-                    name="purchase_order_number"
-                    label="Nro orden de compra"
+                    name="document_number"
+                    label="Nro de doc."
                     component={InputBase}
                   />
-                </div>
-
-                <div className="col-span-1 flex items-center">
-                  <Field name="hasHes">
-                    {({ field }: { field: any}) => (
-                      <Checkbox
-                        isSelected={field.value}
-                        onValueChange={(value) => setFieldValue(field.name, value)}
-                        size="md"
-                      >
-                        Habilitar HES
-                      </Checkbox>
-                    )}
-                  </Field>
-                </div>
-                {values.hasHes && (
-                  <div className="col-span-1">
-                    <Field name="hes" label="HES" component={InputBase} />
+                  <div className="col-span-2">
+                    <Field
+                      name="client"
+                      placeholder="Buscar Cliente..."
+                      label="Cliente"
+                      fetchOptions={fetchClients}
+                      component={Select2}
+                    />
                   </div>
-                )}
-                <div className="col-span-2">
+                  <div className="col-span-2">
+                    <Field
+                      name="purchase_order_number"
+                      label="Nro orden de compra"
+                      component={InputBase}
+                    />
+                  </div>
+                  <div className="col-span-1 flex items-center">
+                    <Field name="hasHes">
+                      {({ field }: { field: any}) => (
+                        <Checkbox
+                          isSelected={field.value}
+                          onValueChange={(value) => setFieldValue(field.name, value)}
+                          size="md"
+                        >
+                          Habilitar HES
+                        </Checkbox>
+                      )}
+                    </Field>
+                  </div>
+                  {values.hasHes && (
+                    <div className="col-span-1">
+                      <Field name="hes" label="HES" component={InputBase} />
+                    </div>
+                  )}
+                  <div className="col-span-2">
+                    <Field
+                      name="description"
+                      label="Descripción"
+                      component={
+                        TextareaBase
+                      }
+                    />
+                  </div>
+                </section>
+                <section className="grid grid-cols-1 gap-4 pl-4 md:grid-cols-2">
                   <Field
-                    name="description"
-                    label="Descripción"
-                    component={
-                      TextareaBase
-                    }
+                    name="start_date"
+                    label="Fecha de emisión"
+                    component={DatePickerBase}
                   />
-                </div>
-              </section>
-              <section className="grid grid-cols-1 gap-4 pl-4 md:grid-cols-2">
-                <Field
-                  name="start_date"
-                  label="Fecha de emisión"
-                  component={DatePickerBase}
-                />
-                <Field
-                  name="payment_deadline"
-                  label="Plazo de pago"
-                  placeholder="30 días"
-                  component={InputBase}
-                />
-                <ExpirationDateCalculated />
-
-                <div className="col-span-1">
                   <Field
-                    name="serviceType"
-                    placeholder="Buscar servicio..."
-                    label="Servicio"
-                    fetchOptions={fetchBillingServices}
-                    component={Select2}
+                    name="payment_deadline"
+                    label="Plazo de pago"
+                    placeholder="30 días"
+                    component={InputBase}
                   />
-                </div>
-                <Field
-                  name="currency"
-                  label="Moneda"
-                  component={SelectBase}
-                  options={[
-                    { label: 'Soles', value: 'SOLES' },
-                    { label: 'Dólares', value: 'DOLARES' },
-                  ]}
-                />
-
-                <Field
-                  name="conversionRate"
-                  label="Tipo de cambio"
-                  component={InputBase}
-                />
-
-                <Field
-                  name="status"
-                  label="Estado"
-                  component={SelectBase}
-                  options={[
-                    { label: 'Pendiente', value: 'PENDIENTE' },
-                    { label: 'Cancelado', value: 'CANCELADO' },
-                    { label: 'Anulado', value: 'ANULADO' },
-                    { label: 'Factoring', value: 'FACTORING' },
-                  ]}
-                />
-
-                <div className="col-span-2">
-                  <AmountCalculated />
-                </div>
-              </section>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button
-                color="primary"
-                type="submit"
-                isLoading={isSubmitting}
-                size="lg"
-              >
-                Guardar
-              </Button>
-            </div>
-          </Form>
-        )}
-      </Formik>
-    </CardBase>
+                  <ExpirationDateCalculated />
+                  <div className="col-span-1">
+                    <Field
+                      key={refreshKey}
+                      name="serviceType"
+                      placeholder="Buscar servicio..."
+                      label="Servicio"
+                      fetchOptions={fetchBillingServices}
+                      component={Select2}
+                    />
+                  </div>
+                  <Field
+                    name="currency"
+                    label="Moneda"
+                    component={SelectBase}
+                    options={[
+                      { label: 'Soles', value: 'SOLES' },
+                      { label: 'Dólares', value: 'DOLARES' },
+                    ]}
+                  />
+                  <Button
+                      onPress={onOpen}
+                      className="mb-0"
+                      color="primary"
+                    >
+                    Crear Servicio
+                  </Button>
+                  <Field
+                    name="conversionRate"
+                    label="Tipo de cambio"
+                    component={InputBase}
+                  />
+                  <Field
+                    name="status"
+                    label="Estado"
+                    component={SelectBase}
+                    options={[
+                      { label: 'Pendiente', value: 'PENDIENTE' },
+                      { label: 'Cancelado', value: 'CANCELADO' },
+                      { label: 'Anulado', value: 'ANULADO' },
+                      { label: 'Factoring', value: 'FACTORING' },
+                    ]}
+                  />
+                  <div className="col-span-2">
+                    <AmountCalculated />
+                  </div>
+                </section>
+              </div>
+              <div className="mt-4 flex justify-end">
+                <Button
+                  color="primary"
+                  type="submit"
+                  isLoading={isSubmitting}
+                  size="lg"
+                >
+                  Guardar
+                </Button>
+              </div>
+            </Form>
+          )}
+        </Formik>
+      </CardBase>
+    </>
   )
 }
