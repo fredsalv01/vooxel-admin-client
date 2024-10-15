@@ -539,7 +539,7 @@ export const EditBillingPage = () => {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-0 border-green-500 md:border-t-2 pt-3 mt-3">
                 <div className="grid grid-cols-1 gap-4">
-                  <h4>Depósito 1 ( Detracción ) </h4>
+                  <h4>Depósito 1 </h4>
                   <Field
                     name="depositDate"
                     label="Fecha de depósito"
@@ -548,7 +548,7 @@ export const EditBillingPage = () => {
                   <ShowFieldDepositCurrency />
                 </div>
                 <div className="grid grid-cols-1 gap-4">
-                  <h4>Depósito 2</h4>
+                  <h4>Depósito 2 ( Detracción )</h4>
                   <Field
                     name="state2"
                     label="Estado"
