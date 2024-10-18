@@ -5,21 +5,24 @@ import { VACATION_DETAIL_TYPE_BACKEND } from '../../../lib/consts/general'
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
 import axiosInstance from '../../../axios/axios'
 import { Alerts } from '../../../lib/helpers/alerts'
+import { useVacationStore } from '../hooks/useVacationStore'
 
-export const VacationDetail = ({
-  row,
-  indexRow,
-  onChangeForm,
-  onDeleteRow,
-  fetchData,
-}) => {
-  const [item, setItem] = useState(row)
-  const [settingDays, setSettingDays] = useState(item.id > 0 ? true : false)
-  const [manualDays, setManualDays] = useState(item.quantity || 0)
+export const VacationDetail = ({ index, fetchData }) => {
+  const item = useVacationStore((state) =>
+    state.getVacationDetailByIndex(index),
+  )
 
-  useEffect(() => {
-    setItem(row)
-  }, [row])
+  const setVacationDetailByIndex = useVacationStore(
+    (state) => state.setVacationDetailByIndex,
+  )
+  const removeVacationDetailByIndex = useVacationStore(
+    (state) => state.removeVacationDetailByIndex,
+  )
+
+  const [settingDays, setSettingDays] = useState(
+    (item?.id ?? -1) > 0 ? true : false,
+  )
+  const [manualDays, setManualDays] = useState(item?.quantity || 0)
 
   useEffect(() => {
     if (!settingDays) {
@@ -29,21 +32,21 @@ export const VacationDetail = ({
 
   const handleChange = ({ target }) => {
     const { name, value } = target
+    console.log('🚀 ~ handleChange ~ { name, value }:', { name, value })
 
-    if (name === 'days') {
+    if (name === 'quantity') {
       setSettingDays(true)
       setManualDays(value)
-    } else {
+    } else if (name === 'startDate' || name === 'endDate') {
       setSettingDays(false)
     }
 
     const newItem = {
       ...item,
-      [name]: name === 'days' ? parseInt(value || 0) : value,
+      [name]: name === 'quantity' ? parseInt(value || 0) : value,
     }
 
-    setItem(newItem)
-    onChangeForm(newItem)
+    setVacationDetailByIndex(index, ...newItem)
   }
 
   const checkDates = () => {
@@ -63,60 +66,47 @@ export const VacationDetail = ({
       const endDate = new Date(item.endDate)
       days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
     }
-    setItem({ ...item, days })
-    onChangeForm({ ...item, days })
+    setVacationDetailByIndex(index, { ...item, quantity: days })
     return days
   }
 
   const deleteRow = async () => {
-    // if (form.length > 1) {
-    // if (row.id > 0 && row.vacationType !== "pendientes") {
-    //   ToastNotification.showWarning("No puede eliminar estas vacaciones");
-    //   return;
-    // }
-
-    const { isConfirmed } = await Alerts.confirmAlert({})
-    if (!isConfirmed) return
-
-    if (row.id > 0) {
-      console.log('🚀 ~ deleteRow ~ row:', row)
-      console.log('🚀 ~ deleteRow ~ indexRow:', indexRow)
+    if (item.id > 0) {
+      const { isConfirmed } = await Alerts.confirmAlert({})
+      if (!isConfirmed) return
       try {
-        await axiosInstance.delete(`/vacation-details/${row.id}`)
-        onDeleteRow(indexRow)
-        ToastNotification.showSuccess('Vacaciones eliminadas')
+        await axiosInstance.delete(`/vacation-details/${item.id}`)
+        removeVacationDetailByIndex(index)
+        ToastNotification.showSuccess('Vacación eliminada')
       } catch (error) {
-        ToastNotification.showError('Error al eliminar vacaciones')
+        ToastNotification.showError('Error al eliminar vacación')
       } finally {
         setTimeout(() => {
           fetchData()
         }, 2000)
       }
     } else {
-      onDeleteRow(indexRow)
+      removeVacationDetailByIndex(index)
     }
   }
 
   const days = useMemo(() => {
+    console.log('🚀 ~ days ~ settingDays:', settingDays)
     if (settingDays) {
       return manualDays
     }
 
-    if (
-      item.startDate !== row.startDate &&
-      item.endDate !== row.endDate &&
-      !settingDays
-    ) {
+    if (item.startDate || item.endDate || !settingDays) {
       return calculateDays()
     }
 
     return manualDays
-  }, [item.startDate, item.endDate, settingDays, manualDays])
+  }, [item?.startDate, item?.endDate, settingDays, manualDays])
 
   return (
     <div className="custom-shadow mx-2 my-4 grid grid-cols-1 rounded-md py-4 md:grid-cols-10">
       <div className="col-span-1 flex items-center justify-center">
-        {indexRow + 1}
+        {index + 1}
       </div>
 
       <div className="col-span-8 grid gap-4">
@@ -138,7 +128,7 @@ export const VacationDetail = ({
           <Input
             label="Cant. de días"
             type="number"
-            name="days"
+            name="quantity"
             value={days}
             onChange={(e) => handleChange(e)}
           />
@@ -146,7 +136,7 @@ export const VacationDetail = ({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Select
             className="col-span-1"
-            label="Tipo de vacaciones"
+            label="Tipo de vacaciónes"
             variant="bordered"
             placeholder="Seleccionar tipo"
             name="vacationType"
@@ -172,8 +162,6 @@ export const VacationDetail = ({
         </div>
       </div>
 
-      {/* <div className='grid grid-cols-2 md:grid-cols-12 gap-4'> */}
-
       <div className="flex items-center justify-center md:col-span-1">
         <Button
           type="button"
@@ -186,7 +174,6 @@ export const VacationDetail = ({
           </span>
         </Button>
       </div>
-      {/* </div> */}
     </div>
   )
 }

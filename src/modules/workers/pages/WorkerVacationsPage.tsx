@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMinus, faEquals } from '@fortawesome/free-solid-svg-icons'
 
 import { CardBase } from '../../../components/base'
 import { Chip } from '@nextui-org/react'
@@ -11,12 +12,10 @@ import { useFetchData } from '../../../hooks/useFetchData'
 import { useWorker } from '../hooks/useWorker'
 
 import ReactLoading from 'react-loading'
+import { useVacationStore } from '../hooks/useVacationStore'
 
 export const WorkerVacationsPage = () => {
   const { id: worderId } = useParams()
-
-  const [vacDetailActive, setVacDetailActive] = useState({})
-  const [totalExpiredDays, setTotalExpiredDays] = useState(0)
 
   const {
     data: vacationsWorker,
@@ -28,25 +27,20 @@ export const WorkerVacationsPage = () => {
 
   const { getWorkerDetails } = useWorker(worderId)
 
-  useEffect(() => {
-    if (vacationsWorker) {
-      console.log('🚀 ~ useEffect ~ vacationsWorker:', vacationsWorker)
-      setVacDetailActive(vacationsWorker)
-      setTotalExpiredDays(vacationsWorker.expiredDays)
-    }
-  }, [vacationsWorker, vacDetailActive, totalExpiredDays])
+  const vacation = useVacationStore(state => state.vacation)
+  const accumulatedVac = useVacationStore(state => state.computed.accumulatedVac)
+  const takenVac = useVacationStore(state => state.computed.takenVac)
+  const remainingVac = useVacationStore(state => state.computed.remainingVac)
+  const expiredDays = useVacationStore(state => state.computed.expiredDays)
+  const setVacation = useVacationStore(state => state.setVacation)
+  const setVacationDetail = useVacationStore(state => state.setVacationDetails)
 
-  const onDeleteRow = async (indexRow) => {
-    const activeDetails = vacDetailActive.vacationDetails.filter(
-      (item, index) => index !== indexRow,
-    )
-    const newVacDetailActive = {
-      ...vacDetailActive,
-      vacationDetails: activeDetails,
+  useEffect(() => {
+    if (!loading) {
+      setVacation(vacationsWorker);
+      setVacationDetail(vacationsWorker.vacationDetails);
     }
-    console.log('🚀 ~ onDeleteRow ~ newVacDetailActive:', newVacDetailActive)
-    setVacDetailActive(newVacDetailActive)
-  }
+  }, [loading])
 
   return (
     <div className="container flex flex-col">
@@ -66,7 +60,7 @@ export const WorkerVacationsPage = () => {
             </p>
 
             <p className="text-xl">
-              <strong>Días espirados:</strong> <br /> {totalExpiredDays}
+              <strong>Días espirados:</strong> <br /> {expiredDays}
             </p>
           </div>
 
@@ -84,37 +78,25 @@ export const WorkerVacationsPage = () => {
               <Slot slot="header">
                 <Chip
                   className="gap-1 border-none capitalize text-default-600"
-                  color={vacDetailActive.isActive ? 'success' : 'danger'}
+                  color={vacation.isActive ? 'success' : 'danger'}
                   size="sm"
                   variant="dot"
                 >
-                  {vacDetailActive.isActive ? 'Activas' : 'Inactivas'}
+                  {vacation.isActive ? 'Activas' : 'Inactivas'}
                 </Chip>
               </Slot>
               <Slot slot="body">
-                {/* {JSON.stringify(vacDetailActive)} */}
                 <div className="my-3 flex flex-wrap justify-between rounded-md border border-blue-600 px-4 py-2">
-                  <div>Acumuladas: {vacDetailActive.accumulatedVacations}</div>
-                  <div className="text-2xl font-semibold text-blue-600">
-                    <FontAwesomeIcon icon="fa-solid fa-minus" />
-                  </div>
-                  <div>Tomadas: {vacDetailActive.takenVacations}</div>
-                  <div className="text-2xl font-semibold text-blue-600">
-                    <FontAwesomeIcon icon="fa-solid fa-equals" />
-                  </div>
-                  <div>Pendientes: {vacDetailActive.remainingVacations}</div>
+                  <div>Acumuladas: {accumulatedVac}</div>
+                    <FontAwesomeIcon icon={faMinus} />
+                  <div>Tomadas: {takenVac}</div>
+                    <FontAwesomeIcon icon={faEquals} />
+                  <div>Pendientes: {remainingVac}</div>
                 </div>
-
-                {vacDetailActive && (
+                {vacation.isActive && (
                   <FormDataWorkerVacation
-                    vacationsDetailActive={vacDetailActive.vacationDetails}
-                    vacationId={vacDetailActive.id}
-                    fetchData={() => {
-                      fetchData()
-                      getWorkerDetails.refetch()
-                    }}
-                    onDeleteRow={onDeleteRow}
-                  ></FormDataWorkerVacation>
+                    fetchData={() => fetchData()}
+                  />
                 )}
               </Slot>
             </CardBase>
@@ -123,10 +105,4 @@ export const WorkerVacationsPage = () => {
       )}
     </div>
   )
-
-  // return (
-  //   <>
-  //     <pre>{JSON.stringify(data)}</pre>
-  //   </>
-  // )
 }
