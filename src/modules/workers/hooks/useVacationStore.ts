@@ -31,7 +31,7 @@ interface Action {
   addVacationDetail: (vacationDetail: VacationDetail) => void;
   removeVacationDetail: (vacationDetail: VacationDetail) => void;
   getVacationDetailByIndex: (index: number) => VacationDetail | undefined; // Getter function
-  setVacationDetailByIndex: (index: number) => VacationDetail | undefined; // Getter function
+  setVacationDetailByIndex: (index: number, args: any) => VacationDetail | undefined; // Getter function
   removeVacationDetailByIndex: (index: number) => void;
 }
 
@@ -93,12 +93,12 @@ export const useVacationStore = create<State & Action>()(devtools((set, get) => 
   addVacationDetail: (vacationDetail) => set((state) => ({ ...state, vacationDetails: [...state.vacationDetails, vacationDetail] })),
   removeVacationDetail: (vacationDetail) => set((state) => ({ ...state, vacationDetails: state.vacationDetails.filter((vd, index) => vd.id !== vacationDetail.id) })),
   getVacationDetailByIndex: (index) => get().vacationDetails.find((vd) => vd.index === index),
-  setVacationDetailByIndex: (index, ...args) => {
+  setVacationDetailByIndex: (index, args) => {
     const vacationDetail = get().vacationDetails.find((vd) => vd.index === index);
     // If the vacationDetail is not found, return undefined
     if (!vacationDetail) return undefined;
     // If there are no arguments, return the vacationDetail
-    if (!args.length) return vacationDetail;
+    if (!Object.keys(args).length) return vacationDetail;
     // If there are arguments, update the vacationDetail and return it
     set((state) => ({
       ...state,

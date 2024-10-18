@@ -1,52 +1,57 @@
 import React, { useMemo, useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button, Input, Select, SelectItem } from '@nextui-org/react'
+import { faTrash } from '@fortawesome/free-solid-svg-icons'
 import { VACATION_DETAIL_TYPE_BACKEND } from '../../../lib/consts/general'
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
 import axiosInstance from '../../../axios/axios'
 import { Alerts } from '../../../lib/helpers/alerts'
-import { useVacationStore } from '../hooks/useVacationStore'
+import { useVacationStore, VacationDetail } from '../hooks/useVacationStore'
 
-export const VacationDetail = ({ index, fetchData }) => {
-  const item = useVacationStore((state) =>
-    state.getVacationDetailByIndex(index),
-  )
+interface VacationDetailProps {
+  row: any;
+  index: number;
+  fetchData: () => void;
+  updateVacationDetail: (index: number, detail: any) => void;
+  deleteVacationDetail: (index: number) => void;
+}
 
-  const setVacationDetailByIndex = useVacationStore(
-    (state) => state.setVacationDetailByIndex,
-  )
-  const removeVacationDetailByIndex = useVacationStore(
-    (state) => state.removeVacationDetailByIndex,
-  )
 
+export const VacationDetailComp: React.FC<VacationDetailProps> = ({ index, row, fetchData, updateVacationDetail, deleteVacationDetail }) => {
+  const [item, setItem] = useState<Partial<VacationDetail>>(row || {})
+  
   const [settingDays, setSettingDays] = useState(
     (item?.id ?? -1) > 0 ? true : false,
   )
   const [manualDays, setManualDays] = useState(item?.quantity || 0)
-
+  
   useEffect(() => {
+    console.log("🚀 ~ item:", item)
+    console.log("🚀 ~ settingDays:", settingDays)
     if (!settingDays) {
       setManualDays(calculateDays())
     }
   }, [item.startDate, item.endDate])
 
-  const handleChange = ({ target }) => {
-    const { name, value } = target
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
     console.log('🚀 ~ handleChange ~ { name, value }:', { name, value })
 
     if (name === 'quantity') {
       setSettingDays(true)
-      setManualDays(value)
+      setManualDays(parseInt(value, 10))
     } else if (name === 'startDate' || name === 'endDate') {
       setSettingDays(false)
     }
 
     const newItem = {
       ...item,
-      [name]: name === 'quantity' ? parseInt(value || 0) : value,
+      [name]: name === 'quantity' ? parseInt(value || '0') : value,
     }
+    console.log("🚀 ~ handleChange ~ newItem:", newItem)
 
-    setVacationDetailByIndex(index, ...newItem)
+    setItem(newItem)
+    updateVacationDetail(index, newItem)
   }
 
   const checkDates = () => {
@@ -64,19 +69,19 @@ export const VacationDetail = ({ index, fetchData }) => {
     if (item.startDate && item.endDate) {
       const startDate = new Date(item.startDate)
       const endDate = new Date(item.endDate)
-      days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
+      days = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
     }
-    setVacationDetailByIndex(index, { ...item, quantity: days })
+    setItem({...item, quantity: days })
     return days
   }
 
   const deleteRow = async () => {
-    if (item.id > 0) {
+    if ((item?.id ?? -1) > 0) {
       const { isConfirmed } = await Alerts.confirmAlert({})
       if (!isConfirmed) return
       try {
         await axiosInstance.delete(`/vacation-details/${item.id}`)
-        removeVacationDetailByIndex(index)
+        deleteVacationDetail(index)
         ToastNotification.showSuccess('Vacación eliminada')
       } catch (error) {
         ToastNotification.showError('Error al eliminar vacación')
@@ -86,7 +91,7 @@ export const VacationDetail = ({ index, fetchData }) => {
         }, 2000)
       }
     } else {
-      removeVacationDetailByIndex(index)
+      deleteVacationDetail(index)
     }
   }
 
@@ -129,7 +134,7 @@ export const VacationDetail = ({ index, fetchData }) => {
             label="Cant. de días"
             type="number"
             name="quantity"
-            value={days}
+            value={days.toString()}
             onChange={(e) => handleChange(e)}
           />
         </div>
@@ -146,7 +151,7 @@ export const VacationDetail = ({ index, fetchData }) => {
               handleChange(e)
             }}
           >
-            {VACATION_DETAIL_TYPE_BACKEND.map((item) => (
+            {VACATION_DETAIL_TYPE_BACKEND.map((item: { value: string; label: string }) => (
               <SelectItem key={item.value}>{item.label}</SelectItem>
             ))}
           </Select>
@@ -169,8 +174,8 @@ export const VacationDetail = ({ index, fetchData }) => {
           isIconOnly
           className="bg-white"
         >
-          <span className="text-danger">
-            <FontAwesomeIcon icon="fa-solid fa-trash" />
+          <span className="text-red-500">
+            <FontAwesomeIcon icon={faTrash} />
           </span>
         </Button>
       </div>

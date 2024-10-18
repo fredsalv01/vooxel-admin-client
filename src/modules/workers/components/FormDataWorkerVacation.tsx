@@ -1,24 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@nextui-org/react';
-import { VacationDetail } from './VacationDetail';
+import { VacationDetailComp } from './VacationDetailComp';
 import { PlusIcon } from '../../../components/icons';
 import { VACATION_DETAIL_TYPE_BACKEND } from '../../../lib/consts/general';
 import axiosInstance from '../../../axios/axios';
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
-import { useVacationStore } from '../hooks/useVacationStore';
+import { useVacationStore, VacationDetail } from '../hooks/useVacationStore';
 
 interface Props {
   fetchData: () => void;
+  vacationId: number;
 }
 
-export const FormDataWorkerVacation: React.FC<Props> = ({ fetchData }) => {
+export const FormDataWorkerVacation: React.FC<Props> = ({ fetchData, vacationId }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Shallow comparison to get state from Zustand store
   const vacationDetails = useVacationStore(state => state.vacationDetails);
-  const vacation = useVacationStore(state => state.vacation);
   const addVacationDetail = useVacationStore(state => state.addVacationDetail);
   const remainingVac = useVacationStore(state => state.computed.remainingVac);
+  const setVacationDetails = useVacationStore(state => state.setVacationDetails);
+
+  
+
+  const removeVacationDetailByIndex = useVacationStore(
+    (state) => state.removeVacationDetailByIndex,
+  )
 
   const addRow = () => {
     addVacationDetail({
@@ -28,8 +35,18 @@ export const FormDataWorkerVacation: React.FC<Props> = ({ fetchData }) => {
       quantity: 0,
       vacationType: VACATION_DETAIL_TYPE_BACKEND[2].value,
       reason: '',
-    } as Partial<VacationDetail>);
+    } as VacationDetail);
   };
+
+  const updateVacationDetail = (index: number, detail: any) => {
+    const updatedDetails = [...vacationDetails];
+    updatedDetails[index] = detail;
+    setVacationDetails(updatedDetails);
+  };
+  
+  const deleteVacationDetail = (index: number) => { 
+    removeVacationDetailByIndex(index);
+  }
 
   const onSubmit = async () => {
     try {
@@ -65,7 +82,7 @@ export const FormDataWorkerVacation: React.FC<Props> = ({ fetchData }) => {
         { newDates: [], oldDates: [] },
       );
 
-      await axiosInstance.put(`/vacation-details/vacation/${vacation.id}`, {
+      await axiosInstance.put(`/vacation-details/vacation/${vacationId}`, {
         items: [...newDates, ...oldDates],
       });
 
@@ -93,10 +110,12 @@ export const FormDataWorkerVacation: React.FC<Props> = ({ fetchData }) => {
         {vacationDetails.length > 0 ? (
           vacationDetails.map((item, index) => (
             <React.Fragment key={index}>
-              <VacationDetail
+              <VacationDetailComp
                 index={index}
-                vacation={vacation}
+                row={item}
                 fetchData={fetchData}
+                updateVacationDetail={updateVacationDetail}
+                deleteVacationDetail={deleteVacationDetail}
               />
             </React.Fragment>
           ))

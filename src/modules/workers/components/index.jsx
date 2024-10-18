@@ -9,5 +9,5 @@ export { EditCreateContractWorkerModal } from "./EditCreateContractWorkerModal";
 export { EditCreateCertification } from "./EditCreateCertification";
 export { EditCreateCertificationModal } from "./EditCreateCertificationModal";
 export { GridHabilities } from "./GridHabilities";
-export { VacationDetail } from "./VacationDetail";
+export { VacationDetailComp } from "./VacationDetailComp";
 export { FormDataWorkerVacation } from "./FormDataWorkerVacation";

@@ -96,6 +96,7 @@ export const WorkerVacationsPage = () => {
                 {vacation.isActive && (
                   <FormDataWorkerVacation
                     fetchData={() => fetchData()}
+                    vacationId={vacation.id}
                   />
                 )}
               </Slot>
