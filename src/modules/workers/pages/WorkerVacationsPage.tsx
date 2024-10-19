@@ -34,13 +34,18 @@ export const WorkerVacationsPage = () => {
   const expiredDays = useVacationStore(state => state.computed.expiredDays)
   const setVacation = useVacationStore(state => state.setVacation)
   const setVacationDetail = useVacationStore(state => state.setVacationDetails)
+  const vacationDetails = useVacationStore(state => state.vacationDetails)
+  const setVacationDetails = useVacationStore(state => state.setVacationDetails)
 
   useEffect(() => {
+    console.log("🚀 ~ useEffect ~ loading: part1", loading)
     if (!loading) {
+      console.log("🚀 ~ useEffect ~ loading: part2", loading)
+
       setVacation(vacationsWorker);
       setVacationDetail(vacationsWorker.vacationDetails);
     }
-  }, [loading])
+  }, [loading, vacationsWorker, vacationsWorker?.vacationDetails])
 
   return (
     <div className="container flex flex-col">
@@ -97,6 +102,9 @@ export const WorkerVacationsPage = () => {
                   <FormDataWorkerVacation
                     fetchData={() => fetchData()}
                     vacationId={vacation.id}
+                    vacationDetails={vacationDetails}
+                    remainingVac={remainingVac}
+                    setVacationDetails={setVacationDetails}
                   />
                 )}
               </Slot>

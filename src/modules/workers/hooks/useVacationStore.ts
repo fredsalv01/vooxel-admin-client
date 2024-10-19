@@ -81,6 +81,9 @@ export const useVacationStore = create<State & Action>()(devtools((set, get) => 
     get vacationDetails() {
       return get()?.vacationDetails;
     },
+    get vacation() {
+      return get()?.vacation;
+    },
   },
 
   // Actions
