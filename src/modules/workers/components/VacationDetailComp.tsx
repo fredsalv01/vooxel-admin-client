@@ -20,7 +20,7 @@ export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, 
 
   const [item, setItem] = useState<VacationDetail>(row);
   const [settingDays, setSettingDays] = useState<boolean>(
-    (item?.id || -1) > 0 ? true : false 
+    (row?.id || -1) > 0 ? true : false 
   );
   const [manualDays, setManualDays] = useState<number>(item?.quantity || 0);
 
@@ -29,7 +29,6 @@ export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, 
   }, [row]);
 
   useEffect(() => {
-    console.log("🚀 ~ useEffect ~ settingDays:", settingDays)
     if (!settingDays) {
       setManualDays(calculateDays());
     }
@@ -79,14 +78,21 @@ export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, 
 
     const newItem = { ...item, quantity: days }
     setItem(newItem);
-    updateVacationDetail(newItem);
+    // updateVacationDetail(newItem);
     return days;
   };
 
   const days = useMemo(() => {
-    if (settingDays) return manualDays;
-    return calculateDays();
-  }, [item.startDate, item.endDate, settingDays, manualDays]);
+    if (settingDays) {
+      return manualDays;
+    }
+
+    if (item.startDate || item.endDate || !settingDays) {
+      return calculateDays();
+    }
+
+    return 0;
+  }, [item?.startDate, item?.endDate, settingDays, manualDays]);
 
   return (
     <div className="custom-shadow mx-2 my-4 grid grid-cols-1 rounded-md py-4 md:grid-cols-10">

@@ -10,6 +10,7 @@ import Slot from '../../../components/Slot'
 
 import { useFetchData } from '../../../hooks/useFetchData'
 import { useWorker } from '../hooks/useWorker'
+import { VACATION_DETAIL_TYPE_BACKEND } from '../../../lib/consts/general';
 
 import ReactLoading from 'react-loading'
 import { useVacationStore } from '../hooks/useVacationStore'
@@ -28,24 +29,37 @@ export const WorkerVacationsPage = () => {
   const { getWorkerDetails } = useWorker(worderId)
 
   const vacation = useVacationStore(state => state.vacation)
+  const setVacation = useVacationStore(state => state.setVacation)
+
+  const vacationDetails = useVacationStore(state => state.vacationDetails)
+  const setVacationDetails = useVacationStore(state => state.setVacationDetails)
+  
   const accumulatedVac = useVacationStore(state => state.computed.accumulatedVac)
   const takenVac = useVacationStore(state => state.computed.takenVac)
   const remainingVac = useVacationStore(state => state.computed.remainingVac)
   const expiredDays = useVacationStore(state => state.computed.expiredDays)
-  const setVacation = useVacationStore(state => state.setVacation)
-  const setVacationDetail = useVacationStore(state => state.setVacationDetails)
-  const vacationDetails = useVacationStore(state => state.vacationDetails)
-  const setVacationDetails = useVacationStore(state => state.setVacationDetails)
-
+  
   useEffect(() => {
-    console.log("🚀 ~ useEffect ~ loading: part1", loading)
+    setVacationDetails([]);
+    console.log("🚀 ~ useEffect ~ loading:", loading)
     if (!loading) {
-      console.log("🚀 ~ useEffect ~ loading: part2", loading)
-
+      console.log("🚀 ~ useEffect ~ loading:", loading)
       setVacation(vacationsWorker);
-      setVacationDetail(vacationsWorker.vacationDetails);
+      setVacationDetails(vacationsWorker.vacationDetails);
     }
-  }, [loading, vacationsWorker, vacationsWorker?.vacationDetails])
+  }, [loading])
+
+
+  const onAddVacationDetail = (push: any) => { 
+    push({
+      index: vacationDetails.length,
+      startDate: '',
+      endDate: '',
+      quantity: 0,
+      vacationType: VACATION_DETAIL_TYPE_BACKEND[2].value,
+      reason: '',
+    })
+  }
 
   return (
     <div className="container flex flex-col">
@@ -105,6 +119,7 @@ export const WorkerVacationsPage = () => {
                     vacationDetails={vacationDetails}
                     remainingVac={remainingVac}
                     setVacationDetails={setVacationDetails}
+                    onAddVacationDetail={onAddVacationDetail}
                   />
                 )}
               </Slot>

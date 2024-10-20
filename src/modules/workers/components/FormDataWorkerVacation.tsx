@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Button } from '@nextui-org/react';
 import { VacationDetailComp } from './VacationDetailComp';
-import { PlusIcon } from '../../../components/icons';
 import { VACATION_DETAIL_TYPE_BACKEND } from '../../../lib/consts/general';
 import axiosInstance from '../../../axios/axios';
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
 import { useVacationStore, VacationDetail } from '../hooks/useVacationStore';
-import { Formik, Form, FieldArray, Field, useFormik, useFormikContext } from 'formik'
+import { Formik, Form, FieldArray } from 'formik'
 import * as Yup from 'yup'
 import { Alerts } from '../../../lib/helpers/alerts';
 
@@ -16,6 +15,7 @@ interface Props {
   vacationDetails: VacationDetail[];
   remainingVac: number;
   setVacationDetails: (vacationDetails: VacationDetail[]) => void;
+  onAddVacationDetail: (push: (value: any) => void) => void;
 }
 
 type FormValues = {
@@ -40,6 +40,7 @@ export const FormDataWorkerVacation: React.FC<Props> = ({
   vacationDetails,
   remainingVac,
   setVacationDetails,
+  onAddVacationDetail,
 }) => {
 
   const [isLoading, setIsLoading] = useState(false);
@@ -55,14 +56,13 @@ export const FormDataWorkerVacation: React.FC<Props> = ({
   });
 
   useEffect(() => { 
-    if (JSON.stringify(initialValues) !== JSON.stringify(vacationDetails)) {
+    if (JSON.stringify(initialValues) !== JSON.stringify(vacationDetails) && vacationDetails.length > 0) {
       setInitialValues({
         vacationDetails: vacationDetails.length > 0 ? vacationDetails : [
           { index: vacationDetails.length, startDate: '', endDate: '', quantity: 0, vacationType: VACATION_DETAIL_TYPE_BACKEND[2].value, reason: '' }
         ]
       });
     }
-    console.log("🚀 ~ useEffect ~ vacationDetails:", vacationDetails)
   }, [vacationDetails]);
 
   const removeVacationDetailByIndex = useVacationStore(
@@ -74,7 +74,7 @@ export const FormDataWorkerVacation: React.FC<Props> = ({
   }
 
   const deleteRow = async (item: VacationDetail, index: number, values: FormValues,  remove: (index: number) => void) => {
-
+    console.log("🚀 ~ deleteRow ~ index:", index)
     if (values.vacationDetails.length === 1) {
       ToastNotification.showWarning('No puedes eliminar todas las vacaciones');
       return;
@@ -190,14 +190,7 @@ export const FormDataWorkerVacation: React.FC<Props> = ({
                           ])
                         }
                         deleteVacationDetail={() => deleteRow(vacationDetail, index, values, remove)}
-                        addVacationDetail={() => push({
-                          index: values.vacationDetails.length,
-                          startDate: '',
-                          endDate: '',
-                          quantity: 0,
-                          vacationType: VACATION_DETAIL_TYPE_BACKEND[2].value,
-                          reason: '',
-                        })}
+                        addVacationDetail={() => onAddVacationDetail(push)}
                         isLoading={isLoading}
                       />
                     </React.Fragment>
