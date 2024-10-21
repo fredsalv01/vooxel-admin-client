@@ -20,6 +20,7 @@ import { VacationDetailComp } from '../components/VacationDetailComp'
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp';
 import * as Yup from 'yup'
 import { Alerts } from '../../../lib/helpers/alerts';
+import { useShallow } from 'zustand/shallow';
 
 const validationSchema = Yup.object().shape({
   vacationDetails: Yup.array().of(
@@ -56,7 +57,7 @@ export const WorkerVacationsPage = () => {
   const vacation = useVacationStore(state => state.vacation)
   const setVacation = useVacationStore(state => state.setVacation)
 
-  const vacationDetails = useVacationStore(state => state.vacationDetails)
+  const vacationDetails = useVacationStore(useShallow(state => state.vacationDetails))
   const setVacationDetails = useVacationStore(state => state.setVacationDetails)
   const addVacationDetail = useVacationStore(state => state.addVacationDetail)
   
@@ -88,8 +89,15 @@ export const WorkerVacationsPage = () => {
           { index: vacationDetails.length, startDate: '', endDate: '', quantity: 0, vacationType: VACATION_DETAIL_TYPE_BACKEND[2].value, reason: '' }
         ]
       });
+    } else if (vacationDetails.length === 0) {
+      setInitialValues({
+        vacationDetails: [
+          { index: 0, startDate: '', endDate: '', quantity: 0, vacationType: VACATION_DETAIL_TYPE_BACKEND[2].value, reason: '' }
+        ]
+      });
     }
-  }, [vacationDetails]);
+    console.log("🚀 ~ WorkerVacationsPage ~ vacationDetails:", vacationDetails)
+  }, [vacationDetails, loading]);
 
   const onAddVacationDetail = (push: any) => {
     const newItem = {
@@ -110,7 +118,7 @@ export const WorkerVacationsPage = () => {
 
   const deleteRow = async (item: VacationDetail, index: number, values: FormValues,  remove: (index: number) => void) => {
     console.log("🚀 ~ deleteRow ~ index:", index)
-    if (values.vacationDetails.length === 1) {
+    if (values.vacationDetails.length === 1 && (item?.id ?? -1) <= -1) {
       ToastNotification.showWarning('No puedes eliminar todas las vacaciones');
       return;
     }
@@ -120,17 +128,19 @@ export const WorkerVacationsPage = () => {
       if (!isConfirmed) return
       try {
         setIsLoading(true)
-        await axiosInstance.delete(`/vacation-details/${item.id}`)
+        const resp = await axiosInstance.delete(`/vacation-details/${item.id}`)
+        console.log("🚀 ~ deleteRow ~ resp:", resp)
         remove(index)
-        deleteVacationDetail(index)
+        setVacation(resp.data);
+        setVacationDetails(resp.data.vacationDetails);
         ToastNotification.showSuccess('Vacación eliminada')
       } catch (error) {
         ToastNotification.showError('Error al eliminar vacación')
       } finally {
         setIsLoading(false)
-        setTimeout(() => {
-          fetchData()
-        }, 1500)
+        // setTimeout(() => {
+        //   fetchData()
+        // }, 1500)
       }
     } else {
       deleteVacationDetail(index)

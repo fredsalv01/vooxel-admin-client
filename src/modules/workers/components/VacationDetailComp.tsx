@@ -118,6 +118,9 @@ export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, 
                 value={item.vacationType}
                 selectedKeys={[item.vacationType]}
                 onChange={(e) => handleChange(e as any)}
+                disabledKeys={
+                  item?.id && ['tomadas', 'compradas'].includes(item.vacationType) ? ['pendientes'] : []
+                }
               >
                 {VACATION_DETAIL_TYPE_BACKEND.map((type: { value: string; label: string }) => (
                   <SelectItem key={type.value} value={type.value}>
