@@ -16,40 +16,24 @@ interface VacationDetailProps {
 }
 
 export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, updateVacationDetail, deleteVacationDetail, addVacationDetail, isLoading }) => {
-  const { setFieldValue, values } = useFormikContext<{ vacationDetails: VacationDetail[] }>();
-
+  const { setFieldValue } = useFormikContext<{ vacationDetails: VacationDetail[] }>();
   const [item, setItem] = useState<VacationDetail>(row);
-  const [settingDays, setSettingDays] = useState<boolean>(
-    (row?.id || -1) > 0 ? true : false 
-  );
-  const [manualDays, setManualDays] = useState<number>(item?.quantity || 0);
 
   useEffect(() => { 
     setItem(row);
   }, [row]);
 
-  useEffect(() => {
-    if (!settingDays) {
-      setManualDays(calculateDays());
-    }
-  }, [item.startDate, item.endDate]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     let { name, value } = e.target;
-    console.log("🚀 ~ handleChange ~ { name, value }:", { name, value })
-
     name = name.split('.').at(-1) || name;
-    console.log("🚀 ~ handleChange ~ name:", name)
-    // console.log("🚀 ~ handleChange ~ property:", property)
-
+    
     let newItem: VacationDetail = { ...item, [name]: value };
     
     if (name === 'quantity') {
-      setSettingDays(true);
-      newItem.quantity = parseInt(value, 10) || 0;
-      setManualDays(newItem.quantity);
-    } else if (name === 'startDate' || name === 'endDate') {
-      setSettingDays(false);
+      newItem.quantity = parseInt(value, 10) || '';
+    } else if (name == 'startDate' || name == 'endDate') {
+      console.log("🚀 ~ handleChange ~ name:", name)
+      newItem.quantity = calculateDays(name, value);
     }
     console.log("🚀 ~ handleChange ~ newItem:", newItem)
 
@@ -58,41 +42,26 @@ export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, 
     setFieldValue(`vacationDetails.${index}`, newItem); // Sync with Formik
   };
 
-  const checkDates = () => {
-    const { startDate, endDate } = item;
-    if (!startDate || !endDate) return false;
+  const calculateDays = (name: string, value: string) => {
+    let days = 0, startDate = '', endDate = '';
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return start <= end;
-  };
-
-  const calculateDays = () => {
-    if (!checkDates()) return 0;
-    let days = 0;
-    if (item.startDate && item.endDate) {
-      const startDate = new Date(item.startDate);
-      const endDate = new Date(item.endDate);
-      days = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    if (name === 'startDate') {
+      startDate = value;
+      endDate = item.endDate;
+    } else if (name === 'endDate') {
+      endDate = value;
+      startDate = item.startDate;
     }
+    console.log("🚀 ~ calculateDays ~ endDate:", endDate)
+    console.log("🚀 ~ calculateDays ~ startDate:", startDate)
 
-    const newItem = { ...item, quantity: days }
-    setItem(newItem);
-    // updateVacationDetail(newItem);
+    if (startDate && endDate) {
+      const startDateValue = new Date(startDate);
+      const endDateValue = new Date(endDate);
+      days = Math.floor((endDateValue.getTime() - startDateValue.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    }
     return days;
   };
-
-  const days = useMemo(() => {
-    if (settingDays) {
-      return manualDays;
-    }
-
-    if (item.startDate || item.endDate || !settingDays) {
-      return calculateDays();
-    }
-
-    return 0;
-  }, [item?.startDate, item?.endDate, settingDays, manualDays]);
 
   return (
     <div className="custom-shadow mx-2 my-4 grid grid-cols-1 rounded-md py-4 md:grid-cols-10">
@@ -130,7 +99,7 @@ export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, 
                 {...field}
                 label="Cant. de días"
                 type="number"
-                value={days.toString()}
+                value={item.quantity.toString()}
                 onChange={handleChange}
               />
             )}
@@ -158,12 +127,15 @@ export const VacationDetailComp: React.FC<VacationDetailProps> = ({ row, index, 
               </Select>
             )}
           </Field>
+          <div className="col-span-2">
+
 
           <Field name={`vacationDetails.${index}.reason`}>
             {({ field }: { field: any }) => (
               <Input {...field} label="Razón" value={item.reason} onChange={handleChange} />
             )}
           </Field>
+          </div>
         </div>
       </div>
 

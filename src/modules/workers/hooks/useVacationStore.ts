@@ -20,7 +20,7 @@ export interface VacationDetail {
   reason: string;
   startDate: string;
   endDate: string;
-  quantity: number;
+  quantity: number | string;
   vacationId?: number;
   // isActive: boolean;
 }
