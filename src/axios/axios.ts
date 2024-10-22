@@ -6,6 +6,7 @@ import { redirect } from "react-router-dom";
 interface ImportMetaEnv {
   VITE_API_BACK_LOCAL: string;
   VITE_API_BACK_DEV: string;
+  VITE_API_BACK_PROD: string
 }
 
 declare global {
@@ -16,7 +17,7 @@ declare global {
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL:
-    import.meta.env.VITE_API_BACK_LOCAL || import.meta.env.VITE_API_BACK_DEV,
+  import.meta.env.VITE_API_BACK_DEV || import.meta.env.VITE_API_BACK_LOCAL,
   timeout: 10000, // 10s.
   headers: {
     "Content-Type": "application/json",
