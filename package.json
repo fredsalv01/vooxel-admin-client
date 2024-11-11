@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "start": "serve dist -s -n -L -p $PORT",
     "deploy-gcp": "npm run build && gsutil cp -r dist/* gs://vooxell-webapp/vooxel-admin-client"
   },
   "dependencies": {
@@ -45,6 +46,7 @@
     "react-select": "^5.8.0",
     "react-toastify": "^10.0.5",
     "recharts": "^2.12.5",
+    "serve": "^14.2.4",
     "sweetalert2": "^11.6.13",
     "sweetalert2-react-content": "^5.0.7",
     "yup": "^1.4.0",

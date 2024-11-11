@@ -13,8 +13,8 @@ export const Login = () => {
   const navigate = useNavigate()
 
   const [values, setValues] = useState({
-    email: 'mister@gmail.com',
-    password: 'password',
+    email: '',
+    password: '',
   })
 
   const [isLoading, setIsLoading] = useState(false)
