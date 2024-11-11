@@ -14,7 +14,42 @@ interface PaginationProps {
 interface UseQueryPromiseProps {
   url: string;
   key: string;
+  type: 'GET' | 'POST';
+  filters?: any[
+  /**
+   * year: [2021, 2022, 2023, 2024, 2025]
+   * month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+   * dates: [
+   *  {
+   *    column:"date",
+   *    start_date: "2021-01-01",
+   *    end_date: "null"
+   *  }
+   * ],
+   * order: [column = id, direction = 'desc']
+   */
+  ];
 }
+
+// "year": [
+//   2021
+// ],
+//   "month": [
+//     1
+//   ],
+//     "currency": [
+//       "SOLES",
+//       "DOLARES"
+//     ],
+//       "state": "PENDIENTE",
+//         "service": [
+//           "CONSULTORIA",
+//           "CAPACITACION"
+//         ],
+//           "client": [
+//             "Empresa 1",
+//             "Empresa 2"
+//           ],
 
 interface Meta {
   currentPage: number;
@@ -29,7 +64,7 @@ interface ResponseData {
   [key: string]: any;
 }
 
-export const useQueryPromise = ({ url, key }: UseQueryPromiseProps): any => {
+export const useQueryPromise = ({ url, key, filters, type = 'GET' }: UseQueryPromiseProps): any => {
   const [paginationProps, setPaginationProps] = useState<PaginationProps>({
     currentPage: 1,
     itemCount: 1,
@@ -66,15 +101,34 @@ export const useQueryPromise = ({ url, key }: UseQueryPromiseProps): any => {
         limit: paginationProps.itemsPerPage,
       };
 
-      if (['billing'].includes(url)) {
+      if (['billing/find'].includes(url)) {
         delete params.isActive;
       }
 
       try {
         if (debouncedSearch.length) params.input = debouncedSearch;
+
+        if (filters) {
+          params.filters = filters;
+        }
+
+        if (type === 'POST') {
+          const response = await axiosInstance.post(url, params);
+          const { meta } = response.data;
+          setPaginationProps({
+            currentPage: meta.currentPage,
+            itemCount: meta.itemCount,
+            itemsPerPage: meta.itemsPerPage,
+            totalItems: meta.totalItems,
+            totalPages: meta.totalPages,
+          });
+          return response.data;
+        }
+
         const response = await axiosInstance.get(url, {
           params,
         });
+
         const { meta } = response.data;
         setPaginationProps({
           currentPage: meta.currentPage,
@@ -84,6 +138,8 @@ export const useQueryPromise = ({ url, key }: UseQueryPromiseProps): any => {
           totalPages: meta.totalPages,
         });
         return response.data;
+
+
       } catch (err) {
         console.error('Error fetching data:', err);
         throw err;
@@ -98,17 +154,12 @@ export const useQueryPromise = ({ url, key }: UseQueryPromiseProps): any => {
   }, [error]);
 
   const updatingList = (prop: keyof PaginationProps, newValue: any) => {
-    // update if the prop is in the paginationProps and the value is different
     if (paginationProps[prop] === newValue) return;
     setPaginationProps({
       ...paginationProps,
       [prop]: newValue,
     });
-
-    // refetch();
   }
-
-  // return { data, isFetching, refetch, isSuccess, error };
 
   return {
     data,

@@ -1,12 +1,21 @@
-import React from 'react'
-import { Button, Chip } from '@nextui-org/react'
+import React, { useEffect, useState } from 'react'
+import {
+  Button,
+  Select,
+  SelectItem,
+  DateRangePicker,
+  Input,
+  Chip,
+} from '@nextui-org/react'
 import { Link } from 'react-router-dom'
 
 import Slot from '../../../components/Slot'
-import { TableList } from '../../../components/base'
+import { TableList, Sidebar } from '../../../components/base'
 import { useQueryPromise } from '../../../hooks/useQueryPromise'
 import { EditIcon, PlusIcon } from '../../../components/icons'
 import { Alerts } from '../../../lib/helpers/alerts'
+import { useSidebar } from '../../../hooks'
+import { useFetchData } from '../../../hooks/useFetchData'
 
 // orden de las columnas
 // AÑO - MES - T/D - NRO DOC - FECHA DE EMISION - PLAZO DE PAGO -
@@ -18,18 +27,53 @@ import { Alerts } from '../../../lib/helpers/alerts'
 
 // agregar un tooltip para mostrar
 const headersTable = [
-  { name: 'Año', uid: 'year' },
-  { name: 'Mes', uid: 'month' },
+  {
+    name: 'Año',
+    uid: 'year',
+    isFiltered: true,
+    filterType: 'array',
+    keyOptions: 'years',
+  },
+  {
+    name: 'Mes',
+    uid: 'month',
+    isFiltered: true,
+    filterType: 'array',
+    keyOptions: 'months',
+  },
   { name: 'T/D', uid: 'documentType' },
   { name: 'Nro. de documento', uid: 'documentNumber' },
-  { name: 'Fecha de emisión', uid: 'startDate' },
+  {
+    name: 'Fecha de emisión',
+    uid: 'startDate',
+    isFiltered: true,
+    filterType: 'date',
+  },
   { name: 'Plazo de pago', uid: 'paymentDeadline' },
-  { name: 'Cliente', uid: 'client' },
+  {
+    name: 'Cliente',
+    uid: 'client',
+    isFiltered: true,
+    filterType: 'array',
+    keyOptions: 'clientBusinessNames',
+  },
   { name: 'RUC', uid: 'clientRuc' },
-  { name: 'Tipo de servicio', uid: 'serviceName' },
+  {
+    name: 'Tipo de servicio',
+    uid: 'serviceName',
+    isFiltered: true,
+    filterType: 'array',
+    keyOptions: 'serviceNames',
+  },
   { name: 'Descripción', uid: 'description' },
   { name: 'Nro. OC', uid: 'purchaseOrderNumber' },
-  { name: 'Moneda', uid: 'currency' },
+  {
+    name: 'Moneda',
+    uid: 'currency',
+    isFiltered: true,
+    filterType: 'array',
+    keyOptions: 'currencies',
+  },
   { name: 'T/C', uid: 'conversionRate' },
   { name: 'Monto Neto', uid: 'amount' },
   { name: 'IGV', uid: 'igv' },
@@ -37,10 +81,21 @@ const headersTable = [
   { name: 'Monto Neto US$', uid: 'currencyConversionAmount' },
   { name: 'IGV US$', uid: 'igvConversionAmount' },
   { name: 'Monto Total US$', uid: 'totalConversionAmount' },
-  { name: 'Estado', uid: 'billingState' },
+  {
+    name: 'Estado',
+    uid: 'billingState',
+    isFiltered: true,
+    filterType: 'array',
+    keyOptions: 'billingStates',
+  },
   { name: 'Mes depósito', uid: 'depositMonth' },
   { name: 'Fecha depósito', uid: 'depositDate' },
-  { name: 'Fecha de vencimiento', uid: 'expirationDate' },
+  {
+    name: 'Fecha de vencimiento',
+    uid: 'expirationDate',
+    isFiltered: true,
+    filterType: 'date',
+  },
   { name: 'Días acumulados', uid: 'accumulatedDays' },
   { name: 'Acciones', uid: 'actions' },
 ]
@@ -74,6 +129,34 @@ const INITIAL_VISIBLE_COLUMNS = [
 ]
 
 export const BillingList = () => {
+  const { isOpen, toggleSidebar } = useSidebar()
+
+  const [filters, setFilters] = useState([])
+
+  const { data: unique_values } = useFetchData({ url: 'billing/unique_values' })
+
+  useEffect(() => {
+    if (unique_values && Object.keys(unique_values).length > 0) {
+      const properties = []
+      for (const element of headersTable) {
+        if (element.isFiltered) {
+          let data = {
+            name: element.name,
+            value: null,
+            key: element.uid,
+            type: element.filterType ?? 'text',
+          }
+          if (element.filterType === 'array') {
+            data.options = unique_values[element.keyOptions] ?? []
+            data.optionsSelected = []
+          }
+          properties.push(data)
+        }
+      }
+      setFilters(properties)
+    }
+  }, [unique_values])
+
   const {
     data,
     isFetching,
@@ -82,7 +165,7 @@ export const BillingList = () => {
     paginationProps,
     updatingList,
     setQuerySearch,
-  } = useQueryPromise({ url: 'billing', key: 'billing' })
+  } = useQueryPromise({ url: 'billing/find', key: 'billing', type: 'POST' })
 
   const addCurrency = (currency, cellValue) => {
     const language = {
@@ -184,8 +267,51 @@ export const BillingList = () => {
     }
   }
 
+  const RenderFilterInput = ({ filter }) => {
+    const [values, setValues] = useState(filter.optionsSelected || [])
+
+    const handleSelectionChange = (selected) => {
+      const selectedArray = Array.from(selected)
+      setValues(selectedArray)
+    }
+
+    switch (filter.type) {
+      case 'text':
+        return <Input label={filter.name} className="max-w-xs" />
+      case 'date':
+        return <DateRangePicker label={filter.name} className="max-w-xs" />
+      case 'array':
+        return (
+          <Select
+            label={filter.name}
+            selectionMode="multiple"
+            placeholder="selecciona un valor"
+            selectedKeys={values}
+            className="max-w-xs"
+            onSelectionChange={handleSelectionChange}
+            textValue={values.join(', ')} // Plain text representation of selected values
+          >
+            {filter.options.map((item) => (
+              <SelectItem key={item}>{item}</SelectItem>
+            ))}
+          </Select>
+        )
+      default:
+        return <Input label={filter.name} className="max-w-xs" />
+    }
+  }
+
   return (
     <>
+      <Sidebar isOpen={isOpen} filters={filters} toggleSidebar={toggleSidebar}>
+        <h3 className="mb-4 font-bold uppercase">Filtros</h3>
+        {filters &&
+          filters.map((filter, index) => (
+            <div key={index} className="mb-4">
+              <RenderFilterInput filter={filter} />
+            </div>
+          ))}
+      </Sidebar>
       <TableList
         title="Facturación"
         items={data?.items || []}
@@ -198,14 +324,19 @@ export const BillingList = () => {
         setQuerySearch={setQuerySearch}
       >
         <Slot slot="topContent">
-          {/* onPress={onOpen} */}
+          <Button
+            color="primary"
+            onClick={toggleSidebar}
+            style={{ alignSelf: 'flex-end' }}
+          >
+            Filtros
+          </Button>
           <Button
             as={Link}
             to={`/billing/create`}
             color="primary"
             endContent={<PlusIcon />}
           >
-            {/* onClick={onOpen} */}
             Agregar
           </Button>
         </Slot>

@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
-
 export interface Vacation {
   id: number;
   plannedVacations: number;
@@ -60,7 +59,7 @@ export const useVacationStore = create<State & Action>()(devtools((set, get) => 
     expiredDays: 0,
     workerId: 0,
     isActive: false,
-  },
+  }, 
 
   vacationDetails: [],
 
