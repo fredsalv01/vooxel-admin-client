@@ -85,7 +85,16 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET' }: UseQueryPro
 
   useEffect(() => {
     handleSearchChange(querySearch);
-  }, [querySearch, handleSearchChange]);
+  }, [querySearch, handleSearchChange, filters]);
+
+  useEffect(() => {
+    if (filters) {
+      setPaginationProps((prev) => ({
+        ...prev,
+        currentPage: 1,
+      }));
+    }
+  }, [filters]);
 
   const { data, isFetching, refetch, isSuccess, error } = useQuery<ResponseData>({
     queryKey: [
@@ -93,9 +102,10 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET' }: UseQueryPro
       paginationProps.currentPage,
       paginationProps.itemsPerPage,
       debouncedSearch,
+      filters,
     ],
     queryFn: async () => {
-      const params: Record<string, any> = {
+      let params: Record<string, any> = {
         isActive: true,
         page: paginationProps.currentPage,
         limit: paginationProps.itemsPerPage,
@@ -109,7 +119,10 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET' }: UseQueryPro
         if (debouncedSearch.length) params.input = debouncedSearch;
 
         if (filters) {
-          params.filters = filters;
+          params = {
+            ...params,
+            ...filters
+          };
         }
 
         if (type === 'POST') {

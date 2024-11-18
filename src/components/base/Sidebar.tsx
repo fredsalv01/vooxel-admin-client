@@ -1,5 +1,7 @@
 import React from 'react';
 import { Button, Spacer } from '@nextui-org/react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,7 +13,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, childre
   return (
     <aside
       style={{
-        width: isOpen ? '300px' : '0px',
+        width: isOpen ? '350px' : '0px',
         height: '100vh',
         backgroundColor: '#1A1A1A',
         color: '#FFF',
@@ -25,7 +27,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, childre
         right: 0,
         zIndex: 9999,
         overflow: 'hidden',
-        
       }}
     >
       {/* Sidebar Toggle Button */}
@@ -36,8 +37,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, childre
             transform: isOpen ? 'translateX(0)' : 'translateX(50px)',
             transition: 'opacity 0.3s, transform 0.3s',
             pointerEvents: isOpen ? 'auto' : 'none', // Disables click when hidden
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
         }}
-      > Cerrar
+        isIconOnly
+        color='secondary'
+        size='sm'
+        >
+        <FontAwesomeIcon icon={faXmark} size='2x' />
       </Button>
       <Spacer y={1} />
 
@@ -49,6 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, childre
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'translateX(0)' : 'translateX(50px)',
           transition: 'opacity 0.3s, transform 0.3s',
+          marginTop: '1.5rem',
         }}>
           {children}
         </div>

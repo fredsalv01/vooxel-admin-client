@@ -1,3 +1,5 @@
+import { CalendarDate } from "@internationalized/date";
+
 export function capitalize(str: string): string {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -55,3 +57,16 @@ export function stringToNumber(str: string, decimals: number = 2): number {
   const number = parseFloat(str);
   return parseFloat(number.toFixed(decimals));
 }
+
+// format date string with calendarDate from react-datepicker
+export function toDateFromDatePicker(date: any): CalendarDate | null {
+  if (!date) return null
+  const { year, month, day } = date
+  const newDate = new CalendarDate(year, month, day)
+  return newDate
+}
+
+export function capitalizeFirstLetter(word: string): string {
+  if (!word) return '';
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+};

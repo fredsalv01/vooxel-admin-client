@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import {
-  Button,
-  Select,
-  SelectItem,
-  DateRangePicker,
-  Input,
-  Chip,
-} from '@nextui-org/react'
+import { Button, Chip, ButtonGroup } from '@nextui-org/react'
 import { Link } from 'react-router-dom'
 
 import Slot from '../../../components/Slot'
 import { TableList, Sidebar } from '../../../components/base'
 import { useQueryPromise } from '../../../hooks/useQueryPromise'
-import { EditIcon, PlusIcon } from '../../../components/icons'
+import {
+  DocumentDownloadIcon,
+  EditIcon,
+  PlusIcon,
+} from '../../../components/icons'
 import { Alerts } from '../../../lib/helpers/alerts'
 import { useSidebar } from '../../../hooks'
 import { useFetchData } from '../../../hooks/useFetchData'
+import { useFilters } from '../../../store/useFilters'
+import { RenderFilterInput } from '../../../components'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
+import {
+  capitalizeFirstLetter,
+  toDateFromDatePicker,
+} from '../../../lib/helpers/utils'
 
 // orden de las columnas
 // AÑO - MES - T/D - NRO DOC - FECHA DE EMISION - PLAZO DE PAGO -
@@ -63,7 +68,7 @@ const headersTable = [
     uid: 'serviceName',
     isFiltered: true,
     filterType: 'array',
-    keyOptions: 'serviceNames',
+    keyOptions: 'service',
   },
   { name: 'Descripción', uid: 'description' },
   { name: 'Nro. OC', uid: 'purchaseOrderNumber' },
@@ -131,7 +136,78 @@ const INITIAL_VISIBLE_COLUMNS = [
 export const BillingList = () => {
   const { isOpen, toggleSidebar } = useSidebar()
 
-  const [filters, setFilters] = useState([])
+  const setFilters = useFilters((state) => state.setFilters)
+  const filters = useFilters((state) => state.filters.billingFilters)
+  const getFilters = useFilters((state) => state.computed.getFilters)
+  const [customFilters, setCustomFilters] = useState({})
+
+  const exportExcel = () => {
+    console.log('🚀 ~ exportExcel ~ filters:', filters)
+  }
+
+  const searchData = () => {
+    let mutateFilters = {}
+    const billingFilters = getFilters('billingFilters')
+    console.log('🚀 ~ searchData ~ billingFilters:', billingFilters)
+    billingFilters.forEach((filter) => {
+      console.log('🚀 ~ billingFilters.forEach ~ filter:', filter)
+      if (filter.type === 'array' && filter.optionsSelected.length > 0) {
+        mutateFilters[filter.key] = filter.optionsSelected
+      } else if (
+        filter.type === 'date' &&
+        Object.keys(filter.optionsSelected || {}).length > 0
+      ) {
+        // validate if has dates property
+        console.log(
+          '🚀 ~ billingFilters.forEach ~ mutateFilters:',
+          mutateFilters,
+        )
+        if (!mutateFilters['dates']) mutateFilters['dates'] = []
+        mutateFilters['dates'].push({
+          column: filter.key,
+          start_date: toDateFromDatePicker(
+            filter.optionsSelected.start,
+          ).toString(),
+          end_date: toDateFromDatePicker(filter.optionsSelected.end).toString(),
+        })
+      }
+    })
+    console.log('🚀 ~ searchData ~ mutateFilters:', mutateFilters)
+    setCustomFilters(mutateFilters)
+  }
+
+  const clearFilters = () => {
+    const properties = []
+    for (const element of headersTable) {
+      if (element.isFiltered) {
+        let data = {
+          name: element.name,
+          value: null,
+          key: element.keyOptions,
+          type: element.filterType ?? 'text',
+        }
+
+        switch (element.filterType) {
+          case 'array':
+            data.options = unique_values[element.keyOptions] ?? []
+            data.optionsSelected = []
+            break
+
+          case 'date':
+            data.optionsSelected = null
+            break
+
+          default:
+            break
+        }
+
+        properties.push(data)
+      }
+    }
+    console.log('🚀 ~ clearFilters ~ properties:', properties)
+    setFilters('billingFilters', properties)
+    setCustomFilters({})
+  }
 
   const { data: unique_values } = useFetchData({ url: 'billing/unique_values' })
 
@@ -143,29 +219,45 @@ export const BillingList = () => {
           let data = {
             name: element.name,
             value: null,
-            key: element.uid,
+            key: element.keyOptions,
             type: element.filterType ?? 'text',
           }
+
           if (element.filterType === 'array') {
+            const keyIndex = filters.findIndex(
+              (item) => item.key === element.keyOptions,
+            )
+
+            if (keyIndex)
+              data.optionsSelected =
+                filters && (filters[keyIndex]?.optionsSelected ?? [])
+            else data.optionsSelected = []
+
             data.options = unique_values[element.keyOptions] ?? []
-            data.optionsSelected = []
+
+            for (let i = 0; i < data.options.length; i++) {
+              if (typeof data.options[i] === 'number') {
+                data.options[i] = data.options[i].toString()
+              } else {
+                data.options[i] = capitalizeFirstLetter(data.options[i])
+              }
+            }
           }
+
           properties.push(data)
         }
       }
-      setFilters(properties)
+      setFilters('billingFilters', properties)
     }
   }, [unique_values])
 
-  const {
-    data,
-    isFetching,
-    refetch,
-    isSuccess,
-    paginationProps,
-    updatingList,
-    setQuerySearch,
-  } = useQueryPromise({ url: 'billing/find', key: 'billing', type: 'POST' })
+  const { data, isFetching, paginationProps, updatingList, setQuerySearch } =
+    useQueryPromise({
+      url: 'billing/find',
+      key: 'billing',
+      type: 'POST',
+      filters: customFilters,
+    })
 
   const addCurrency = (currency, cellValue) => {
     const language = {
@@ -267,50 +359,39 @@ export const BillingList = () => {
     }
   }
 
-  const RenderFilterInput = ({ filter }) => {
-    const [values, setValues] = useState(filter.optionsSelected || [])
-
-    const handleSelectionChange = (selected) => {
-      const selectedArray = Array.from(selected)
-      setValues(selectedArray)
-    }
-
-    switch (filter.type) {
-      case 'text':
-        return <Input label={filter.name} className="max-w-xs" />
-      case 'date':
-        return <DateRangePicker label={filter.name} className="max-w-xs" />
-      case 'array':
-        return (
-          <Select
-            label={filter.name}
-            selectionMode="multiple"
-            placeholder="selecciona un valor"
-            selectedKeys={values}
-            className="max-w-xs"
-            onSelectionChange={handleSelectionChange}
-            textValue={values.join(', ')} // Plain text representation of selected values
-          >
-            {filter.options.map((item) => (
-              <SelectItem key={item}>{item}</SelectItem>
-            ))}
-          </Select>
-        )
-      default:
-        return <Input label={filter.name} className="max-w-xs" />
-    }
-  }
-
   return (
     <>
       <Sidebar isOpen={isOpen} filters={filters} toggleSidebar={toggleSidebar}>
         <h3 className="mb-4 font-bold uppercase">Filtros</h3>
+
+        <ButtonGroup isDisabled={false} className="mb-5">
+          <Button
+            onClick={searchData}
+            endContent={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+            color="primary"
+          >
+            Buscar
+          </Button>
+          <Button onClick={clearFilters} color="secondary">
+            Limpiar
+          </Button>
+        </ButtonGroup>
+
         {filters &&
           filters.map((filter, index) => (
             <div key={index} className="mb-4">
-              <RenderFilterInput filter={filter} />
+              <RenderFilterInput filter={filter} module="billingFilters" />
             </div>
           ))}
+
+        <Button
+          className="mt-5"
+          color="success"
+          endContent={<DocumentDownloadIcon />}
+          onClick={exportExcel}
+        >
+          Exportar Excel
+        </Button>
       </Sidebar>
       <TableList
         title="Facturación"

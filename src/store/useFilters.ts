@@ -1,55 +1,67 @@
-import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
-
-export interface Vacation {
-  id: number;
-  plannedVacations: number;
-  accumulatedVacations: number;
-  takenVacations: number;
-  remainingVacations: number;
-  expiredDays: number;
-  workerId: number;
-  isActive: boolean;
-}
-
-export interface VacationDetail {
-  id?: number;
-  index: number;
-  vacationType: string;
-  reason: string;
-  startDate: string;
-  endDate: string;
-  quantity: number | string;
-  vacationId?: number;
-  // isActive: boolean;
-}
+import { create } from 'zustand';
+import { devtools } from 'zustand/middleware';
 
 interface Action {
-  setFilters: (filters: any[]) => void;
-  clearFilters: () => void;
+  setFilters: (module: string, filters: any[]) => void;
+  clearFilters: (module: string) => void;
+  setOptionsByKey: (module: string, key: string | number, newOptionSelected: any[]) => void;
 }
 
 interface State {
-  filters: any[];
+  filters: {
+    [module: string]: any[];
+  };
   computed: {
-    get filters(): any[];
-  }
+    getFilters: (module: string) => any[];
+  };
 }
 
-
 // Create your store, which includes both state and (optionally) actions
-export const useVacationStore = create<State & Action>()(devtools((set, get) => ({
-
-  filters: [],
-
-  // Getters
-  computed: {
-    get filters() {
-      return get()?.filters;
+export const useFilters = create<State & Action>()(
+  devtools((set, get) => ({
+    filters: {
+      billingFilters: [],
+      workerFilters: [],
     },
-  },
 
-  // Actions
-  setFilters: (filters) => set((state) => ({ ...state, filters })),
-  clearFilters: () => set((state) => ({ ...state, filters: [] })),
-})))
+    // Getters
+    computed: {
+      getFilters: (module: string) => {
+        return get().filters[module] || [];
+      },
+    },
+
+    // Actions
+    setFilters: (module: string, filters: any[]) =>
+      set((state) => ({
+        ...state,
+        filters: {
+          ...state.filters,
+          [module]: filters,
+        },
+      })),
+    setOptionsByKey: (module: string, key: string | number, newOptionSelected: any[]) =>
+      set((state) => {
+        const filters = state.filters[module] || [];
+        const keyIndex = filters.findIndex((filter) => filter.key === key);
+        if (keyIndex !== -1) {
+          filters[keyIndex].optionsSelected = newOptionSelected;
+        }
+        return {
+          ...state,
+          filters: {
+            ...state.filters,
+            [module]: filters,
+          },
+        };
+      }),
+    clearFilters: (module: string) =>
+      set((state) => ({
+        ...state,
+        filters: {
+          ...state.filters,
+          [module]: [],
+        },
+      })),
+  }))
+);
