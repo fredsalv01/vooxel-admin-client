@@ -38,8 +38,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, childre
             transition: 'opacity 0.3s, transform 0.3s',
             pointerEvents: isOpen ? 'auto' : 'none', // Disables click when hidden
             position: 'absolute',
-            top: '1rem',
-            right: '1rem',
+            top: '0.5rem',
+            left: '1rem',
         }}
         isIconOnly
         color='secondary'
@@ -51,15 +51,21 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, childre
 
       {/* Sidebar Content */}
       {isOpen && (
-        <div style={{ 
+        <div 
+          className='sidebar-content'
+          style={{ 
           width: '100%',
           textAlign: 'center',
           opacity: isOpen ? 1 : 0,
           transform: isOpen ? 'translateX(0)' : 'translateX(50px)',
           transition: 'opacity 0.3s, transform 0.3s',
-          marginTop: '1.5rem',
+          marginTop: '1.3rem',
+          overflowY: 'auto',
         }}>
+          
           {children}
+
+
         </div>
       )}
     </aside>

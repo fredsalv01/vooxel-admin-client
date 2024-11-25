@@ -15,6 +15,7 @@ interface UseQueryPromiseProps {
   url: string;
   key: string;
   type: 'GET' | 'POST';
+  paginate: boolean;
   filters?: any[
   /**
    * year: [2021, 2022, 2023, 2024, 2025]
@@ -64,7 +65,7 @@ interface ResponseData {
   [key: string]: any;
 }
 
-export const useQueryPromise = ({ url, key, filters, type = 'GET' }: UseQueryPromiseProps): any => {
+export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = true }: UseQueryPromiseProps): any => {
   const [paginationProps, setPaginationProps] = useState<PaginationProps>({
     currentPage: 1,
     itemCount: 1,
@@ -126,6 +127,12 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET' }: UseQueryPro
         }
 
         if (type === 'POST') {
+
+          params = {
+            ...params,
+            paginate
+          }
+
           const response = await axiosInstance.post(url, params);
           const { meta } = response.data;
           setPaginationProps({

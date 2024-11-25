@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, useDisclosure, ButtonGroup } from '@nextui-org/react'
 import {
   PlusIcon,
@@ -17,70 +17,67 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { useFilters } from '../../../store/useFilters'
 import { useSidebar } from '../../../hooks'
+import { useFetchData } from '../../../hooks/useFetchData'
+import { capitalizeFirstLetter, downloadXLSX } from '../../../lib/helpers/utils'
+import axiosInstance from '../../../axios/axios'
+import * as XLSX from 'xlsx'
 
 const headersTable = [
-  { name: 'Nro', uid: 'nro' },
+  // { name: 'Nro', uid: 'nro' },
   {
     name: 'Nombre(s)',
     uid: 'name',
-    isFilterd: true,
-    filterType: 'array',
-    keyOptions: 'names',
   },
   {
     name: 'Apellidos',
     uid: 'apPat',
-    isFilterd: true,
-    filterType: 'array',
-    keyoptions: 'lastNames',
   },
   {
     name: 'Cargo',
     uid: 'charge',
-    isFilterd: true,
+    isFiltered: true,
     filterType: 'array',
-    keyOptions: 'charges',
+    keyOptions: 'charge',
   },
   {
     name: 'Tipo de Documento',
     uid: 'documentType',
-    isFilterd: true,
+    isFiltered: true,
     filterType: 'array',
-    keyOptions: 'documentTypes',
+    keyOptions: 'documentType',
   },
   {
     name: 'Numero de Documento',
     uid: 'documentNumber',
-    isFilterd: true,
-    filterType: 'array',
-    keyOptions: 'documentNumbers',
   },
   {
     name: 'Jefe Directo',
     uid: 'chiefOfficerName',
-    isFilterd: true,
-    filterType: 'array',
-    keyOptions: 'chiefOfficers',
   },
   {
     name: 'Tipo de Contrato',
     uid: 'contractType',
-    isFilterd: true,
-    filterType: 'array',
-    keyOptions: 'contractTypes',
   },
   {
     name: 'habilidades',
     uid: 'techSkills',
-    isFilterd: true,
-    filterType: 'array',
-    keyOptions: 'techSkills',
   },
   { name: 'Acciones', uid: 'actions' },
 ]
 
+const arrayFilters = [
+  { name: 'Cargo', key: 'charge', type: 'array' },
+  { name: 'Tipo de Documento', key: 'documentType', type: 'array' },
+  { name: 'Cliente', key: 'client', type: 'array' },
+  { name: 'Nivel de ingles', key: 'englishLevel', type: 'array' },
+  { name: 'Seniority', key: 'seniority', type: 'array' },
+  { name: 'Departamento', key: 'department', type: 'array' },
+  { name: 'Distrito', key: 'district', type: 'array' },
+  { name: 'Provincia', key: 'provincia', type: 'array' },
+]
+
 const INITIAL_VISIBLE_COLUMNS = [
-  'Nro',
+  // 'Nro',
   'name',
   'apPat',
   'charge',
@@ -99,7 +96,11 @@ export const WorkerList = () => {
 
   const setFilters = useFilters((state) => state.setFilters)
   const filters = useFilters((state) => state.filters.workerFilters)
+  const clearFilters = useFilters((state) => state.clearFilters)
+  const prepareFiltersToSend = useFilters((state) => state.prepareFiltersToSend)
   const getFilters = useFilters((state) => state.computed.getFilters)
+
+  const [customFilters, setCustomFilters] = useState({})
 
   const {
     data,
@@ -108,114 +109,136 @@ export const WorkerList = () => {
     paginationProps,
     updatingList,
     setQuerySearch,
-  } = useQueryPromise({ url: 'workers', key: 'workers' })
+  } = useQueryPromise({
+    url: 'workers/find',
+    key: 'workers',
+    type: 'POST',
+    filters: customFilters,
+  })
 
-  const exportExcel = () => {
-    console.log('🚀 ~ exportExcel ~ filters:', filters)
+  const exportExcel = async () => {
+    try {
+      const { data } = await axiosInstance.post('workers/find', {
+        isActive: true,
+        paginate: false,
+        ...prepareFiltersToSend('workerFilters'),
+      })
+
+      const headersTableExcel = [
+        // { name: 'Nro', uid: 'nro' },
+        {
+          name: 'Nombre(s)',
+          uid: 'name',
+        },
+        {
+          name: 'Apellido Paterno',
+          uid: 'apPat',
+        },
+        {
+          name: 'Apellido Materno',
+          uid: 'apPat',
+        },
+        {
+          name: 'Cargo',
+          uid: 'charge',
+          isFiltered: true,
+          filterType: 'array',
+          keyOptions: 'charge',
+        },
+        {
+          name: 'Tipo de Documento',
+          uid: 'documentType',
+          isFiltered: true,
+          filterType: 'array',
+          keyOptions: 'documentType',
+        },
+        {
+          name: 'Numero de Documento',
+          uid: 'documentNumber',
+        },
+        {
+          name: 'Jefe Directo',
+          uid: 'chiefOfficerName',
+        },
+        {
+          name: 'Tipo de Contrato',
+          uid: 'contractType',
+        },
+        {
+          name: 'habilidades',
+          uid: 'techSkills',
+        },
+        { name: 'Acciones', uid: 'actions' },
+      ]
+
+      downloadXLSX(data, 'Colaboradores', headersTableExcel)
+    } catch (error) {
+      console.error('🚀 ~ exportExcel ~ error:', error)
+    }
   }
 
   const searchData = () => {
-    let mutateFilters = {}
-    getFilters.forEach((filter) => {
-      if (filter.type === 'array' && filter.optionsSelected.length > 0) {
-        mutateFilters[filter.key] = filter.optionsSelected
-        console.log(
-          '🚀 ~ getFilters.forEach ~ mutateFilters[filter.key]:',
-          mutateFilters[filter.key],
-        )
-      } else if (
-        filter.type === 'date' &&
-        Object.keys(filter.optionsSelected || {}).length > 0
-      ) {
-        // validate if has dates property
-        if (!mutateFilters['dates']) mutateFilters['dates'] = []
-        mutateFilters['dates'].push({
-          column: filter.key,
-          start_date: toDateFromDatePicker(
-            filter.optionsSelected.start,
-          ).toString(),
-          end_date: toDateFromDatePicker(filter.optionsSelected.end).toString(),
-        })
-      }
-    })
-    console.log('🚀 ~ searchData ~ mutateFilters:', mutateFilters)
-    setCustomFilters(mutateFilters)
+    setCustomFilters(prepareFiltersToSend('workerFilters'))
   }
 
-  const clearFilters = () => {
-    const properties = []
-    for (const element of headersTable) {
-      if (element.isFiltered) {
-        let data = {
-          name: element.name,
-          value: null,
-          key: element.keyOptions,
-          type: element.filterType ?? 'text',
-        }
-
-        switch (element.filterType) {
-          case 'array':
-            data.options = unique_values[element.keyOptions] ?? []
-            data.optionsSelected = []
-            break
-
-          case 'date':
-            data.optionsSelected = null
-            break
-
-          default:
-            break
-        }
-
-        properties.push(data)
-      }
-    }
-    console.log('🚀 ~ clearFilters ~ properties:', properties)
-    setFilters('workerFilters', properties)
+  const clearLocalFilters = () => {
+    clearFilters('workerFilters', arrayFilters, unique_values)
     setCustomFilters({})
   }
 
-  // const { data: unique_values } = useFetchData({ url: 'billing/unique_values' })
+  const exportExcelVacations = async () => {
+    try {
+      const ids = data.items.map((item) => item.id)
+      const resp = await axiosInstance.post('vacations/export-vacations', [
+        ...ids,
+      ])
+      downloadXLSX(resp, 'Vacaciones', [])
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
-  // useEffect(() => {
-  //   if (unique_values && Object.keys(unique_values).length > 0) {
-  //     const properties = []
-  //     for (const element of headersTable) {
-  //       if (element.isFiltered) {
-  //         let data = {
-  //           name: element.name,
-  //           value: null,
-  //           key: element.keyOptions,
-  //           type: element.filterType ?? 'text',
-  //         }
+  const { data: unique_values } = useFetchData({ url: 'workers/unique-values' })
 
-  //         if (element.filterType === 'array') {
-  //           const keyIndex = filters.findIndex(
-  //             (item) => item.key === element.keyOptions,
-  //           )
+  useEffect(() => {
+    if (unique_values && Object.keys(unique_values).length > 0) {
+      const properties = []
+      for (const element of arrayFilters) {
+        let data = {
+          name: element.name,
+          value: null,
+          key: element.key,
+          type: element.type ?? 'text',
+        }
 
-  //           if (keyIndex)
-  //             data.optionsSelected =
-  //               filters && (filters[keyIndex]?.optionsSelected ?? [])
-  //           else data.optionsSelected = []
+        if (element.type === 'array') {
+          const keyIndex = filters.findIndex((item) => item.key === element.key)
 
-  //           data.options = unique_values[element.keyOptions] ?? []
+          if (keyIndex)
+            data.optionsSelected =
+              filters && (filters[keyIndex]?.optionsSelected ?? [])
+          else data.optionsSelected = []
 
-  //           for (let i = 0; i < data.options.length; i++) {
-  //             if (typeof data.options[i] === 'number') {
-  //               data.options[i] = data.options[i].toString()
-  //             } else {
-  //               data.options[i] = capitalizeFirstLetter(data.options[i])
-  //             }
-  //           }
-  //         }
+          data.options = unique_values[element.key] ?? []
 
-  //         properties.push(data)
-  //       }
-  //     }
-  //     setFilters('billingFilters', properties)
-  //   }
-  // }, [unique_values])
+          // make unique values to string
+
+          for (let i = 0; i < data.options.length; i++) {
+            if (typeof data.options[i] === 'number') {
+              data.options[i] = data.options[i].toString()
+            }
+            // else {
+            //   data.options[i] = capitalizeFirstLetter(data.options[i])
+            // }
+          }
+
+          data.options = [...new Set(data.options)]
+        }
+        properties.push(data)
+      }
+      setFilters('workerFilters', properties)
+    }
+  }, [unique_values])
 
   const switchRenderCell = (worker, columnKey) => {
     const cellValue = worker[columnKey]
@@ -303,7 +326,7 @@ export const WorkerList = () => {
           >
             Buscar
           </Button>
-          <Button onClick={clearFilters} color="secondary">
+          <Button onClick={clearLocalFilters} color="secondary">
             Limpiar
           </Button>
         </ButtonGroup>
@@ -311,7 +334,7 @@ export const WorkerList = () => {
         {filters &&
           filters.map((filter, index) => (
             <div key={index} className="mb-4">
-              <RenderFilterInput filter={filter} />
+              <RenderFilterInput filter={filter} module="workerFilters" />
             </div>
           ))}
 
@@ -322,6 +345,15 @@ export const WorkerList = () => {
           onClick={exportExcel}
         >
           Exportar Excel
+        </Button>
+
+        <Button
+          className="mt-5"
+          color="success"
+          endContent={<DocumentDownloadIcon />}
+          onClick={exportExcelVacations}
+        >
+          Exportar Excel Vacaciones
         </Button>
       </Sidebar>
 

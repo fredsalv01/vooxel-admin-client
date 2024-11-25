@@ -17,8 +17,8 @@ declare global {
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL:
-  import.meta.env.VITE_API_BACK_DEV || import.meta.env.VITE_API_BACK_LOCAL,
-  timeout: 10000, // 10s.
+    import.meta.env.VITE_API_BACK_DEV || import.meta.env.VITE_API_BACK_LOCAL,
+  // timeout: 10000, // 10s.
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -64,7 +64,8 @@ axiosInstance.interceptors.response.use(
           console.error("Requested resource not found");
           break;
         default:
-          console.error(error.response.data.message);
+          const errorMessage = (error.response.data as { message: string }).message;
+          console.error(errorMessage);
       }
     } else if (error.request) {
       console.error("Request was made but no response was received");

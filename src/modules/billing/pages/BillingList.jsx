@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Chip, ButtonGroup } from '@nextui-org/react'
 import { Link } from 'react-router-dom'
+import * as XLSX from 'xlsx'
 
 import Slot from '../../../components/Slot'
 import { TableList, Sidebar } from '../../../components/base'
@@ -17,10 +18,8 @@ import { useFilters } from '../../../store/useFilters'
 import { RenderFilterInput } from '../../../components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
-import {
-  capitalizeFirstLetter,
-  toDateFromDatePicker,
-} from '../../../lib/helpers/utils'
+import { downloadXLSX, addCurrency } from '../../../lib/helpers/utils'
+import axiosInstance from '../../../axios/axios'
 
 // orden de las columnas
 // AÑO - MES - T/D - NRO DOC - FECHA DE EMISION - PLAZO DE PAGO -
@@ -35,49 +34,32 @@ const headersTable = [
   {
     name: 'Año',
     uid: 'year',
-    isFiltered: true,
-    filterType: 'array',
-    keyOptions: 'years',
   },
   {
     name: 'Mes',
     uid: 'month',
-    isFiltered: true,
-    filterType: 'array',
-    keyOptions: 'months',
   },
   { name: 'T/D', uid: 'documentType' },
   { name: 'Nro. de documento', uid: 'documentNumber' },
   {
     name: 'Fecha de emisión',
     uid: 'startDate',
-    isFiltered: true,
-    filterType: 'date',
   },
   { name: 'Plazo de pago', uid: 'paymentDeadline' },
   {
     name: 'Cliente',
     uid: 'client',
-    isFiltered: true,
-    filterType: 'array',
-    keyOptions: 'clientBusinessNames',
   },
   { name: 'RUC', uid: 'clientRuc' },
   {
     name: 'Tipo de servicio',
     uid: 'serviceName',
-    isFiltered: true,
-    filterType: 'array',
-    keyOptions: 'service',
   },
   { name: 'Descripción', uid: 'description' },
   { name: 'Nro. OC', uid: 'purchaseOrderNumber' },
   {
     name: 'Moneda',
     uid: 'currency',
-    isFiltered: true,
-    filterType: 'array',
-    keyOptions: 'currencies',
   },
   { name: 'T/C', uid: 'conversionRate' },
   { name: 'Monto Neto', uid: 'amount' },
@@ -89,20 +71,26 @@ const headersTable = [
   {
     name: 'Estado',
     uid: 'billingState',
-    isFiltered: true,
-    filterType: 'array',
-    keyOptions: 'billingStates',
   },
   { name: 'Mes depósito', uid: 'depositMonth' },
   { name: 'Fecha depósito', uid: 'depositDate' },
   {
     name: 'Fecha de vencimiento',
     uid: 'expirationDate',
-    isFiltered: true,
-    filterType: 'date',
   },
   { name: 'Días acumulados', uid: 'accumulatedDays' },
   { name: 'Acciones', uid: 'actions' },
+]
+
+const arrayFilters = [
+  { name: 'Año', key: 'year', type: 'array' },
+  { name: 'Mes', key: 'month', type: 'array' },
+  { name: 'Fecha de emisión', key: 'startDate', type: 'date' },
+  { name: 'Fecha de vencimiento', key: 'expirationDate', type: 'date' },
+  { name: 'Cliente', key: '', type: 'array' },
+  { name: 'Tipo de servicio', key: 'serviceName', type: 'array' },
+  { name: 'Moneda', key: 'currency', type: 'array' },
+  { name: 'Estado', key: 'status', type: 'array' },
 ]
 
 const INITIAL_VISIBLE_COLUMNS = [
@@ -138,74 +126,28 @@ export const BillingList = () => {
 
   const setFilters = useFilters((state) => state.setFilters)
   const filters = useFilters((state) => state.filters.billingFilters)
-  const getFilters = useFilters((state) => state.computed.getFilters)
+  const clearFilters = useFilters((state) => state.clearFilters)
+  const prepareFiltersToSend = useFilters((state) => state.prepareFiltersToSend)
   const [customFilters, setCustomFilters] = useState({})
 
-  const exportExcel = () => {
-    console.log('🚀 ~ exportExcel ~ filters:', filters)
+  const exportExcel = async () => {
+    try {
+      const { data } = await axiosInstance.post('billing/find', {
+        paginate: false,
+        ...prepareFiltersToSend('billingFilters'),
+      })
+      downloadXLSX(data, 'Factutación', headersTable)
+    } catch (error) {
+      console.log('🚀 ~ exportExcel ~ error:', error)
+    }
   }
 
   const searchData = () => {
-    let mutateFilters = {}
-    const billingFilters = getFilters('billingFilters')
-    console.log('🚀 ~ searchData ~ billingFilters:', billingFilters)
-    billingFilters.forEach((filter) => {
-      console.log('🚀 ~ billingFilters.forEach ~ filter:', filter)
-      if (filter.type === 'array' && filter.optionsSelected.length > 0) {
-        mutateFilters[filter.key] = filter.optionsSelected
-      } else if (
-        filter.type === 'date' &&
-        Object.keys(filter.optionsSelected || {}).length > 0
-      ) {
-        // validate if has dates property
-        console.log(
-          '🚀 ~ billingFilters.forEach ~ mutateFilters:',
-          mutateFilters,
-        )
-        if (!mutateFilters['dates']) mutateFilters['dates'] = []
-        mutateFilters['dates'].push({
-          column: filter.key,
-          start_date: toDateFromDatePicker(
-            filter.optionsSelected.start,
-          ).toString(),
-          end_date: toDateFromDatePicker(filter.optionsSelected.end).toString(),
-        })
-      }
-    })
-    console.log('🚀 ~ searchData ~ mutateFilters:', mutateFilters)
-    setCustomFilters(mutateFilters)
+    setCustomFilters(prepareFiltersToSend('billingFilters'))
   }
 
-  const clearFilters = () => {
-    const properties = []
-    for (const element of headersTable) {
-      if (element.isFiltered) {
-        let data = {
-          name: element.name,
-          value: null,
-          key: element.keyOptions,
-          type: element.filterType ?? 'text',
-        }
-
-        switch (element.filterType) {
-          case 'array':
-            data.options = unique_values[element.keyOptions] ?? []
-            data.optionsSelected = []
-            break
-
-          case 'date':
-            data.optionsSelected = null
-            break
-
-          default:
-            break
-        }
-
-        properties.push(data)
-      }
-    }
-    console.log('🚀 ~ clearFilters ~ properties:', properties)
-    setFilters('billingFilters', properties)
+  const clearLocalFilters = () => {
+    clearFilters('billingFilters', arrayFilters, unique_values)
     setCustomFilters({})
   }
 
@@ -214,38 +156,31 @@ export const BillingList = () => {
   useEffect(() => {
     if (unique_values && Object.keys(unique_values).length > 0) {
       const properties = []
-      for (const element of headersTable) {
-        if (element.isFiltered) {
-          let data = {
-            name: element.name,
-            value: null,
-            key: element.keyOptions,
-            type: element.filterType ?? 'text',
-          }
+      for (const element of arrayFilters) {
+        let data = {
+          name: element.name,
+          key: element.key,
+          type: element.type ?? 'text',
+        }
 
-          if (element.filterType === 'array') {
-            const keyIndex = filters.findIndex(
-              (item) => item.key === element.keyOptions,
-            )
+        if (element.type === 'array') {
+          const keyIndex = filters.findIndex((item) => item.key === element.key)
 
-            if (keyIndex)
-              data.optionsSelected =
-                filters && (filters[keyIndex]?.optionsSelected ?? [])
-            else data.optionsSelected = []
+          if (keyIndex)
+            data.optionsSelected =
+              filters && (filters[keyIndex]?.optionsSelected ?? [])
+          else data.optionsSelected = []
 
-            data.options = unique_values[element.keyOptions] ?? []
+          data.options = unique_values[element.key] ?? []
 
-            for (let i = 0; i < data.options.length; i++) {
-              if (typeof data.options[i] === 'number') {
-                data.options[i] = data.options[i].toString()
-              } else {
-                data.options[i] = capitalizeFirstLetter(data.options[i])
-              }
+          for (let i = 0; i < data.options.length; i++) {
+            if (typeof data.options[i] === 'number') {
+              data.options[i] = data.options[i].toString()
             }
           }
-
-          properties.push(data)
         }
+
+        properties.push(data)
       }
       setFilters('billingFilters', properties)
     }
@@ -258,20 +193,6 @@ export const BillingList = () => {
       type: 'POST',
       filters: customFilters,
     })
-
-  const addCurrency = (currency, cellValue) => {
-    const language = {
-      SOLES: ['PEN', 'es-PE'],
-      DOLARES: ['USD', 'en-US'],
-    }
-
-    const [symbolMoney, lang] = language[currency]
-
-    return new Intl.NumberFormat(lang, {
-      style: 'currency',
-      currency: symbolMoney,
-    }).format(cellValue)
-  }
 
   const getDayMora = (expirationDate) => {
     const date = new Date(expirationDate)
@@ -372,7 +293,7 @@ export const BillingList = () => {
           >
             Buscar
           </Button>
-          <Button onClick={clearFilters} color="secondary">
+          <Button onClick={clearLocalFilters} color="secondary">
             Limpiar
           </Button>
         </ButtonGroup>

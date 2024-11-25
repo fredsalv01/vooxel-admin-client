@@ -5,14 +5,41 @@
 @tailwind utilities;
 
 .container {
-  @apply max-w-7xl mx-auto sm:px-6 lg:px-8;
+  @apply mx-auto max-w-7xl sm:px-6 lg:px-8;
 }
 
 .p-text {
-    @apply text-gray-500;
+  @apply text-gray-500;
 }
 
 .custom-shadow {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em, rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em, rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;
+  box-shadow:
+    rgba(0, 0, 0, 0.25) 0px 0.0625em 0.0625em,
+    rgba(0, 0, 0, 0.25) 0px 0.125em 0.5em,
+    rgba(255, 255, 255, 0.1) 0px 0px 0px 1px inset;
 }
 
+/* Custom scrollbar styles for WebKit browsers */
+.sidebar-content::-webkit-scrollbar {
+  width: 8px;
+  height: auto;
+  display: none;
+}
+
+/* .sidebar-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: #252528;
+  border-radius: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} */
+
+/* .sidebar-content {
+  scrollbar-width: thin;
+  scrollbar-color: #252528 #f1f1f1;
+} */
