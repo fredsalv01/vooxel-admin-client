@@ -134,14 +134,18 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
           }
 
           const response = await axiosInstance.post(url, params);
-          const { meta } = response.data;
-          setPaginationProps({
-            currentPage: meta.currentPage,
-            itemCount: meta.itemCount,
-            itemsPerPage: meta.itemsPerPage,
-            totalItems: meta.totalItems,
-            totalPages: meta.totalPages,
-          });
+
+          if (paginate) {
+
+            const { meta } = response.data;
+            setPaginationProps({
+              currentPage: meta.currentPage,
+              itemCount: meta.itemCount,
+              itemsPerPage: meta.itemsPerPage,
+              totalItems: meta.totalItems,
+              totalPages: meta.totalPages,
+            });
+          }
           return response.data;
         }
 

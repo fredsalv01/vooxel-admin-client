@@ -72,6 +72,10 @@ export function capitalizeFirstLetter(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
 };
 
+const getNestedProperty = (obj: any, path: string[]): any => {
+  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+};
+
 interface Header {
   uid: string;
   name: string;
@@ -84,7 +88,8 @@ interface DataRow {
 function formattedData(data: DataRow[], headersTable: Header[]): DataRow[] {
   return data.map((row) =>
     headersTable.reduce((acc, header) => {
-      acc[header.name] = row[header.uid] || ''; // Use the header's name as key, map the uid to data, or fallback to an empty string
+      const path = header.uid.split('.'); // Split the uid by '.' to get the path
+      acc[header.name] = getNestedProperty(row, path) || ''; // Use the header's name as key, map the uid to data, or fallback to an empty string
       return acc;
     }, {} as DataRow)
   );
@@ -96,7 +101,6 @@ export function downloadXLSX(data: any, fileName: string, headersTable: any[]): 
   let transformedData = data;
   if (headersTable.length > 0) {
     // delete obj name actions from headerstable
-    headersTable.pop();
     transformedData = formattedData(data, headersTable);
   }
 

@@ -125,10 +125,13 @@ export const WorkerList = () => {
       })
 
       const headersTableExcel = [
-        // { name: 'Nro', uid: 'nro' },
         {
-          name: 'Nombre(s)',
-          uid: 'name',
+          name: 'Tipo de Documento',
+          uid: 'documentType',
+        },
+        {
+          name: 'Nro de Documento',
+          uid: 'documentNumber',
         },
         {
           name: 'Apellido Paterno',
@@ -139,36 +142,81 @@ export const WorkerList = () => {
           uid: 'apPat',
         },
         {
+          name: 'Nombres',
+          uid: 'name',
+        },
+        {
+          name: 'Nivel de inglés',
+          uid: 'englishLevel',
+        },
+        {
           name: 'Cargo',
           uid: 'charge',
-          isFiltered: true,
-          filterType: 'array',
-          keyOptions: 'charge',
         },
         {
-          name: 'Tipo de Documento',
-          uid: 'documentType',
-          isFiltered: true,
-          filterType: 'array',
-          keyOptions: 'documentType',
+          name: 'Seniority',
+          uid: 'seniority',
         },
         {
-          name: 'Numero de Documento',
-          uid: 'documentNumber',
+          name: 'Fecha de nacimiento',
+          uid: 'birthdate',
         },
         {
-          name: 'Jefe Directo',
-          uid: 'chiefOfficerName',
+          name: 'Fecha de inicio',
+          uid: 'startDate',
         },
         {
-          name: 'Tipo de Contrato',
+          name: 'Nro teléfono',
+          uid: 'phoneNumber',
+        },
+        {
+          name: 'Email',
+          uid: 'email',
+        },
+        {
+          name: 'Dirección',
+          uid: 'address',
+        },
+        {
+          name: 'Distrito',
+          uid: 'district',
+        },
+        {
+          name: 'Provincia',
+          uid: 'province',
+        },
+        {
+          name: 'Departamento',
+          uid: 'department',
+        },
+        {
+          name: 'Asignación familiar',
+          uid: 'familiarAssignment',
+        },
+        {
+          name: 'Sueldo',
+          uid: 'salary',
+        },
+        {
+          name: 'Tipo de contrato',
           uid: 'contractType',
         },
         {
-          name: 'habilidades',
-          uid: 'techSkills',
+          name: 'Fecha inicio de contratación',
+          uid: 'contractWorkers.hiringDate',
         },
-        { name: 'Acciones', uid: 'actions' },
+        {
+          name: 'Fecha fin de contratación',
+          uid: 'contractWorkers.endDate',
+        },
+        {
+          name: 'Cliente',
+          uid: 'clientInfo.businessName',
+        },
+        {
+          name: 'Ruc Cliente',
+          uid: 'clientInfo.ruc',
+        },
       ]
 
       downloadXLSX(data, 'Colaboradores', headersTableExcel)
@@ -192,7 +240,40 @@ export const WorkerList = () => {
       const resp = await axiosInstance.post('vacations/export-vacations', [
         ...ids,
       ])
-      downloadXLSX(resp, 'Vacaciones', [])
+
+      const headersTableExcel = [
+        {
+          name: 'Apellido Paterno',
+          uid: 'worker.apPat',
+        },
+        {
+          name: 'Apellido Materno',
+          uid: 'worker.apMat',
+        },
+        {
+          name: 'Nombres',
+          uid: 'worker.name',
+        },
+        {
+          name: 'Días acumulados',
+          uid: accumulatedVacations,
+        }, // dias ganados
+        {
+          name: 'Días tomados o gozados',
+          uid: takenVacations,
+        }, // dias gozados
+        {
+          name: 'Días pendientes',
+          uid: remainingVacations,
+        }, // dias pendientes
+        {
+          name: 'Días expirados',
+          uid: expiredDays,
+        }, // dias vencidos
+
+        // worker{id: 26, name: 'Jose David', apPat: 'Morales', apMat: 'Salvatierra', email: 'josedav@gmail.com', …}
+      ]
+      downloadXLSX(resp, 'Vacaciones')
     } catch (error) {
       console.error(error)
     }

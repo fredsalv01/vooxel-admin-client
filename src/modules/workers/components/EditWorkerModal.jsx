@@ -20,7 +20,6 @@ import axios from '../../../axios/axios'
 import { ToastNotification } from '../../../lib/helpers/toast-notification-temp'
 import * as Yup from 'yup'
 import {
-  BANKS_BACKEND,
   DOCUMENT_TYPES_BACKEND,
   ENGLISH_LEVEL_BACKEND,
   SENIORITY_BACKEND,
@@ -39,6 +38,8 @@ export const EditWorkerModal = ({
     apMat: '',
     documentType: '',
     documentNumber: '',
+    seniority: '',
+    startDate: '',
     englishLevel: '',
     charge: '',
     birthdate: '',
@@ -51,6 +52,7 @@ export const EditWorkerModal = ({
     techSkills: [],
     clientId: '',
     chiefOfficerId: '',
+    salary: 0,
   })
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export const EditWorkerModal = ({
         techSkills: editItem?.techSkills,
         clientId: editItem?.clientInfo?.id.toString() || '',
         chiefOfficerId: editItem?.chiefOfficer?.id.toString() || '',
+        salary: editItem?.salary || 0,
       })
     }
   }, [])
@@ -128,6 +131,7 @@ export const EditWorkerModal = ({
     email: Yup.string().email().required(),
     seniority: Yup.string().required(),
     startDate: Yup.string().required(),
+    salary: Yup.number().required(),
   })
 
   const handleSubmit = async (values, setSubmitting, onClose) => {
@@ -176,36 +180,22 @@ export const EditWorkerModal = ({
   }, [clientsData])
 
   const { data: chiefOfficerData } = useQueryPromise({
-    url: 'workers',
+    url: 'workers/find',
     key: 'workers',
+    paginate: false,
+    type: 'POST',
   })
 
   const computedChiefOfficerData = useMemo(() => {
+    console.log('🚀 ~ chiefOfficerData:', chiefOfficerData)
+    // return []
     return (
-      chiefOfficerData?.items.map((item) => ({
+      chiefOfficerData?.map((item) => ({
         label: `${item.name} ${item.apPat}`,
         value: item.id,
       })) || []
     )
   }, [chiefOfficerData])
-
-  // let listClients = useAsyncList({
-  //     async load({ signal, filterText }) {
-  //         const data = await axios.get('clients', { params: { input: filterText, isActive: true }, signal });
-  //         return {
-  //             items: data.data.items.map((item) => ({ id: item.id, label: item.businessName })) || [],
-  //         };
-  //     },
-  // });
-
-  // let listWokers = useAsyncList({
-  //     async load({ signal, filterText }) {
-  //         const data = await axios.get('workers', { params: { input: filterText, isActive: true }, signal });
-  //         return {
-  //             items: data.data.items.map((item) => ({ id: item.id, label: `${item.name} ${item.apPat}` })) || [],
-  //         };
-  //     },
-  // });
 
   return (
     <Modal
@@ -335,6 +325,14 @@ export const EditWorkerModal = ({
                           { label: 'Sí', value: 'SI' },
                           { label: 'No', value: 'NO' },
                         ]}
+                      />
+                    </div>
+                    <div className="col-span-1">
+                      <Field
+                        name="salary"
+                        label="Salario"
+                        component={InputBase}
+                        type="number"
                       />
                     </div>
                     <div className="col-span-1 md:col-span-2">
