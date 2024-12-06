@@ -38,5 +38,6 @@
   "depositAmountSoles": "monto depositado en soles",
   "depositAmountDollars": "monto depositado en dólares",
   "status": "estado",
-  "requiredField": "el campo es requerido"
+  "requiredField": "el campo es requerido",
+  "province": "provincia"
 }

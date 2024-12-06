@@ -64,9 +64,10 @@ export const TableList = ({
       <TableBottomContent
         paginationProps={paginationProps}
         updatingList={updatingList}
+        setQuerySearch={setQuerySearch}
       />
     ),
-    [paginationProps, updatingList],
+    [paginationProps, updatingList, setQuerySearch],
   )
 
   return (

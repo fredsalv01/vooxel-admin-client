@@ -26,6 +26,11 @@ export const TableTopContent = ({
     setQuerySearch(value)
   }
 
+  const onClear = () => {
+    setInputSearch('')
+    setQuerySearch('')
+  }
+
   return (
     <div>
       <div className="flex flex-wrap justify-between gap-3 md:flex-nowrap">
@@ -38,7 +43,7 @@ export const TableTopContent = ({
           value={inputSearch}
           onClear={() => onClear()}
           onValueChange={onSearchChange}
-          type="search"
+          type="text"
           className="w-full md:w-auto lg:min-w-[500px]"
         />
         <div className="flex justify-end gap-3">

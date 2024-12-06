@@ -79,6 +79,7 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
 
   const handleSearchChange = useCallback(
     debounce((value: string) => {
+      console.log('querySearch', value);
       setDebouncedSearch(value);
     }, 500),
     []

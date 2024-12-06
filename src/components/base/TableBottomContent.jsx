@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
   Button,
   Dropdown,
@@ -8,10 +8,18 @@ import {
   Pagination,
 } from '@nextui-org/react'
 
-export const TableBottomContent = ({ paginationProps, updatingList }) => {
+export const TableBottomContent = ({
+  paginationProps,
+  updatingList,
+  setQuerySearch,
+}) => {
   const [selectedKeys, setSelectedKeys] = React.useState(
     new Set([paginationProps.itemsPerPage.toString()]),
   )
+
+  useEffect(() => {
+    console.log('paginationProps', paginationProps)
+  }, [paginationProps, setQuerySearch])
 
   const selectedValue = React.useMemo(
     () => Array.from(selectedKeys).join(', ').replaceAll('_', ' '),
@@ -23,7 +31,6 @@ export const TableBottomContent = ({ paginationProps, updatingList }) => {
   }
 
   const onSelectionChange = (keys) => {
-    console.log('🚀 ~ onSelectionChange ~ keys:', keys)
     updatingList('itemsPerPage', parseInt(keys.currentKey))
     setSelectedKeys(keys)
   }

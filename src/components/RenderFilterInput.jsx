@@ -120,6 +120,46 @@ export const RenderFilterInput = ({ filter, module }) => {
           </div>
         </div>
       )
+
+    case 'currency':
+      return <>Hola</>
+    // return (
+    //   <>
+    //     <div>
+    //       <label
+    //         for="minAmount"
+    //         className="block text-sm font-medium text-gray-700"
+    //       >
+    //         Min Amount
+    //       </label>
+    //       <input
+    //         type="number"
+    //         id="minAmount"
+    //         name="minAmount"
+    //         min="0"
+    //         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+    //         placeholder="Enter minimum amount"
+    //       />
+    //     </div>
+
+    //     <div>
+    //       <label
+    //         for="maxAmount"
+    //         className="block text-sm font-medium text-gray-700"
+    //       >
+    //         Max Amount
+    //       </label>
+    //       <input
+    //         type="number"
+    //         id="maxAmount"
+    //         name="maxAmount"
+    //         min="0"
+    //         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+    //         placeholder="Enter maximum amount"
+    //       />
+    //     </div>
+    //   </>
+    // )
     default:
       return <Input label={filter.name} className="max-w-xs" />
   }

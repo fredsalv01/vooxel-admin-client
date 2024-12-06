@@ -74,6 +74,7 @@ const arrayFilters = [
   { name: 'Departamento', key: 'department', type: 'array' },
   { name: 'Distrito', key: 'district', type: 'array' },
   { name: 'Provincia', key: 'provincia', type: 'array' },
+  // { name: 'Salario', key: 'salary', type: 'currency' },
 ]
 
 const INITIAL_VISIBLE_COLUMNS = [
@@ -243,6 +244,10 @@ export const WorkerList = () => {
 
       const headersTableExcel = [
         {
+          name: 'Cliente',
+          uid: 'worker.clientInfo.businessName',
+        },
+        {
           name: 'Apellido Paterno',
           uid: 'worker.apPat',
         },
@@ -256,24 +261,23 @@ export const WorkerList = () => {
         },
         {
           name: 'Días acumulados',
-          uid: accumulatedVacations,
+          uid: 'accumulatedVacations',
         }, // dias ganados
         {
           name: 'Días tomados o gozados',
-          uid: takenVacations,
+          uid: 'takenVacations',
         }, // dias gozados
         {
           name: 'Días pendientes',
-          uid: remainingVacations,
+          uid: 'remainingVacations',
         }, // dias pendientes
         {
           name: 'Días expirados',
-          uid: expiredDays,
+          uid: 'expiredDays',
         }, // dias vencidos
-
-        // worker{id: 26, name: 'Jose David', apPat: 'Morales', apMat: 'Salvatierra', email: 'josedav@gmail.com', …}
       ]
-      downloadXLSX(resp, 'Vacaciones')
+
+      downloadXLSX(resp.data, 'Vacaciones', headersTableExcel)
     } catch (error) {
       console.error(error)
     }
@@ -283,6 +287,8 @@ export const WorkerList = () => {
 
   useEffect(() => {
     if (unique_values && Object.keys(unique_values).length > 0) {
+      // unique_values.push({ salary: [10, 1000] })
+
       const properties = []
       for (const element of arrayFilters) {
         let data = {
@@ -303,14 +309,9 @@ export const WorkerList = () => {
           data.options = unique_values[element.key] ?? []
 
           // make unique values to string
-
           for (let i = 0; i < data.options.length; i++) {
-            if (typeof data.options[i] === 'number') {
+            if (typeof data.options[i] === 'number')
               data.options[i] = data.options[i].toString()
-            }
-            // else {
-            //   data.options[i] = capitalizeFirstLetter(data.options[i])
-            // }
           }
 
           data.options = [...new Set(data.options)]
