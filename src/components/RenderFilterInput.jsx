@@ -7,7 +7,7 @@ import {
   Input,
   Button,
 } from '@nextui-org/react'
-import { CalendarDate } from '@internationalized/date'
+// import { CalendarDate } from '@internationalized/date'
 
 import { useFilters } from '../store/useFilters'
 import { toDateFromDatePicker } from '../lib/helpers/utils'
@@ -33,13 +33,20 @@ export const RenderFilterInput = ({ filter, module }) => {
       case 'array':
         setValues(new Set(filter.optionsSelected || []))
         break
+      case 'range_currency':
+        // min and max
+        filter.optionsSelected = filter.optionsSelected || {
+          min: null,
+          max: null,
+        }
+        break
 
       default:
         throw new Error('Tipo de filtro no soportado')
     }
   }, [filter, module])
 
-  const handleSelectionChange = (e) => {
+  const handleSelectionChange = (e, key = null) => {
     console.log('🚀 ~ handleSelectionChange ~ filter:', filter)
     let selectedValues = e
 
@@ -52,6 +59,11 @@ export const RenderFilterInput = ({ filter, module }) => {
       case 'array':
         selectedValues = Array.from(selectedValues)
         setValues(new Set(selectedValues))
+        break
+      case 'range_currency':
+        e = e > 0 ? e : null
+        selectedValues = { ...values, [key]: e }
+        setValues({ ...values, [key]: e })
         break
 
       default:
@@ -121,45 +133,41 @@ export const RenderFilterInput = ({ filter, module }) => {
         </div>
       )
 
-    case 'currency':
-      return <>Hola</>
-    // return (
-    //   <>
-    //     <div>
-    //       <label
-    //         for="minAmount"
-    //         className="block text-sm font-medium text-gray-700"
-    //       >
-    //         Min Amount
-    //       </label>
-    //       <input
-    //         type="number"
-    //         id="minAmount"
-    //         name="minAmount"
-    //         min="0"
-    //         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-    //         placeholder="Enter minimum amount"
-    //       />
-    //     </div>
-
-    //     <div>
-    //       <label
-    //         for="maxAmount"
-    //         className="block text-sm font-medium text-gray-700"
-    //       >
-    //         Max Amount
-    //       </label>
-    //       <input
-    //         type="number"
-    //         id="maxAmount"
-    //         name="maxAmount"
-    //         min="0"
-    //         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-    //         placeholder="Enter maximum amount"
-    //       />
-    //     </div>
-    //   </>
-    // )
+    case 'range_currency':
+      return (
+        <div className="grid grid-cols-6 gap-2">
+          <div className="position-relative col-span-5">
+            <p className="mb-3">{filter.name}</p>
+            <div className="flex items-center justify-center gap-3">
+              <Input
+                label="Mín"
+                type="number"
+                className="max-w-xs"
+                placeholder="Monto"
+                onValueChange={(e) => handleSelectionChange(e, 'min')}
+              />
+              <Input
+                label="Máx"
+                type="number"
+                className="max-w-xs"
+                placeholder="Monto"
+                onValueChange={(e) => handleSelectionChange(e, 'max')}
+              />
+            </div>
+          </div>
+          <div className="col-span-1 mb-3 flex self-end">
+            <Button
+              onClick={() => handleSelectionChange([])}
+              isIconOnly
+              color="secondary"
+              size="sm"
+              isDisabled={!values.size}
+            >
+              <FontAwesomeIcon icon={faXmark} />
+            </Button>
+          </div>
+        </div>
+      )
     default:
       return <Input label={filter.name} className="max-w-xs" />
   }

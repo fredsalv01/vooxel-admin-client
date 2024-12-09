@@ -112,7 +112,20 @@ export const useFilters = create<State & Action>()(
             start_date: start ? toDateFromDatePicker(start)?.toString() : null,
             end_date: end ? toDateFromDatePicker(end)?.toString() : null,
           })
+        } else if (filter.type === 'range_currency') {
+          if (filter.optionsSelected.min || filter.optionsSelected.max) {
+            mutateFilters[filter.key] = {
+              min: filter.optionsSelected.min,
+              max: filter.optionsSelected.max,
+            }
+          }
         }
+
+
+        // mutateFilters['salary'] = {
+        //   "min": 1,
+        //   "max": 1500
+        // }
       })
       return mutateFilters
     }

@@ -136,6 +136,7 @@ export const BillingList = () => {
         paginate: false,
         ...prepareFiltersToSend('billingFilters'),
       })
+      headersTable.pop()
       downloadXLSX(data, 'Factutación', headersTable)
     } catch (error) {
       console.log('🚀 ~ exportExcel ~ error:', error)

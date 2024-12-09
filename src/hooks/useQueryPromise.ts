@@ -16,7 +16,8 @@ interface UseQueryPromiseProps {
   key: string;
   type: 'GET' | 'POST';
   paginate: boolean;
-  filters?: any[
+  filters?: Record<string, any>;
+  // filters?: any[
   /**
    * year: [2021, 2022, 2023, 2024, 2025]
    * month: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -29,7 +30,7 @@ interface UseQueryPromiseProps {
    * ],
    * order: [column = id, direction = 'desc']
    */
-  ];
+  // ];
 }
 
 // "year": [
@@ -81,6 +82,10 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
     debounce((value: string) => {
       console.log('querySearch', value);
       setDebouncedSearch(value);
+      setPaginationProps((prev) => ({
+        ...prev,
+        currentPage: 1,
+      }));
     }, 500),
     []
   );
@@ -89,20 +94,25 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
     handleSearchChange(querySearch);
   }, [querySearch, handleSearchChange, filters]);
 
-  useEffect(() => {
-    if (filters) {
-      setPaginationProps((prev) => ({
-        ...prev,
-        currentPage: 1,
-      }));
-    }
-  }, [filters]);
+  const handleResponse = (response: any) => {
+    const { meta } = response.data;
+    setPaginationProps({
+      currentPage: meta.currentPage,
+      itemCount: meta.itemCount,
+      itemsPerPage: meta.itemsPerPage,
+      totalItems: meta.totalItems,
+      totalPages: meta.totalPages,
+    });
+    return response.data;
+  };
 
   const { data, isFetching, refetch, isSuccess, error } = useQuery<ResponseData>({
     queryKey: [
       key,
       paginationProps.currentPage,
       paginationProps.itemsPerPage,
+      // paginationProps.totalItems,
+      // paginationProps.totalPages,
       debouncedSearch,
       filters,
     ],
@@ -128,41 +138,17 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
         }
 
         if (type === 'POST') {
-
           params = {
             ...params,
-            paginate
-          }
+            paginate: true,
+          };
 
           const response = await axiosInstance.post(url, params);
-
-          if (paginate) {
-
-            const { meta } = response.data;
-            setPaginationProps({
-              currentPage: meta.currentPage,
-              itemCount: meta.itemCount,
-              itemsPerPage: meta.itemsPerPage,
-              totalItems: meta.totalItems,
-              totalPages: meta.totalPages,
-            });
-          }
-          return response.data;
+          return handleResponse(response);
         }
 
-        const response = await axiosInstance.get(url, {
-          params,
-        });
-
-        const { meta } = response.data;
-        setPaginationProps({
-          currentPage: meta.currentPage,
-          itemCount: meta.itemCount,
-          itemsPerPage: meta.itemsPerPage,
-          totalItems: meta.totalItems,
-          totalPages: meta.totalPages,
-        });
-        return response.data;
+        const response = await axiosInstance.get(url, { params });
+        return handleResponse(response);
 
 
       } catch (err) {
@@ -194,6 +180,7 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
     error,
     paginationProps,
     updatingList,
-    setQuerySearch,
+    debouncedSearch,
+    setQuerySearch
   }
 };

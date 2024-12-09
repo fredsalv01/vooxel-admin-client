@@ -18,9 +18,8 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import { useFilters } from '../../../store/useFilters'
 import { useSidebar } from '../../../hooks'
 import { useFetchData } from '../../../hooks/useFetchData'
-import { capitalizeFirstLetter, downloadXLSX } from '../../../lib/helpers/utils'
+import { downloadXLSX, addCurrency } from '../../../lib/helpers/utils'
 import axiosInstance from '../../../axios/axios'
-import * as XLSX from 'xlsx'
 
 const headersTable = [
   // { name: 'Nro', uid: 'nro' },
@@ -59,6 +58,10 @@ const headersTable = [
     uid: 'contractType',
   },
   {
+    name: 'Salario',
+    uid: 'salary',
+  },
+  {
     name: 'habilidades',
     uid: 'techSkills',
   },
@@ -74,7 +77,7 @@ const arrayFilters = [
   { name: 'Departamento', key: 'department', type: 'array' },
   { name: 'Distrito', key: 'district', type: 'array' },
   { name: 'Provincia', key: 'provincia', type: 'array' },
-  // { name: 'Salario', key: 'salary', type: 'currency' },
+  { name: 'Rango de salario', key: 'salary', type: 'range_currency' },
 ]
 
 const INITIAL_VISIBLE_COLUMNS = [
@@ -86,6 +89,7 @@ const INITIAL_VISIBLE_COLUMNS = [
   'documentNumber',
   'chiefOfficerName',
   'contractType',
+  'salary',
   'techSkills',
   'actions',
 ]
@@ -99,7 +103,6 @@ export const WorkerList = () => {
   const filters = useFilters((state) => state.filters.workerFilters)
   const clearFilters = useFilters((state) => state.clearFilters)
   const prepareFiltersToSend = useFilters((state) => state.prepareFiltersToSend)
-  const getFilters = useFilters((state) => state.computed.getFilters)
 
   const [customFilters, setCustomFilters] = useState({})
 
@@ -293,7 +296,6 @@ export const WorkerList = () => {
       for (const element of arrayFilters) {
         let data = {
           name: element.name,
-          value: null,
           key: element.key,
           type: element.type ?? 'text',
         }
@@ -316,8 +318,20 @@ export const WorkerList = () => {
 
           data.options = [...new Set(data.options)]
         }
+
+        if (element.type === 'range_currency') {
+          const keyIndex = filters.findIndex((item) => item.key === element.key)
+
+          if (keyIndex)
+            data.optionsSelected =
+              filters &&
+              (filters[keyIndex]?.optionsSelected ?? { min: null, max: null })
+          else data.optionsSelected = { min: null, max: null }
+        }
+
         properties.push(data)
       }
+      console.log('🚀 ~ useEffect ~ properties:', properties)
       setFilters('workerFilters', properties)
     }
   }, [unique_values])
@@ -345,6 +359,8 @@ export const WorkerList = () => {
         ) : (
           <div className="text-xs">{worker.contractType}</div>
         )
+      case 'salary':
+        return addCurrency('SOLES', worker.salary)
       case 'techSkills':
         return worker.techSkills && <GridHabilities items={worker.techSkills} />
       case 'actions':
