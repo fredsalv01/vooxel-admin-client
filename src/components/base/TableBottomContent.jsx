@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Button,
   Dropdown,
@@ -11,17 +11,17 @@ import {
 export const TableBottomContent = ({
   paginationProps,
   updatingList,
-  setQuerySearch,
+  isLoading,
 }) => {
-  const [selectedKeys, setSelectedKeys] = React.useState(
-    new Set([paginationProps.itemsPerPage.toString()]),
+  const [selectedKeys, setSelectedKeys] = useState(
+    new Set([paginationProps?.itemsPerPage ? paginationProps.itemsPerPage.toString() : '10']),
   )
 
-  useEffect(() => {
-    console.log('paginationProps', paginationProps)
-  }, [paginationProps, setQuerySearch])
+  useEffect(() => { 
+    console.log('🚀 ~ paginationProps:', paginationProps);
+  }, [paginationProps])
 
-  const selectedValue = React.useMemo(
+  const selectedValue = useMemo(
     () => Array.from(selectedKeys).join(', ').replaceAll('_', ' '),
     [selectedKeys],
   )
@@ -31,7 +31,7 @@ export const TableBottomContent = ({
   }
 
   const onSelectionChange = (keys) => {
-    updatingList('itemsPerPage', parseInt(keys.currentKey))
+    // updatingList('itemsPerPage', parseInt(keys.currentKey))
     setSelectedKeys(keys)
   }
 
@@ -60,15 +60,17 @@ export const TableBottomContent = ({
         </Dropdown>
         <small className="ms-2 text-xs">filas por página</small>
       </div>
-      <Pagination
-        isCompact
-        showControls
-        showShadow
-        color="primary"
-        page={paginationProps.currentPage}
-        total={paginationProps.totalPages}
-        onChange={updatePage}
-      />
+      { !isLoading && 
+        <Pagination
+          isCompact
+          showControls
+          showShadow
+          color="primary"
+          page={paginationProps.currentPage}
+          total={paginationProps.totalPages}
+          onChange={updatePage}
+        /> 
+      }
     </div>
   )
 }

@@ -65,6 +65,7 @@ export const TableList = ({
         paginationProps={paginationProps}
         updatingList={updatingList}
         setQuerySearch={setQuerySearch}
+        isLoading={isLoading}
       />
     ),
     [paginationProps, updatingList, setQuerySearch],

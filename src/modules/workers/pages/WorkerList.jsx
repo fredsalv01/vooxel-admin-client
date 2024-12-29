@@ -110,7 +110,6 @@ export const WorkerList = () => {
     data,
     isFetching,
     refetch,
-    paginationProps,
     updatingList,
     setQuerySearch,
   } = useQueryPromise({
@@ -462,7 +461,7 @@ export const WorkerList = () => {
         switchFn={switchRenderCell}
         initialColumns={INITIAL_VISIBLE_COLUMNS}
         isLoading={isFetching}
-        paginationProps={paginationProps}
+        paginationProps={data?.meta || {}}
         updatingList={updatingList}
         setQuerySearch={setQuerySearch}
       >

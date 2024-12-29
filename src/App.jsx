@@ -47,7 +47,7 @@ function App() {
           <Route path="billing" element={<BillingList />} />
           <Route path="billing/create" element={<CreateBillingPage />} />
           <Route path="billing/:id/edit" element={<EditBillingPage />} />
-          <Route path="projects" element={<ProjectList />} />
+          {/* <Route path="projects" element={<ProjectList />} /> */}
         </Route>
       </Routes>
     </Router>

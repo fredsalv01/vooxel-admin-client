@@ -38,12 +38,12 @@ export const DASHBOARD_SIDEBAR_LINKS = [
     path: '/billing',
     icon: <HiOutlineDocumentText />,
   },
-  {
-    key: 'projects',
-    label: 'Proyectos',
-    path: '/projects',
-    icon: <HiOutlineCollection />,
-  },
+  // {
+  //   key: 'projects',
+  //   label: 'Proyectos',
+  //   path: '/projects',
+  //   icon: <HiOutlineCollection />,
+  // },
 ]
 
 export const DASHBOARD_SIDEBAR_BOTTOM_LINKS = [

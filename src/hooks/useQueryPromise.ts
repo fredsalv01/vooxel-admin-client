@@ -96,6 +96,7 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
 
   const handleResponse = (response: any) => {
     const { meta } = response.data;
+    console.log("🚀 ~ handleResponse ~ response.data:", response.data)
     setPaginationProps({
       currentPage: meta.currentPage,
       itemCount: meta.itemCount,
@@ -181,6 +182,7 @@ export const useQueryPromise = ({ url, key, filters, type = 'GET', paginate = tr
     paginationProps,
     updatingList,
     debouncedSearch,
-    setQuerySearch
+    setQuerySearch,
+    querySearch
   }
 };
